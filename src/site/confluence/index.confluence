@@ -1,0 +1,4 @@
+h1. SQL Module
+
+This module implements SQL parser, it is based on jsqlparser patch. All classes in this module are internal. 
+See generated javacc grammar documentation for supported [SQL synatax|jjdoc/index.html].   
