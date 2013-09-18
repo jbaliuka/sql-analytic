@@ -24,7 +24,7 @@ package com.github.sql.analytic.parser;
 
 import java.io.Reader;
 
-import com.exigen.ipb.operationalreports.sql.parser.CCJSqlParser;
+import com.github.sql.analytic.parser.CCJSqlParser;
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.statement.Statement;
 
