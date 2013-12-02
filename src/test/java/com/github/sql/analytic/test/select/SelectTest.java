@@ -514,6 +514,40 @@ public class SelectTest extends TestCase {
 		Statement parsed = parserManager.parse(new StringReader(statement));
 		assertEquals(statement, ""+parsed);
 	}
+	
+	public void testAnalyticFunction() throws JSQLParserException {
+		String statement = "SELECT SUM(a) OVER (PARTITION BY b ORDER BY c) FROM tab1";
+		Statement parsed = parserManager.parse(new StringReader(statement));
+		assertEquals(statement, ""+parsed);
+		
+		statement = "SELECT SUM(a) OVER () FROM tab1";
+		parsed = parserManager.parse(new StringReader(statement));
+		assertEquals(statement, ""+parsed);
+		
+		statement = "SELECT SUM(a) OVER (PARTITION BY b) FROM tab1";
+		parsed = parserManager.parse(new StringReader(statement));
+		assertEquals(statement, ""+parsed);
+		
+		
+		statement = "SELECT SUM(a) OVER (ORDER BY c) FROM tab1";
+		parsed = parserManager.parse(new StringReader(statement));
+		assertEquals(statement, ""+parsed);
+		
+		statement = "SELECT SUM(a) OVER (ORDER BY c NULLS FIRST ) FROM tab1";
+		parsed = parserManager.parse(new StringReader(statement));
+		assertEquals(statement, ""+parsed);
+		
+		
+		statement = "SELECT AVG(sal) OVER (PARTITION BY deptno ORDER BY sal ROWS BETWEEN 0 PRECEDING  AND  0 PRECEDING ) AS avg_of_current_sal FROM emp";
+		parsed = parserManager.parse(new StringReader(statement));
+		assertEquals(statement, ""+parsed);
+		
+		statement = "SELECT AVG(sal) OVER (PARTITION BY deptno ORDER BY sal RANGE CURRENT ROW ) AS avg_of_current_sal FROM emp";
+		parsed = parserManager.parse(new StringReader(statement));
+		assertEquals(statement, ""+parsed);
+		
+	}
+	
 
 	public void testLike() throws JSQLParserException {
 		String statement = "SELECT * FROM tab1 WHERE a LIKE 'test'";

@@ -39,6 +39,7 @@ public class Function implements Expression,FromItem {
 	private String alias;
 	private boolean pipeline = false;
 	private boolean distinct = false;
+	private AnalyticCause analyticCause;
 	
 	public boolean isDistinct() {
 		return distinct;
@@ -114,6 +115,11 @@ public class Function implements Expression,FromItem {
     	
     	String ans = name.toString() + params.toString();
     	
+    	if(analyticCause != null){
+    		
+    		ans = ans +  analyticCause.toString();
+    	}
+    	
     	if(isEscaped) {
     		ans = "{fn "+ans+"}"; 
     	}
@@ -143,5 +149,13 @@ public class Function implements Expression,FromItem {
 
 	public boolean isPipeline() {
 		return pipeline;
+	}
+
+	public AnalyticCause getAnalyticCause() {
+		return analyticCause;
+	}
+
+	public void setAnalyticCause(AnalyticCause analyticCause) {
+		this.analyticCause = analyticCause;
 	}
 }

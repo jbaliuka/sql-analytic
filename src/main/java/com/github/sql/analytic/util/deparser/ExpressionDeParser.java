@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.github.sql.analytic.expression.AllComparisonExpression;
+import com.github.sql.analytic.expression.AnalyticCause;
 import com.github.sql.analytic.expression.AnyComparisonExpression;
 import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.CaseExpression;
@@ -371,7 +372,12 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 
 	
 	public void visit(GroupingExpression groupingExpression) {
-		// TODO Auto-generated method stub
+		
+		
+	}
+
+	public void visit(AnalyticCause analyticCause) {
+		
 		
 	}
 

@@ -26,18 +26,22 @@ import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 
 
-
-
-
-
-
 /**
  * An element (column reference) in an "ORDER BY" clause.
  */
 
 public class OrderByElement implements Expression{
+	
+	public enum NullOrdering{
+		
+		NULLS_FIRST,
+		NULLS_LAST
+		
+	}
+	
 	private Expression columnReference;
 	private boolean asc = true; 
+	private NullOrdering nullOrdering;
 	
 
 	public boolean isAsc() {
@@ -66,6 +70,20 @@ public class OrderByElement implements Expression{
 		if(!asc){
 			builder.append(" DESC");
 		}
+		if(nullOrdering != null){
+			builder.append(' ');
+			builder.append(nullOrdering == NullOrdering.NULLS_FIRST ? "NULLS FIRST" : "NULLS LAST");
+			builder.append(' ');
+		}
+		
 		return builder.toString();
+	}
+
+	public NullOrdering getNullOrdering() {
+		return nullOrdering;
+	}
+
+	public void setNullOrdering(NullOrdering nullOrdering) {
+		this.nullOrdering = nullOrdering;
 	}
 }
