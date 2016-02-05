@@ -87,6 +87,7 @@ public interface ExpressionVisitor {
 	public void visit(OrderByElement orderByElement);
 	public void visit(GroupingExpression groupingExpression);
 	public void visit(AnalyticCause analyticCause);
+	public void visit(CastExpression castExpression);
 
 
 }

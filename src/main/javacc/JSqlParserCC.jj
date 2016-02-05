@@ -77,6 +77,7 @@ import com.github.sql.analytic.expression.NullValue;
 import com.github.sql.analytic.expression.Parenthesis;
 import com.github.sql.analytic.expression.StringValue;
 import com.github.sql.analytic.expression.CaseExpression;
+import com.github.sql.analytic.expression.CastExpression;
 import com.github.sql.analytic.expression.WhenClause;
 import com.github.sql.analytic.expression.AnyComparisonExpression;
 import com.github.sql.analytic.expression.AllComparisonExpression;
@@ -232,7 +233,8 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_PRECEDING: "PRECEDING">
 |   <K_FOLLOWING: "FOLLOWING">
 |   <K_CURRENT: "CURRENT">
-|   <K_ROW: "ROW"> 
+|   <K_ROW: "ROW">
+|   <K_CAST: "CAST" > 
   
 }
 
@@ -1404,7 +1406,8 @@ Expression PrimaryExpression():
 
 	<K_NULL> { retval = new NullValue(); }
 
-	|	retval=CaseWhenExpression()
+	|  LOOKAHEAD(CaseWhenExpression()) retval=CaseWhenExpression()
+	|  LOOKAHEAD(CastExpression())   retval=CastExpression()
 	
 	| "?" { retval = new JdbcParameter(); }
 	
@@ -1436,6 +1439,22 @@ Expression PrimaryExpression():
 			retval = new InverseExpression(retval); 
 		}
     	return retval; 
+    }
+}
+
+
+Expression CastExpression():
+{
+	CastExpression castExp = new CastExpression();
+	Expression expr;
+	Token type;
+	
+}
+{
+   <K_CAST> "("  expr = SimpleExpression() { castExp.setExpression(expr);  } "AS" type = <S_IDENTIFIER> { castExp.setType(type.image); }  ")"	   
+    	
+    {
+    	return castExp;
     }
 }
 

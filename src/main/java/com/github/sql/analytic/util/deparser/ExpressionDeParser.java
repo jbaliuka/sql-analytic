@@ -8,6 +8,7 @@ import com.github.sql.analytic.expression.AnalyticCause;
 import com.github.sql.analytic.expression.AnyComparisonExpression;
 import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.CaseExpression;
+import com.github.sql.analytic.expression.CastExpression;
 import com.github.sql.analytic.expression.DateValue;
 import com.github.sql.analytic.expression.DoubleValue;
 import com.github.sql.analytic.expression.Expression;
@@ -378,6 +379,10 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 
 	public void visit(AnalyticCause analyticCause) {
 		
+		
+	}
+
+	public void visit(CastExpression castExpression) {
 		
 	}
 

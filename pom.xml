@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>sql-analytic</groupId>
 	<artifactId>sql-analytic-parser</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<name>SQL Parser</name>
 	
 	<build>

@@ -37,6 +37,17 @@ public class SelectTest extends TestCase {
 
 	}
 	
+	public void testCAST() throws JSQLParserException {
+		String statement = "SELECT CAST( col AS FLOAT) AS col FROM mytable";
+
+		Select select = (Select) parserManager.parse(new StringReader(statement));
+
+		assertEquals(statement,select.toString());
+		
+
+	}
+	
+	
 	public void testPiPeline() throws JSQLParserException {
 		String statement = "SELECT * FROM TABLE(myFunction())";
 
