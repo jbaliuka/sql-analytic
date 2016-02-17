@@ -34,6 +34,8 @@ public class Table implements FromItem {
 	private String schemaName;
 	private String name;
 	private String alias;
+	private String partition;
+	private boolean partitionFor;
 	
 	public Table() {
 	}
@@ -93,6 +95,31 @@ public class Table implements FromItem {
 	
 	
 	public String toString() {
-		return getWholeTableName()+((alias!=null)?" AS "+alias:"");
+		String tableName = getWholeTableName()+((alias!=null)?" AS "+alias:"");
+		if(partition != null){
+			tableName = tableName + " PARTITION ";
+			if(partitionFor){
+				tableName = tableName + " FOR";
+			}
+			
+			tableName = tableName + "(" + partition + ")";
+		}
+		return tableName;
+	}
+
+	public String getPartition() {
+		return partition;
+	}
+
+	public void setPartition(String partition) {
+		this.partition = partition;
+	}
+
+	public boolean isPartitionFor() {
+		return partitionFor;
+	}
+
+	public void setPartitionFor(boolean partitionFor) {
+		this.partitionFor = partitionFor;
 	}
 }

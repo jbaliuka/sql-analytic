@@ -37,6 +37,23 @@ public class SelectTest extends TestCase {
 
 	}
 	
+	public void testPartition() throws JSQLParserException {
+		String statement = "SELECT col FROM mytable PARTITION  FOR('2016-01-01')";
+
+		Select select = (Select) parserManager.parse(new StringReader(statement));
+
+		assertEquals(statement,select.toString());
+		
+		 statement = "SELECT col FROM mytable PARTITION (p1)";
+
+		 select = (Select) parserManager.parse(new StringReader(statement));
+
+		assertEquals(statement,select.toString());
+		
+		
+
+	}
+	
 	public void testCAST() throws JSQLParserException {
 		String statement = "SELECT CAST( col AS FLOAT) AS col FROM mytable";
 
