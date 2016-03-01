@@ -498,20 +498,20 @@ Table Table():
 	Table table = null;
 	String name1 = null;
 	String name2 = null;
-	Token partition = null;
-	String partitonName = null;
+	Expression partition = null;
+	
 }
 {
 	(LOOKAHEAD(3) 
 		name1=RelObjectName() "." name2=RelObjectName()  { table = new Table(name1, name2); }
 		[ <K_PARTITION> [<K_FOR> { table.setPartitionFor(true); } ] 
-			"(" (partition=<S_CHAR_LITERAL>| partitonName = RelObjectName())  ")" 
-			{table.setPartition( partitonName == null ? partition.image : partitonName);}] 
+			"(" partition = SimpleExpression()  ")" 
+			{table.setPartition( partition ); }] 
 		|
 		name1=RelObjectName() { table = new Table(null, name1); } 
 		[ <K_PARTITION> [<K_FOR> { table.setPartitionFor(true); } ] 
-			"(" (partition=<S_CHAR_LITERAL>| partitonName = RelObjectName())  ")" 
-			{table.setPartition( partitonName == null ? partition.image : partitonName);}] 
+			"(" partition= SimpleExpression()  ")" 
+			{table.setPartition( partition ); }] 
 	)	
 	{		
 		return table; 
