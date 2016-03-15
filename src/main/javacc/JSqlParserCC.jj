@@ -255,7 +255,7 @@ TOKEN : /* Numeric Constants */
 SPECIAL_TOKEN:
 {
    <LINE_COMMENT: "--"(~["\r","\n"])*>
-|  <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+|  <MULTI_LINE_COMMENT: "/*" ~["+"] (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
 
 }
 
@@ -267,6 +267,7 @@ TOKEN:
 |   < #SPECIAL_CHARS: "$" | "_">
 |   < S_CHAR_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
+|   < S_HINTS: "/*+" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/" >
 }
 
 
@@ -548,6 +549,13 @@ SelectBody SelectBody():
 	{ return selectBody; }
 }
 
+String Hints():
+{ Token token = null; }
+{
+	(token=<S_HINTS>)
+   { return token.image; }
+}
+
 PlainSelect PlainSelect():
 { 
 	PlainSelect plainSelect = new PlainSelect(); 
@@ -561,11 +569,11 @@ PlainSelect PlainSelect():
 	Expression having = null;
 	Limit limit = null;
 	Top top = null;
+	String hints = null;
 }
 {
-    <K_SELECT> 
-
-    [ 
+    <K_SELECT>
+    [
     	<K_ALL> 
     	| 
     		(
@@ -575,7 +583,7 @@ PlainSelect PlainSelect():
     ] 
     
     [ 	top = Top() { plainSelect.setTop(top);	} ]
-
+    [   hints = Hints() { plainSelect.setHints(hints); } ]
     
     selectItems=SelectItemsList()
     
@@ -1885,7 +1893,7 @@ String AList():
 	 "(" 
 	 
 	 ( (tk=<S_INTEGER> | tk=<S_DOUBLE> | tk=<S_CHAR_LITERAL> | tk=<S_IDENTIFIER>) { retval.append(tk.image); } ["," {retval.append(",");}] )*    
-	 
+
 	")"
 	{
 		retval.append(")");
