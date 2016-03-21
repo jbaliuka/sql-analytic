@@ -93,6 +93,21 @@ public class SelectTest extends TestCase {
 	assertEquals(sql,normalize(select.toString()));
 	 
 	}
+
+	public void testHints() throws JSQLParserException{
+
+		String sql = "SELECT /*+ NO_PARALLEL */ CASE WHEN COUNT(NUMBER_OF_TEST) = 0 THEN 0 " +
+				"ELSE  (CASE WHEN STATUS = 'test' THEN 0 ELSE 1 END) / COUNT(NUMBER_OF_TEST)" +
+				" END AS HIT_RATIO	FROM TEST";
+
+
+		sql = normalize(sql);
+
+		Select select = (Select) parserManager.parse(new StringReader(sql));
+
+		assertEquals(sql,normalize(select.toString()));
+
+	}
 	
 	public void testIF() throws JSQLParserException {
 		String statement = "SELECT CASE WHEN 1 > 0 THEN 0 ELSE 1 END FROM TEST";

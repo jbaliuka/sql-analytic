@@ -50,6 +50,7 @@ public class PlainSelect implements SelectBody {
 	private Expression having;
 	private Limit limit;
 	private Top top;
+	private String hints;
 
 
 
@@ -63,6 +64,14 @@ public class PlainSelect implements SelectBody {
 
 	public Table getInto() {
 		return into;
+	}
+
+	public String getHints() {
+		return hints;
+	}
+
+	public void setHints(String hints) {
+		this.hints = hints;
 	}
 
 	/**
@@ -174,6 +183,10 @@ public class PlainSelect implements SelectBody {
 
 	public String toString() {
 		StringBuilder sql = new StringBuilder("SELECT ");
+
+		if(hints != null) {
+			sql.append(hints).append(" ");
+		}
 
 		if(distinct != null){
 			sql.append(distinct + " ");
