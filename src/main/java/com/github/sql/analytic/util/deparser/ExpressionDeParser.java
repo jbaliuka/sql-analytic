@@ -18,6 +18,7 @@ import com.github.sql.analytic.expression.GroupingExpression;
 import com.github.sql.analytic.expression.InverseExpression;
 import com.github.sql.analytic.expression.JdbcParameter;
 import com.github.sql.analytic.expression.LongValue;
+import com.github.sql.analytic.expression.NamedParameter;
 import com.github.sql.analytic.expression.NullValue;
 import com.github.sql.analytic.expression.Parenthesis;
 import com.github.sql.analytic.expression.StringValue;
@@ -383,6 +384,11 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 	}
 
 	public void visit(CastExpression castExpression) {
+		
+	}
+
+	public void visit(NamedParameter namedParameter) {
+		// TODO Auto-generated method stub
 		
 	}
 

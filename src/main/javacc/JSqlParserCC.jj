@@ -69,6 +69,7 @@ import com.github.sql.analytic.expression.WindowRange;
 import com.github.sql.analytic.expression.WindowOffset;
 import com.github.sql.analytic.expression.InverseExpression;
 import com.github.sql.analytic.expression.JdbcParameter;
+import com.github.sql.analytic.expression.NamedParameter;
 import com.github.sql.analytic.expression.LongValue;
 import com.github.sql.analytic.expression.DateValue;
 import com.github.sql.analytic.expression.TimeValue;
@@ -268,6 +269,7 @@ TOKEN:
 |   < S_CHAR_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
 |   < S_HINTS: "/*+" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/" >
+|   < S_PARAM: ":" (  <DIGIT> | <LETTER> | <SPECIAL_CHARS> )* >
 }
 
 
@@ -1428,7 +1430,9 @@ Expression PrimaryExpression():
 	
 	| "?" { retval = new JdbcParameter(); }
 	
-	|    LOOKAHEAD([ "+" | "-"] Function()) [ "+" | "-" { isInverse = true; }] retval=Function() 
+	| token = <S_PARAM> { retval = new NamedParameter(token.image.substring(1));}
+	
+	| LOOKAHEAD([ "+" | "-"] Function()) [ "+" | "-" { isInverse = true; }] retval=Function() 
 	
 	| LOOKAHEAD([	"+" | "-"] <S_DOUBLE>) 	[	"+" | "-" { tmp = "-"; }]  token=<S_DOUBLE> { retval = new DoubleValue(tmp+token.image); }
 	

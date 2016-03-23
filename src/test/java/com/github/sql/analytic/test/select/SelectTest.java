@@ -37,6 +37,17 @@ public class SelectTest extends TestCase {
 
 	}
 	
+	
+	public void testNamedParam() throws JSQLParserException {
+		String statement = "SELECT * FROM mytable WHERE col = :1";
+
+		Select select = (Select) parserManager.parse(new StringReader(statement));
+
+		assertEquals(statement,select.toString());
+		
+
+	}
+	
 	public void testPartition() throws JSQLParserException {
 		String statement = "SELECT col FROM mytable PARTITION  FOR('2016-01-01')";
 
