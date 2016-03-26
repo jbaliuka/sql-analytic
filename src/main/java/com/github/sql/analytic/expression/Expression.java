@@ -22,9 +22,10 @@
 
 package com.github.sql.analytic.expression;
 
-
+import com.github.sql.analytic.statement.Statement;
 
 public interface Expression {
+	
 	public void accept(ExpressionVisitor expressionVisitor);
 
 }

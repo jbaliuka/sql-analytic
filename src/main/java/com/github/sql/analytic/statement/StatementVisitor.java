@@ -35,6 +35,7 @@ import com.github.sql.analytic.statement.update.Update;
 
 
 public interface StatementVisitor {
+	
 	public void visit(Select select);
 	public void visit(Delete delete);
 	public void visit(Update update);
@@ -44,5 +45,7 @@ public interface StatementVisitor {
 	public void visit(Truncate truncate);
 	public void visit(CreateTable createTable);
 	public void visit(CreateView createView);
+	
+	
 
 }

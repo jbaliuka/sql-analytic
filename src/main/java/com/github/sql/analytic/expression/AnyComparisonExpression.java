@@ -10,11 +10,24 @@ public class AnyComparisonExpression implements Expression {
 		this.subSelect = subSelect;
 	}
 	
-	public SubSelect GetSubSelect() {
+	public AnyComparisonExpression() {		
+	}
+
+	public SubSelect getSubSelect() {
 		return subSelect;
 	}
 
 	public void accept(ExpressionVisitor expressionVisitor) {
 		expressionVisitor.visit(this);
 	}
+
+	public void setSubSelect(SubSelect sub) {
+		subSelect = sub;		
+	}
+	
+	@Override
+	public String toString() {		
+		return " ANY " + subSelect;
+	}
+	
 }

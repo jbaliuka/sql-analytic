@@ -2,6 +2,7 @@ package com.github.sql.analytic.expression.operators.string;
 
 import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
+import com.github.sql.analytic.statement.StatementVisitor;
 
 
 public class Concat extends BinaryExpression{
@@ -15,5 +16,7 @@ public class Concat extends BinaryExpression{
 	public void accept(ExpressionVisitor expressionVisitor) {		
 		expressionVisitor.visit(this);
 	}
+
+	
 
 }

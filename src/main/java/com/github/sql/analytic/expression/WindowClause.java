@@ -1,6 +1,6 @@
 package com.github.sql.analytic.expression;
 
-public class WindowCause {	
+public class WindowClause {	
 	public enum Type{
 		ROWS,
 		RANGE		

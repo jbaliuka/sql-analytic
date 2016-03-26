@@ -107,13 +107,11 @@ public class Union implements SelectBody {
 		}
 		StringBuilder builder = new StringBuilder(selects);	
 		for (int i = 0; i < plainSelects.size(); i++) {
-			builder.append("(");
+			
 			builder.append(plainSelects.get(i));
 			if(i < plainSelects.size() - 1){
-				builder.append(") UNION ");
+				builder.append(" UNION ");
 				builder.append(allDistinct);				
-			}else {
-				builder.append(")");
 			}
 			
 		}

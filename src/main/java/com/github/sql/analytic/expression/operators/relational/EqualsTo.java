@@ -24,6 +24,7 @@ package com.github.sql.analytic.expression.operators.relational;
 
 import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
+import com.github.sql.analytic.statement.StatementVisitor;
 
 
 public class EqualsTo extends BinaryExpression {
@@ -34,5 +35,7 @@ public class EqualsTo extends BinaryExpression {
 	public String getStringExpression() {
 		return "=";
 	}
+
+	
 
 }

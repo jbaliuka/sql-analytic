@@ -39,7 +39,7 @@ public class Function implements Expression,FromItem {
 	private String alias;
 	private boolean pipeline = false;
 	private boolean distinct = false;
-	private AnalyticCause analyticCause;
+	private AnalyticClause analyticCause;
 	
 	public boolean isDistinct() {
 		return distinct;
@@ -151,11 +151,11 @@ public class Function implements Expression,FromItem {
 		return pipeline;
 	}
 
-	public AnalyticCause getAnalyticCause() {
+	public AnalyticClause getAnalyticCause() {
 		return analyticCause;
 	}
 
-	public void setAnalyticCause(AnalyticCause analyticCause) {
+	public void setAnalyticClause(AnalyticClause analyticCause) {
 		this.analyticCause = analyticCause;
 	}
 }

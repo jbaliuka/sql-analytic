@@ -38,6 +38,9 @@ public class DoubleValue implements Expression {
 		this.stringValue = value;
 	}
 	
+	public DoubleValue() {		
+	}
+
 	public void accept(ExpressionVisitor expressionVisitor) {
 		expressionVisitor.visit(this);
 	}
@@ -45,10 +48,6 @@ public class DoubleValue implements Expression {
 
 	public double getValue() {
 		return value;
-	}
-
-	public void setValue(double d) {
-		value = d;
 	}
 
 	public String toString() {

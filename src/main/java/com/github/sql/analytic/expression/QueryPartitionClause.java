@@ -3,7 +3,7 @@ package com.github.sql.analytic.expression;
 import com.github.sql.analytic.expression.operators.relational.ExpressionList;
 import com.github.sql.analytic.statement.select.PlainSelect;
 
-public class QueryPartitionCause {
+public class QueryPartitionClause implements Expression{
 
 	private ExpressionList expressionList;
 
@@ -23,6 +23,10 @@ public class QueryPartitionCause {
 		}
 
 		return buffer.toString();
+	}
+
+	public void accept(ExpressionVisitor expressionVisitor) {
+		expressionVisitor.visit(this);		
 	}
 
 }

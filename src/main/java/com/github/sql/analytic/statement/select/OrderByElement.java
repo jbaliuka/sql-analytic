@@ -24,6 +24,7 @@ package com.github.sql.analytic.statement.select;
 
 import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
+import com.github.sql.analytic.statement.StatementVisitor;
 
 
 /**
@@ -86,4 +87,6 @@ public class OrderByElement implements Expression{
 	public void setNullOrdering(NullOrdering nullOrdering) {
 		this.nullOrdering = nullOrdering;
 	}
+
+	
 }

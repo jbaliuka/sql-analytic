@@ -58,4 +58,6 @@ public class ExistsExpression implements Expression {
 	public String toString() {
 		return getStringExpression() + " " + rightExpression.toString();
 	}
+
+	
 }

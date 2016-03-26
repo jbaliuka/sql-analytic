@@ -23,6 +23,7 @@
 package com.github.sql.analytic.statement.select;
 
 import com.github.sql.analytic.expression.ExpressionVisitor;
+import com.github.sql.analytic.statement.StatementVisitor;
 
 /**
  * An index of a column in expressions as "GROUP BY 1" or as "ORDER BY 1,2"
@@ -51,5 +52,6 @@ public class ColumnIndex implements ColumnReference {
 		expressionVisitor.visit(this);
 		
 	}
+
 
 }

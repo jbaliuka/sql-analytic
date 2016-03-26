@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.github.sql.analytic.expression.AllComparisonExpression;
-import com.github.sql.analytic.expression.AnalyticCause;
+import com.github.sql.analytic.expression.AnalyticClause;
 import com.github.sql.analytic.expression.AnyComparisonExpression;
 import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.CaseExpression;
@@ -20,7 +20,9 @@ import com.github.sql.analytic.expression.JdbcParameter;
 import com.github.sql.analytic.expression.LongValue;
 import com.github.sql.analytic.expression.NamedParameter;
 import com.github.sql.analytic.expression.NullValue;
+import com.github.sql.analytic.expression.OrderByClause;
 import com.github.sql.analytic.expression.Parenthesis;
+import com.github.sql.analytic.expression.QueryPartitionClause;
 import com.github.sql.analytic.expression.StringValue;
 import com.github.sql.analytic.expression.TimeValue;
 import com.github.sql.analytic.expression.TimestampValue;
@@ -278,6 +280,9 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
         } else {
             visit(function.getParameters());
         }
+        if(function.getAnalyticCause() != null){
+        	visit(function.getAnalyticCause());
+        }
 
         if (function.isEscaped()) {
             buffer.append("}");
@@ -333,6 +338,7 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 		
 		Expression elseExp = caseExpression.getElseExpression();
 		if( elseExp != null ) {
+			buffer.append(" ELSE ");
 			elseExp.accept(this);
 		}
 		
@@ -348,12 +354,12 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 
 	public void visit(AllComparisonExpression allComparisonExpression) {
 		buffer.append(" ALL ");
-		allComparisonExpression.GetSubSelect().accept((ExpressionVisitor)this);
+		allComparisonExpression.getSubSelect().accept((ExpressionVisitor)this);
 	}
 
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
 		buffer.append(" ANY ");
-		anyComparisonExpression.GetSubSelect().accept((ExpressionVisitor)this);
+		anyComparisonExpression.getSubSelect().accept((ExpressionVisitor)this);
 	}
 
 	public void visit(ColumnIndex columnIndex) {
@@ -374,22 +380,29 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 
 	
 	public void visit(GroupingExpression groupingExpression) {
-		
-		
+		buffer.append(groupingExpression);		
 	}
 
-	public void visit(AnalyticCause analyticCause) {
-		
-		
+	public void visit(AnalyticClause analyticCause) {
+		 buffer.append(analyticCause.toString());
 	}
 
 	public void visit(CastExpression castExpression) {
-		
+		buffer.append("CAST (");
+		castExpression.getExpression().accept(this);
+		buffer.append(" AS ");
+		buffer.append(castExpression.getType()).append(")");
 	}
 
 	public void visit(NamedParameter namedParameter) {
-		// TODO Auto-generated method stub
 		
+		buffer.append(namedParameter);
+		
+	}
+
+	public void visit(QueryPartitionClause queryPartitionClause) {
+		
+		buffer.append(queryPartitionClause);
 	}
 
 	

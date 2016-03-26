@@ -26,6 +26,7 @@ import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
 import com.github.sql.analytic.expression.operators.relational.ItemsListVisitor;
+import com.github.sql.analytic.statement.StatementVisitor;
 
 
 
@@ -77,4 +78,6 @@ public class SubSelect implements FromItem, Expression, ItemsList {
 	public boolean isExpression() {
 		return expression;
 	}
+
+	
 }
