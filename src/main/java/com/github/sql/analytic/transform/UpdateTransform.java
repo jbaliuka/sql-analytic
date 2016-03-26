@@ -11,11 +11,11 @@ import com.github.sql.analytic.statement.update.Update;
 
 
 public class UpdateTransform {
-	
+
 	public static class UpdateListItem{
 		private Column column;
 		private Expression expression;
-		
+
 		public UpdateListItem(Column column, Expression expression) {
 			super();
 			this.column = column;
@@ -33,23 +33,25 @@ public class UpdateTransform {
 		public void setExpression(Expression expression) {
 			this.expression = expression;
 		}
-		
+
 	}
-	
+
 	private StatementTransform statementTransform;
-	
+	private Table table;
+
 
 	public UpdateTransform(StatementTransform statementTransform) {
 		this.statementTransform = statementTransform;
 	}
 
 	public Statement transform(Update update) {
-		
+
 		Update newUpdate = new Update();
 		newUpdate.setTable(transformTable(update.getTable()));
+		setTable(newUpdate.getTable());
 		newUpdate.setColumns(new ArrayList<Column>());
 		newUpdate.setExpressions(new ArrayList<Expression>());
-		
+
 		for (int i = 0; i < update.getColumns().size(); i++) {
 			Column column = (Column) update.getColumns().get(i);
 			Expression expression = (Expression) update.getExpressions().get(i);			
@@ -60,35 +62,43 @@ public class UpdateTransform {
 			}				
 
 		}
-		
-		if (update.getWhere() != null) {
-			newUpdate.setWhere(transformWhere(update.getWhere()));
-		}
+
+
+		newUpdate.setWhere(transformWhere(update.getWhere()));
+
 		return newUpdate;
 
 	}
-	
+
 	private UpdateListItem transfromItem(UpdateListItem updateListItem) {
-		
+
 		updateListItem.setExpression(statementTransform.transform(updateListItem.getExpression()));				
 		updateListItem.setColumn(updateListItem.getColumn());
-		
+
 		return updateListItem;
 	}
 
 	protected Table transformTable(Table table) {
-		
+
 		Table newTable = new Table(table.getSchemaName(),table.getName());
 		newTable.setAlias(table.getAlias());
 		newTable.setPartition(table.getPartition());
 		newTable.setPartitionFor(table.isPartitionFor());
-		
+
 		return newTable;
 	}
 	protected Expression transformWhere(Expression where) {		
 		return statementTransform.transform(where);
 	}
 
-	
+	public Table getTable() {
+		return table;
+	}
+
+	public void setTable(Table table) {
+		this.table = table;
+	}
+
+
 
 }

@@ -27,6 +27,7 @@ import com.github.sql.analytic.statement.create.view.CreateView;
 import com.github.sql.analytic.statement.delete.Delete;
 import com.github.sql.analytic.statement.drop.Drop;
 import com.github.sql.analytic.statement.insert.Insert;
+import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.replace.Replace;
 import com.github.sql.analytic.statement.select.Select;
 import com.github.sql.analytic.statement.truncate.Truncate;
@@ -45,6 +46,7 @@ public interface StatementVisitor {
 	public void visit(Truncate truncate);
 	public void visit(CreateTable createTable);
 	public void visit(CreateView createView);
+	public void visit(CreatePolicy policy);
 	
 	
 

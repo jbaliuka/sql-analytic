@@ -10,11 +10,11 @@ import com.github.sql.analytic.statement.select.SubSelect;
 
 public class FromItemTransform implements FromItemVisitor{
 
-	private StatementTransform statementTransform;
+	private SelectTransform selectTransform;
 	private FromItem fromItem ;
 
-	public FromItemTransform(StatementTransform statementTransform) {
-		this.statementTransform = statementTransform;
+	public FromItemTransform(SelectTransform selectTransform) {
+		this.selectTransform = selectTransform;
 	}
 
 	public void visit(Table tableName) {		
@@ -27,7 +27,7 @@ public class FromItemTransform implements FromItemVisitor{
 	}
 
 	public void visit(SubSelect subSelect) {
-		fromItem = (FromItem) statementTransform.transform((Expression)subSelect);
+		fromItem = (FromItem) selectTransform.getStatementTransform().transform((Expression)subSelect);
 		fromItem.setAlias(subSelect.getAlias());		
 		
 	}
@@ -37,7 +37,7 @@ public class FromItemTransform implements FromItemVisitor{
 	}
 
 	public void visit(Function function) {
-		fromItem = (Function)statementTransform.transform(function);		
+		fromItem = (Function)selectTransform.getStatementTransform().transform(function);		
 	}
 
 	public FromItem getFromItem() {		

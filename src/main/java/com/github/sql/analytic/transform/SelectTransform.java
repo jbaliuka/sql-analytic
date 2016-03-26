@@ -16,6 +16,7 @@ import com.github.sql.analytic.statement.select.SelectItem;
 import com.github.sql.analytic.statement.select.SelectVisitor;
 import com.github.sql.analytic.statement.select.Top;
 import com.github.sql.analytic.statement.select.Union;
+import com.github.sql.analytic.statement.select.WithItem;
 
 
 /**
@@ -27,6 +28,12 @@ public class SelectTransform implements SelectVisitor   {
 
 
 	private SelectBody selectBody;
+
+	public void setSelectBody(SelectBody selectBody) {
+		this.selectBody = selectBody;
+	}
+
+
 	private StatementTransform statementTransform;
 
 
@@ -40,29 +47,19 @@ public class SelectTransform implements SelectVisitor   {
 		this.statementTransform = statementTransform;
 	}
 
+
+	protected FromItemTransform createFromItemTransform() {
+
+		return new FromItemTransform(this);
+
+	}
+
 	public void visit(PlainSelect plainSelect) {
 
-		selectBody = new PlainSelect();		
-
-		Top top = plainSelect.getTop();
-		if (top != null) {
-			((PlainSelect) selectBody).setTop(top);
-		}
-
-		transformDistinct(plainSelect);
-
-		((PlainSelect) selectBody).setSelectItems(new ArrayList<SelectItem>());
-
-		for (SelectItem item : plainSelect.getSelectItems()) {
-			SelectItemTransfrom transform = statementTransform.createSelectItemTransform();
-			item.accept(transform);		
-			((PlainSelect) selectBody).getSelectItems().add(transform.getItem());				
-		}
-
-
+		selectBody = new PlainSelect();			
 
 		if (plainSelect.getFromItem() != null) {
-			FromItemTransform transform  = statementTransform.createFromItemTransform();
+			FromItemTransform transform  = createFromItemTransform();
 			plainSelect.getFromItem().accept(transform);
 			((PlainSelect) selectBody).setFromItem(transform.getFromItem());
 		}
@@ -74,9 +71,19 @@ public class SelectTransform implements SelectVisitor   {
 			}
 		}
 
-		if(plainSelect.getWhere() != null){
-			transformWhere(plainSelect);
+		((PlainSelect) selectBody).setWhere(transformWhere(plainSelect.getWhere()));
+
+
+		Top top = plainSelect.getTop();
+		if (top != null) {
+			((PlainSelect) selectBody).setTop(top);
 		}
+
+		transformDistinct(plainSelect);
+
+		((PlainSelect) selectBody).setSelectItems(transformSelectItems(plainSelect.getSelectItems()));		
+
+
 
 		if (plainSelect.getGroupByColumnReferences() != null) {
 			((PlainSelect) selectBody).setGroupByColumnReferences(new ArrayList<Expression>());
@@ -100,9 +107,25 @@ public class SelectTransform implements SelectVisitor   {
 	}
 
 
+	protected List<SelectItem> transformSelectItems(List<SelectItem> list) {
+		List<SelectItem> newList = new ArrayList<SelectItem>();
+		for (SelectItem item : list) {
+			SelectItemTransfrom transform = statementTransform.createSelectItemTransform();
+			item.accept(transform);	
+			newList.add(transform.getItem());					
+		}
+		return newList;
+	}
 
-	protected void transformWhere(PlainSelect plainSelect) {
-		((PlainSelect) selectBody).setWhere(statementTransform.transform(plainSelect.getWhere()));
+
+
+	protected Expression transformWhere(Expression expression) {
+		if(expression != null){
+			return statementTransform.transform(expression);
+		}else {
+			return null;
+		}
+
 	}
 
 	protected void transformDistinct(PlainSelect plainSelect) {
@@ -170,7 +193,7 @@ public class SelectTransform implements SelectVisitor   {
 	}
 
 	public void transformLimit(Limit limit) {
-		
+
 		if(selectBody instanceof Union){
 			((Union) selectBody).setLimit(limit);
 		}else {
@@ -181,7 +204,7 @@ public class SelectTransform implements SelectVisitor   {
 
 
 	public void transformJoin(Join join) {
-		
+
 		Join newJoin = new Join();
 		((PlainSelect) selectBody).getJoins().add(newJoin);
 		newJoin.setFull(join.isFull());
@@ -191,28 +214,39 @@ public class SelectTransform implements SelectVisitor   {
 		newJoin.setNatural(join.isNatural());
 		newJoin.setOuter(join.isOuter());
 		newJoin.setSimple(join.isSimple());
-		
-		FromItemTransform transform = statementTransform.createFromItemTransform();		
+
+		FromItemTransform transform = createFromItemTransform();		
 		join.getRightItem().accept(transform);		
 		newJoin.setRightItem(transform.getFromItem());
-		
+
 		if (join.getOnExpression() != null) {			
 			newJoin.setOnExpression(statementTransform.transform(join.getOnExpression()));			
 		}
-		
+
 		if (join.getUsingColumns() != null) {
 			newJoin.setUsingColumns(new ArrayList<Column>());
 			for ( Column next : join.getUsingColumns()) {
 				newJoin.getUsingColumns().add((Column) statementTransform.transform(next));
 			}
-			
-		}
-		 
-	}
 
+		}
+
+	}
 
 	public SelectBody getSelectBody() {
 		return selectBody;
+	}
+
+
+	public  StatementTransform getStatementTransform() {
+
+		return statementTransform;
+	}
+
+
+	public void visit(WithItem newItem) {
+
+
 	}
 
 

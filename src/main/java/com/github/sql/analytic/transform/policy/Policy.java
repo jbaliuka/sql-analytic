@@ -1,0 +1,107 @@
+package com.github.sql.analytic.transform.policy;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.github.sql.analytic.schema.Table;
+import com.github.sql.analytic.statement.policy.CreatePolicy;
+import com.github.sql.analytic.statement.select.WithItem;
+import com.github.sql.analytic.transform.DeleteTransform;
+import com.github.sql.analytic.transform.SelectTransform;
+import com.github.sql.analytic.transform.StatementTransform;
+import com.github.sql.analytic.transform.UpdateTransform;
+
+public class Policy extends StatementTransform {
+
+	private List<CreatePolicy> policyList;
+	private SessionContext sessionContext;
+	private Set<Table> tables = new HashSet<Table>();
+	private List<WithItem> withItems = new ArrayList<WithItem>();
+	private boolean checkColumns;
+
+	public boolean isCheckColumns() {
+		return checkColumns;
+	}
+
+
+	public Policy(List<CreatePolicy> policyList, SessionContext sessionContext) {
+		super();
+		this.policyList = policyList;
+		this.sessionContext = sessionContext;
+	}
+
+
+	public List<CreatePolicy> findTablePolicies(String action,Table table) {
+
+		List<CreatePolicy> allPolicies = policyList;
+		List<CreatePolicy> newPolicyList = new ArrayList<CreatePolicy>();
+
+		for(CreatePolicy policy : allPolicies){
+			if( applicableFor(policy,action)){				
+				if(table.getWholeTableName().equalsIgnoreCase(policy.getTable().getWholeTableName())){		
+					if(policy.getRoles() != null){
+						for(String role: policy.getRoles()){
+							if(getSessionContext().isUserInRole(role)){
+								checkColumns = checkColumns || policy.getColumns() != null;
+								newPolicyList.add(policy);								
+							}
+						}
+					}else {
+						checkColumns = checkColumns || policy.getColumns() != null;
+						newPolicyList.add(policy);
+					}
+				}
+			}			
+
+		}
+		if(newPolicyList.isEmpty()){
+			throw new PolicyException(String.format("Unable to find policy list for %s on %s ", table, action)); 
+		}
+		
+		return newPolicyList;
+	}
+
+	private boolean applicableFor(CreatePolicy policy,String actiony) {
+
+		return policy.getAction() == null || actiony.equalsIgnoreCase(policy.getAction()) ||
+				"ALL".equalsIgnoreCase(policy.getAction());
+	}
+
+
+
+	@Override
+	protected SelectTransform createSelectTransform() {
+		return new SelectPolicy("SELECT",true, this);
+	}
+
+	@Override
+	protected DeleteTransform createDeleteTransform() {		 
+		return new DeletePolicy(this);
+	}
+	
+	@Override
+	protected UpdateTransform createUpdateTransform() {		
+		return new UpdatePolicy(this);
+	}
+
+	public List<CreatePolicy> getPolicyList() {
+		return policyList;
+	}
+
+	public SessionContext getSessionContext() {
+		return sessionContext;
+	}
+
+	public Set<Table> getTables() {		
+		return tables;
+	}
+
+
+	public List<WithItem> getWithItems() {		
+		return withItems ;
+	}
+
+
+}

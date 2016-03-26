@@ -14,6 +14,7 @@ import com.github.sql.analytic.statement.create.view.CreateView;
 import com.github.sql.analytic.statement.delete.Delete;
 import com.github.sql.analytic.statement.drop.Drop;
 import com.github.sql.analytic.statement.insert.Insert;
+import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.replace.Replace;
 import com.github.sql.analytic.statement.select.Select;
 import com.github.sql.analytic.statement.select.SelectBody;
@@ -26,11 +27,7 @@ import com.github.sql.analytic.statement.update.Update;
 
 public class StatementTransform  implements StatementVisitor {
 
-
-
 	private Statement statement;
-
-
 
 	public void visit(CreateTable createTable) {
 
@@ -73,9 +70,11 @@ public class StatementTransform  implements StatementVisitor {
 		
 	}
 	
+	
 	public void visit(Select select) {
 		
 		statement = new Select();
+		SelectTransform selectTranssform = createSelectTransform();
 
 		if (select.getWithItemsList() != null && !select.getWithItemsList().isEmpty()) {
 			List<WithItem> withItems = new ArrayList<WithItem>();
@@ -90,7 +89,7 @@ public class StatementTransform  implements StatementVisitor {
 						selectItems.add(item);
 					}
 				}
-				SelectTransform selectTranssform = createSelectTransform();
+				selectTranssform.visit(newItem);
 
 				withItem.getSelectBody().accept(selectTranssform);
 				newItem.setSelectBody(selectTranssform.getSelectBody());
@@ -160,11 +159,7 @@ public class StatementTransform  implements StatementVisitor {
 		return new SelectItemTransfrom(this);
 	}
 
-	protected FromItemTransform createFromItemTransform() {
-
-		return new FromItemTransform(this);
-
-	}
+	
 
 	protected Table copy(Table table) {
 		
@@ -174,6 +169,11 @@ public class StatementTransform  implements StatementVisitor {
 		newTable.setPartitionFor(table.isPartitionFor());
 
 		return newTable;
+	}
+
+	public void visit(CreatePolicy policy) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

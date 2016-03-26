@@ -24,9 +24,7 @@ package com.github.sql.analytic.parser;
 
 import java.io.Reader;
 
-import com.github.sql.analytic.parser.CCJSqlParser;
 import com.github.sql.analytic.JSQLParserException;
-import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.statement.Statement;
 import com.github.sql.analytic.transform.StatementTransform;
 
@@ -41,18 +39,19 @@ public class CCJSqlParserManager implements JSqlParser {
 		CCJSqlParser parser = new CCJSqlParser(statementReader);
 		try {
 			return parser.Statement();
-		} catch (Throwable e) {
+		} catch (ParseException e) {
 			throw new JSQLParserException(e);
 		}
 	}
 	
-	public Statement transform(Reader statementReader,StatementTransform transform) throws JSQLParserException {
-		CCJSqlParser parser = new CCJSqlParser(statementReader);
-		try {					
-			return transform.trasform(parser.Statement());
-		} catch (Throwable e) {
-			throw new JSQLParserException(e);
-		}
+	public Statement transform(Reader statementReader,StatementTransform transform) throws  JSQLParserException {
+		CCJSqlParser parser = new CCJSqlParser(statementReader);							
+			try {
+				return transform.trasform(parser.Statement());
+			} catch (ParseException e) {
+				throw new JSQLParserException();
+			}
+		
 	}
 	
    
