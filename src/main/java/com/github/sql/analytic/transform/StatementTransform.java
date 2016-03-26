@@ -14,6 +14,7 @@ import com.github.sql.analytic.statement.create.view.CreateView;
 import com.github.sql.analytic.statement.delete.Delete;
 import com.github.sql.analytic.statement.drop.Drop;
 import com.github.sql.analytic.statement.insert.Insert;
+import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.replace.Replace;
 import com.github.sql.analytic.statement.select.Select;
 import com.github.sql.analytic.statement.select.SelectBody;
@@ -26,11 +27,7 @@ import com.github.sql.analytic.statement.update.Update;
 
 public class StatementTransform  implements StatementVisitor {
 
-
-
 	private Statement statement;
-
-
 
 	public void visit(CreateTable createTable) {
 
@@ -174,6 +171,11 @@ public class StatementTransform  implements StatementVisitor {
 		newTable.setPartitionFor(table.isPartitionFor());
 
 		return newTable;
+	}
+
+	public void visit(CreatePolicy policy) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

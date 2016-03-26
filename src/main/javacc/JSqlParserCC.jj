@@ -136,6 +136,7 @@ import com.github.sql.analytic.statement.select.Union;
 import com.github.sql.analytic.statement.select.WithItem;
 import com.github.sql.analytic.statement.truncate.Truncate;
 import com.github.sql.analytic.statement.update.Update;
+import com.github.sql.analytic.statement.policy.CreatePolicy;
 
 
 /**
@@ -241,6 +242,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_FOR: "FOR" >
 |   <K_CHECK: "CHECK">
 |   <K_TO: "TO" >
+|   <K_POLICY: "POLICY" >
 }
 
 
@@ -295,8 +297,7 @@ Statement Statement() :
     stm = Drop()
     |
     stm = Truncate()
-    
-    
+  	
     )
     [";"]
     <EOF>
@@ -308,15 +309,50 @@ Statement Statement() :
 
 
 Statement Create():
-{  Statement statement; }
+{  Statement statement = null; }
 {       (
     	<K_TABLE>   statement = CreateTable()  
 		| 
 		<K_VIEW>    statement = CreateView()
+		|
+		<K_POLICY>  statement = CreatePolicy() 
 		)
 
    {  return statement;  }
 }
+
+
+CreatePolicy CreatePolicy():
+{
+  CreatePolicy policy = new CreatePolicy();
+  List<Column> columns = new ArrayList<Column>();
+  Column column;
+  List<String> roles = new ArrayList<String>();
+  Token token;
+  Expression expression;
+  Table table;}{
+  token = <S_IDENTIFIER>  {
+    policy.setName(token.image);  }
+  <K_ON> table = Table() [ "(" column = Column() {columns.add(column);} ("," column = Column() {columns.add(column);})* ")" ] 
+  [LOOKAHEAD(2) <K_FOR>
+  (
+    token = <K_ALL> | token = <K_SELECT> | token = <K_INSERT> | token = <K_UPDATE> | token = <K_DELETE>
+  )  {
+    policy.setAction(token.image);  }
+  ]
+  [
+  	<K_TO> token = <S_IDENTIFIER >	{ roles.add(token.image); }
+  	( token =<S_IDENTIFIER>	{ roles.add(token.image); })*  	
+  ]
+  [<K_USING> "(" expression = Expression() ")" { policy.setUsing(expression); } ]
+  [<K_WITH> <K_CHECK> "(" expression = Expression() ")"{ policy.setCheck(expression); }]
+  {
+    policy.setTable(table);
+    if(columns.size() > 0){
+      policy.setColumns(columns);    }
+    if(roles.size() > 0)    {
+      policy.setRoles(roles);    }
+    return policy;  }}
 
 Update Update():
 { 
@@ -903,10 +939,13 @@ OrderByElement OrderByElement():
 {
 	columnReference = SimpleExpression()
     [<K_ASC> | (<K_DESC> { orderByElement.setAsc(false);}) ] 
-    [<K_NULLS>] ( [<K_FIRST> { orderByElement.setNullOrdering(OrderByElement.NullOrdering.NULLS_FIRST);  } ] | 
-                [<K_LAST> { orderByElement.setNullOrdering(OrderByElement.NullOrdering.NULLS_LAST);  } ] )
-      
-            
+    [<K_NULLS>
+    	(
+    	<K_FIRST> { orderByElement.setNullOrdering(OrderByElement.NullOrdering.NULLS_FIRST); }
+    	|
+    	<K_LAST>  { orderByElement.setNullOrdering(OrderByElement.NullOrdering.NULLS_LAST);  }
+        )
+    ]                  
 	{
     	orderByElement.setColumnReference(columnReference);
 		return orderByElement;

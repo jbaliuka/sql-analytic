@@ -2,12 +2,14 @@ package com.github.sql.analytic.util.deparser;
 
 import java.util.Iterator;
 
+import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.create.table.CreateTable;
 import com.github.sql.analytic.statement.create.view.CreateView;
 import com.github.sql.analytic.statement.delete.Delete;
 import com.github.sql.analytic.statement.drop.Drop;
 import com.github.sql.analytic.statement.insert.Insert;
+import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.replace.Replace;
 import com.github.sql.analytic.statement.select.Select;
 import com.github.sql.analytic.statement.select.WithItem;
@@ -61,17 +63,17 @@ public class StatementDeParser implements StatementVisitor {
 		replaceDeParser.deParse(replace);
 	}
 
-	
+
 	protected SelectDeParser createSelectDeParser(){
 		return  new SelectDeParser();
 	}
-	
-	
+
+
 	public void visit(Select select) {
 		SelectDeParser selectDeParser = createSelectDeParser();
 		selectDeParser.setBuffer(buffer);
 		ExpressionDeParser expressionDeParser = createExpressionDeparser(selectDeParser,buffer);
-		
+
 		selectDeParser.setExpressionVisitor(expressionDeParser);
 		if (select.getWithItemsList() != null && !select.getWithItemsList().isEmpty()) {
 			buffer.append("WITH ");
@@ -89,9 +91,9 @@ public class StatementDeParser implements StatementVisitor {
 	}
 
 	protected ExpressionDeParser createExpressionDeparser(SelectDeParser selectDeParser, StringBuffer buffer2) {
-	
+
 		return new ExpressionDeParser(selectDeParser, buffer);
-		
+
 	}
 
 	public void visit(Truncate truncate) {
@@ -119,9 +121,54 @@ public class StatementDeParser implements StatementVisitor {
 
 	public void visit(CreateView createView) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-	
+	public void visit(CreatePolicy policy) {
+
+		buffer.append("CREATE POLICY ").
+		append(policy.getName()).append(" ON ").append(policy.getTable());
+		
+		if(policy.getColumns() != null){
+			buffer.append("(");
+			int i = 0;
+			for(Column column : policy.getColumns()){
+				buffer.append(column);
+				if(i++ < policy.getColumns().size() - 1){
+					buffer.append(",");	
+				}
+			}
+			buffer.append(")");
+		}
+		
+		if(policy.getAction() != null){
+			buffer.append(" FOR ").append(policy.getAction());	
+		}		
+		if( policy.getRoles() != null ){
+			buffer.append(" TO ");
+			int i = 0;
+			for(String role : policy.getRoles()){
+				buffer.append(role);
+				if(i++ < policy.getRoles().size() - 1){
+					buffer.append(",");	
+				}
+			}
+		}
+		if(policy.getUsing() != null){
+			buffer.append(" USING(");
+			buffer.append(policy.getUsing());
+			buffer.append(")");
+		}
+		if(policy.getCheck() != null){
+			buffer.append(" WITH CHECK(");
+			buffer.append(policy.getCheck());
+			buffer.append(")");
+		}
+		
+		
+
+	}
+
+
 
 }
