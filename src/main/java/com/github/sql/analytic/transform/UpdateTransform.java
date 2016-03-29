@@ -15,7 +15,7 @@ public class UpdateTransform {
 
 	private StatementTransform statementTransform;
 	private Table table;
-
+	
 
 	public UpdateTransform(StatementTransform statementTransform) {
 		this.statementTransform = statementTransform;
@@ -23,7 +23,7 @@ public class UpdateTransform {
 
 	public Statement transform(Update update) {
 
-		Update newUpdate = new Update();
+		Update newUpdate = new Update();		
 		newUpdate.setTable(transformTable(update.getTable()));
 		setTable(newUpdate.getTable());
 		newUpdate.setColumns(new ArrayList<Column>());
@@ -33,7 +33,7 @@ public class UpdateTransform {
 		for (int i = 0; i < update.getColumns().size(); i++) {
 			Column column = (Column) update.getColumns().get(i);
 			Expression expression = (Expression) update.getExpressions().get(i);			
-			NewValue newItem = transfromItem(new NewValue(column,expression));
+			NewValue newItem = transfromItem(new NewValue(column,statementTransform.transform(expression)));
 			if(newItem != null){
 				newValues.add(newItem);				
 			}				

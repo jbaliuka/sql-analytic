@@ -33,8 +33,7 @@ public class InsertTransform implements ItemsListVisitor {
 		newInsert.setUseValues(insert.isUseValues());
 
 		if (insert.getColumns() != null) {	
-			newInsert.setColumns(new ArrayList<Column>());
-			int i = 0;
+			newInsert.setColumns(new ArrayList<Column>());			
 			for (Column column : insert.getColumns()) {			
 				newInsert.getColumns().add(column);				
 			}

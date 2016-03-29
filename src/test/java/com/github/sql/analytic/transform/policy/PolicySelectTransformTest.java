@@ -35,8 +35,8 @@ public class PolicySelectTransformTest extends TestCase {
 		String policy1 = "CREATE POLICY P_1 ON  TEST USING ( 1 = 1 ) ";
 		String policy2 = "CREATE POLICY P_2 ON  TEST USING ( 2 = 2 ) ";
 		String policy3 = "CREATE POLICY P_3 ON  TEST3 USING ( 3 = 3 ) ";
-		
-		
+
+
 
 		assertTransform(Collections.<String>emptyList(),"SELECT 1","SELECT 1");
 		assertTransform(Arrays.asList(policy1),"SELECT 1","SELECT 1");
@@ -44,14 +44,14 @@ public class PolicySelectTransformTest extends TestCase {
 		assertTransform(Arrays.asList(policy1),"SELECT * FROM TEST","SELECT * FROM TEST WHERE 1 = 1");
 		assertTransform(Arrays.asList(policy1,policy2),"SELECT * FROM TEST","SELECT * FROM TEST WHERE (2 = 2) OR (1 = 1)");
 		assertTransform(Arrays.asList(policy1,policy3),"SELECT * FROM TEST,TEST3","SELECT * FROM TEST,TEST3 WHERE (3 = 3) AND (1=1)");
-		
+
 		assertTransform(Arrays.asList(policy1),"DELETE FROM TEST","DELETE FROM TEST WHERE 1 = 1");
 		assertTransform(Arrays.asList(policy1),"UPDATE TEST SET col=1","UPDATE TEST SET col=1 WHERE 1 = 1");		
-		
+
 
 
 	}
-	
+
 	public void testNewValus() throws JSQLParserException{
 
 		String policy1 = "CREATE POLICY P_1 ON TEST USING(user = :current) WITH CHECK ( user = :current ) ";
@@ -60,26 +60,26 @@ public class PolicySelectTransformTest extends TestCase {
 
 		assertTransform(Arrays.asList(policy1),"UPDATE TEST SET user = 'tom'",
 				"UPDATE TEST SET user = 'tom' WHERE ('tom' = :current) AND (TEST.user = :current)");
-		
+
 		assertTransform(Arrays.asList(policy1),"INSERT INTO TEST(user) VALUES ('tom')",
-				"INSERT INTO TEST(user) SELECT 'tom' FROM (SELECT 1) WHERE 'tom' = :current");
-		
+				"INSERT INTO TEST(user) SELECT 'tom' FROM (SELECT 1) DUAL WHERE 'tom' = :current");
+
 		assertTransform(Arrays.asList(policy1),"INSERT INTO TEST(user) SELECT 'tom'",
-				"INSERT INTO TEST(user) SELECT 'tom' FROM (SELECT 1) WHERE 'tom' = :current");
-		
+				"INSERT INTO TEST(user) SELECT 'tom' FROM (SELECT 1) DUAL WHERE 'tom' = :current");
+
 		assertTransform(Arrays.asList(policy1,policy2),"INSERT INTO TEST(user) SELECT 'tom' FROM TEST2",
 				"INSERT INTO TEST(user) SELECT 'tom' FROM TEST2 WHERE 'tom' = :current");
-		
+
 		assertTransform(Arrays.asList(policy3),"UPDATE TEST SET user = 'tom'",
 				"UPDATE TEST SET user = 'tom' WHERE 'tom' = :current AND role = :role");
-		
+
 		assertTransform(Arrays.asList(policy3),"INSERT INTO TEST(user)VALUES('tom')",
-				"INSERT INTO TEST(user) SELECT 'tom' FROM (SELECT 1) WHERE 'tom' = :current AND NULL = :role");
-		
-		
+				"INSERT INTO TEST(user) SELECT 'tom' FROM (SELECT 1) DUAL WHERE 'tom' = :current AND NULL = :role");
+
+
 
 	}
-	
+
 
 	public void testUsingAlias() throws JSQLParserException{
 
@@ -100,7 +100,27 @@ public class PolicySelectTransformTest extends TestCase {
 		assertTransform(Arrays.asList(policy1),"SELECT TEST.col FROM TEST","SELECT TEST.col FROM TEST");
 		assertTransform(Arrays.asList(policy1),"SELECT LENGHT(TEST.col) FROM TEST","SELECT LENGHT(TEST.col) FROM TEST");
 		try{
-			assertTransform(Arrays.asList(policy1),"SELECT (SELECT TEST.col1 FROM TEST ) FROM TEST","SELECT (SELECT TEST.col1 FROM TEST ) FROM TEST");
+			assertTransform(Arrays.asList(policy1),"SELECT (SELECT TEST.hidden FROM TEST ) FROM TEST","SELECT (SELECT TEST.hidden FROM TEST ) FROM TEST");
+			assertTrue(false);
+		}catch(PolicyException expected){
+			assertTrue(true);
+		}
+
+		try{
+			assertTransform(Arrays.asList(policy1),"UPDATE TEST  SET hidden = 1","UPDATE TEST SET hidden = 1");
+			assertTrue(false);
+		}catch(PolicyException expected){
+			assertTrue(true);
+		}
+
+		try{
+			assertTransform(Arrays.asList(policy1),"INSERT INTO TEST(hidden)VALUES(1)","INSERT INTO TEST(hidden)VALUES(1)");
+			assertTrue(false);
+		}catch(PolicyException expected){
+			assertTrue(true);
+		}
+		try{
+			assertTransform(Arrays.asList(policy1),"INSERT INTO TEST(hidden)select 1","INSERT INTO TEST(hidden)select 1");
 			assertTrue(false);
 		}catch(PolicyException expected){
 			assertTrue(true);

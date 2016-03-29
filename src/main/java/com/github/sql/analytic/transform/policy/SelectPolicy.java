@@ -159,6 +159,7 @@ public class SelectPolicy extends SelectTransform {
 
 
 	protected Expression getCheckFilter(Expression filter) {
+		
 		List<CreatePolicy> list = statementTransform.findTablePolicies(action, toTable);
 		Expression checkFilter = null;		
 		for(CreatePolicy policy: list){				
