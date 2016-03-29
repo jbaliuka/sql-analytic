@@ -1,7 +1,6 @@
 package com.github.sql.analytic.transform.policy;
 
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,7 +9,6 @@ import java.util.Set;
 
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.parser.CCJSqlParserManager;
-import com.github.sql.analytic.parser.ParseException;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.Statement;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
