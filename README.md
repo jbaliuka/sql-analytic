@@ -17,7 +17,7 @@ CREATE POLICY name ON table_name [( column_name [,...] )]
     [ USING ( using_expression ) ]
     [ WITH CHECK ( check_expression ) ]
 
-<pre>
+</pre>
 
 Currently it does not provide JDBC driver wrapper and has some limitations because transformation has no table meta data but future versions might be improved to interpret JDBC meta data or CREATE TABLE statements.
 Also it might be used to translate AST to specific SQL dialect using deParser extensions.
