@@ -36,6 +36,7 @@ public class PolicySelectTransformTest extends TestCase {
 		String policy2 = "CREATE POLICY P_2 ON  TEST USING ( 2 = 2 ) ";
 		String policy3 = "CREATE POLICY P_3 ON  TEST3 USING ( 3 = 3 ) ";
 		
+		
 
 		assertTransform(Collections.<String>emptyList(),"SELECT 1","SELECT 1");
 		assertTransform(Arrays.asList(policy1),"SELECT 1","SELECT 1");
@@ -45,7 +46,7 @@ public class PolicySelectTransformTest extends TestCase {
 		assertTransform(Arrays.asList(policy1,policy3),"SELECT * FROM TEST,TEST3","SELECT * FROM TEST,TEST3 WHERE (3 = 3) AND (1=1)");
 		
 		assertTransform(Arrays.asList(policy1),"DELETE FROM TEST","DELETE FROM TEST WHERE 1 = 1");
-		assertTransform(Arrays.asList(policy1),"UPDATE TEST SET col=1","UPDATE TEST SET col=1 WHERE (1 = 1) AND (1 = 1)");		
+		assertTransform(Arrays.asList(policy1),"UPDATE TEST SET col=1","UPDATE TEST SET col=1 WHERE 1 = 1");		
 		
 
 
@@ -53,8 +54,9 @@ public class PolicySelectTransformTest extends TestCase {
 	
 	public void testNewValus() throws JSQLParserException{
 
-		String policy1 = "CREATE POLICY P_1 ON TEST USING ( user = :current ) ";
+		String policy1 = "CREATE POLICY P_1 ON TEST USING(user = :current) WITH CHECK ( user = :current ) ";
 		String policy2 = "CREATE POLICY P_2 ON TEST2 ";
+		String policy3 = "CREATE POLICY P_3 ON TEST WITH CHECK ( user = :current AND role = :role )";
 
 		assertTransform(Arrays.asList(policy1),"UPDATE TEST SET user = 'tom'",
 				"UPDATE TEST SET user = 'tom' WHERE ('tom' = :current) AND (TEST.user = :current)");
@@ -67,6 +69,13 @@ public class PolicySelectTransformTest extends TestCase {
 		
 		assertTransform(Arrays.asList(policy1,policy2),"INSERT INTO TEST(user) SELECT 'tom' FROM TEST2",
 				"INSERT INTO TEST(user) SELECT 'tom' FROM TEST2 WHERE 'tom' = :current");
+		
+		assertTransform(Arrays.asList(policy3),"UPDATE TEST SET user = 'tom'",
+				"UPDATE TEST SET user = 'tom' WHERE 'tom' = :current AND role = :role");
+		
+		assertTransform(Arrays.asList(policy3),"INSERT INTO TEST(user)VALUES('tom')",
+				"INSERT INTO TEST(user) SELECT 'tom' FROM (SELECT 1) WHERE 'tom' = :current AND NULL = :role");
+		
 		
 
 	}

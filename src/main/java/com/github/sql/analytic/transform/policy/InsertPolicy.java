@@ -5,20 +5,53 @@ import java.util.List;
 
 import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.expression.LongValue;
+import com.github.sql.analytic.expression.NullValue;
 import com.github.sql.analytic.expression.StringValue;
 import com.github.sql.analytic.expression.operators.relational.ExpressionList;
 import com.github.sql.analytic.schema.Column;
+import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.select.FromItem;
 import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.SelectBody;
 import com.github.sql.analytic.statement.select.SelectExpressionItem;
 import com.github.sql.analytic.statement.select.SelectItem;
 import com.github.sql.analytic.statement.select.SubSelect;
+import com.github.sql.analytic.transform.ExpressionTransform;
 import com.github.sql.analytic.transform.InsertTransform;
 import com.github.sql.analytic.transform.NewValue;
+import com.github.sql.analytic.transform.StatementTransform;
 import com.github.sql.analytic.transform.UpdateTransform;
 
 public class InsertPolicy extends InsertTransform {
+
+	public static final class InsertTransform extends SelectPolicy {
+		public InsertTransform(String action,  List<NewValue> newValues,
+				Policy statementTransform) {
+			super(action,  newValues, statementTransform);
+		}
+		
+		protected Expression getCheckNewValues(final Table table,Expression check) {
+
+			return  new StatementTransform(){
+				@Override
+				protected ExpressionTransform createExpressionTransform() {		    		
+					return new ExpressionTransform(this){		    			
+						public void visit(Column column){				
+							setExpression(new NullValue());
+							for(NewValue value : getNewValues()){
+								if(value.getColumn().getColumnName().equalsIgnoreCase(column.getColumnName())){
+									setExpression(value.getExpression());
+								}
+							}
+						}
+					};
+				}
+			}.transform(check);
+
+
+		}
+
+	}
 
 	private Policy policyTransform;
 	private List<NewValue> values;
@@ -37,6 +70,7 @@ public class InsertPolicy extends InsertTransform {
 	@Override
 	public void visit(ExpressionList expressionList) {		
 		super.visit(expressionList);
+		checkColumns();
 		
 		SubSelect newSubselect = new SubSelect();
 		PlainSelect body = new PlainSelect();
@@ -51,7 +85,7 @@ public class InsertPolicy extends InsertTransform {
 			body.getSelectItems().add(item);
 		}
 		
-		SelectPolicy policy = new SelectPolicy("INSERT", false,values, policyTransform);
+		InsertTransform policy = new InsertTransform("INSERT",  values, policyTransform);
 		policy.setToTable(getTable());			
 		policy.visit(body);
 		body = (PlainSelect) policy.getSelectBody();
@@ -65,6 +99,7 @@ public class InsertPolicy extends InsertTransform {
 	@Override
 	public void visit(SubSelect subSelect) {		
 		super.visit(subSelect);
+		checkColumns();
 		
 	  List<NewValue> newValues = new ArrayList<NewValue>();
 		
@@ -82,7 +117,7 @@ public class InsertPolicy extends InsertTransform {
 			NewValue value = new NewValue(column, expr);
 			newValues.add(value);				
 		}		
-		SelectPolicy policy = new SelectPolicy("INSERT", true,newValues, policyTransform);
+		InsertTransform policy = new InsertTransform("INSERT",  newValues, policyTransform);
 		policy.setToTable(getTable());
 		policy.visit((PlainSelect)subSelect.getSelectBody());		
 		SubSelect newSubselect = new SubSelect();
@@ -97,6 +132,12 @@ public class InsertPolicy extends InsertTransform {
 		
 		
 		getNewInsert().setItemsList(newSubselect);
+	}
+
+	protected void checkColumns() {
+		if(getNewInsert().getColumns() == null || getNewInsert().getColumns().isEmpty()){
+			throw new PolicyException("column list must be present for insert");
+		}
 	}
 
 	protected SubSelect buildDual() {

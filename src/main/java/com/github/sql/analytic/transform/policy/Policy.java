@@ -74,7 +74,7 @@ public class Policy extends StatementTransform {
 
 	@Override
 	protected SelectTransform createSelectTransform() {
-		return new SelectPolicy("SELECT",true,null,this);
+		return new SelectPolicy("SELECT",null,this);
 	}
 
 	@Override

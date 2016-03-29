@@ -14,7 +14,7 @@ public class DeletePolicy extends DeleteTransform {
 	
 	@Override
 	protected Expression transformWhere(Expression where) {
-		SelectPolicy policy = new SelectPolicy("DELETE", false,null, policyTransform);
+		SelectPolicy policy = new SelectPolicy("DELETE", null, policyTransform);
 		policy.addFrom(getTable());
 		
 		return policy.transformWhere(where);

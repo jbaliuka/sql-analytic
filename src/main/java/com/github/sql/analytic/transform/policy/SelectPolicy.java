@@ -26,16 +26,16 @@ public class SelectPolicy extends SelectTransform {
 	private List<Table> fromTables = new ArrayList<Table>();
 	private List<CreatePolicy> appliedPolicies = new ArrayList<CreatePolicy>();
 	private String action;
-	private boolean checkColumns;	
+		
 	private List<NewValue> newValues;
 
 
 
-	public SelectPolicy(String action,boolean checkColumns,List<NewValue> newValues,Policy statementTransform) {
+	public SelectPolicy(String action,List<NewValue> newValues,Policy statementTransform) {
 		super(statementTransform);
 		this.statementTransform = statementTransform;
 		this.action = action;
-		this.checkColumns = checkColumns;
+		
 		this.newValues = newValues;
 		
 	}
@@ -111,7 +111,7 @@ public class SelectPolicy extends SelectTransform {
 
 		List<SelectItem> newList = super.transformSelectItems(list);
 
-		if(checkColumns && statementTransform.isCheckColumns()){
+		if(statementTransform.isCheckColumns()){
 			for(SelectItem item : list){			
 				item.accept(new ColumnsPolicy(this));
 			}
@@ -137,9 +137,9 @@ public class SelectPolicy extends SelectTransform {
 	private Expression getPolicyFilter() {
 
 		Expression filter = null;
-		List<Table> tables = getAllTables();
-		for(Table table: tables){
-			Expression tableFilter = getTablePolicyFilter(table);
+		
+		for(Table table: fromTables){
+			Expression tableFilter = getUsingFilter(table);
 			if(tableFilter != null){
 				if(filter != null){
 					filter = and(filter,tableFilter);
@@ -148,7 +148,34 @@ public class SelectPolicy extends SelectTransform {
 				}
 			}
 		}
+		
+		if(toTable != null ){			
+			filter = getCheckFilter(filter);
+		}
 
+		return filter;
+	}
+
+
+
+	protected Expression getCheckFilter(Expression filter) {
+		List<CreatePolicy> list = statementTransform.findTablePolicies(action, toTable);
+		Expression checkFilter = null;		
+		for(CreatePolicy policy: list){				
+			if(policy.getCheck() != null){
+				if(checkFilter == null){
+					checkFilter = getCheckNewValues(toTable,policy.getCheck());						
+				}else {						
+					checkFilter = or(checkFilter,getCheckNewValues(toTable,policy.getCheck()));						
+				}
+			}
+		}
+
+		if(filter == null){
+			filter = checkFilter;
+		}else if(checkFilter != null){
+			filter = and(filter,checkFilter);
+		}
 		return filter;
 	}
 
@@ -163,20 +190,11 @@ public class SelectPolicy extends SelectTransform {
 		return tables;
 	}
 
-	private Expression getTablePolicyFilter(Table table) {
+	private Expression getUsingFilter(Table table) {
 
 		Expression filter = null;
 		List<CreatePolicy> list = statementTransform.findTablePolicies(action, table);		
-		boolean oldValues = false;
 		
-		for( Table next : fromTables ){
-			if(table.getWholeTableName().equalsIgnoreCase(next.getWholeTableName())){
-				oldValues = true;
-				break;
-			}
-		}
-		
-		if(oldValues){
 			for(CreatePolicy policy: list){
 				if(policy.getUsing() != null){
 					if(filter == null){
@@ -186,43 +204,20 @@ public class SelectPolicy extends SelectTransform {
 					}
 				}
 			}
-		}
+		
 
-		if( newValues != null ){
-			Expression checkFilter = null;		
-			for(CreatePolicy policy: list){
-				if(policy.getUsing() != null){
-					if(checkFilter == null){
-						checkFilter = getCheckNewValues(table,policy.getUsing());						
-					}else {						
-						checkFilter = or(checkFilter,getCheckNewValues(table,policy.getUsing()));						
-					}
-				}
-				if(policy.getCheck() != null){
-					if(checkFilter == null){
-						checkFilter = getCheckNewValues(table,policy.getCheck());						
-					}else {						
-						checkFilter = or(checkFilter,getCheckNewValues(table,policy.getCheck()));						
-					}
-				}
-			}
-
-			if(filter == null){
-				filter = checkFilter;
-			}else if(checkFilter != null){
-				filter = and(filter,checkFilter);
-			}
-		}
+		
 		return filter;
 	}
 
-	private Expression getCheckNewValues(final Table table,Expression check) {
+	protected Expression getCheckNewValues(final Table table,Expression check) {
 
 		return  new StatementTransform(){
 			@Override
 			protected ExpressionTransform createExpressionTransform() {		    		
 				return new ExpressionTransform(this){		    			
 					public void visit(Column column){				
+						setExpression(column);
 						for(NewValue value : newValues){
 							if(value.getColumn().getColumnName().equalsIgnoreCase(column.getColumnName())){
 								setExpression(value.getExpression());
@@ -263,13 +258,7 @@ public class SelectPolicy extends SelectTransform {
 
 	}
 
-	public boolean isCheckColumns() {
-		return checkColumns;
-	}
-
-	public void setCheckColumns(boolean checkColumns) {
-		this.checkColumns = checkColumns;
-	}
+	
 
 
 
@@ -291,7 +280,9 @@ public class SelectPolicy extends SelectTransform {
 	}
 
 
-
+	public List<NewValue> getNewValues(){
+		return newValues;
+	}
 
 
 
