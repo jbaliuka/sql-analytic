@@ -46,7 +46,7 @@ public class PolicySelectTransformTest extends TestCase {
 		
 		assertTransform(Arrays.asList(policy1),"DELETE FROM TEST","DELETE FROM TEST WHERE 1 = 1");
 		assertTransform(Arrays.asList(policy1),"UPDATE TEST SET col=1","UPDATE TEST SET col=1 WHERE (1 = 1) AND (1 = 1)");		
-		assertTransform(Arrays.asList(policy1),"INSERT INTO TEST SELECT * FROM TEST","INSERT INTO TEST SELECT * FROM TEST WHERE 1 = 1");
+		
 
 
 	}

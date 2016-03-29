@@ -18,7 +18,7 @@ public class InsertTransform implements ItemsListVisitor {
 
 	private StatementTransform statementTransform;
 	private Insert newInsert = new Insert();
-		private Table table;
+	private Table table;
 
 	public InsertTransform(StatementTransform statementTransform) {
 		super();
@@ -27,7 +27,7 @@ public class InsertTransform implements ItemsListVisitor {
 
 
 	public Statement transform(Insert insert) {
-		
+
 		newInsert.setTable(statementTransform.copy(insert.getTable()));
 		table = newInsert.getTable();
 		newInsert.setUseValues(insert.isUseValues());
@@ -43,7 +43,7 @@ public class InsertTransform implements ItemsListVisitor {
 		insert.getItemsList().accept(this);
 		return newInsert;
 	}
-	
+
 	protected List<NewValue> transformItems(List<NewValue> newValues) {
 		return newValues;
 	}
@@ -53,26 +53,33 @@ public class InsertTransform implements ItemsListVisitor {
 
 		ExpressionList newList = new ExpressionList(); 
 		newInsert.setItemsList(newList);
-		
-		List<NewValue> newValues = new ArrayList<NewValue>();
-		for (int i = 0; i < newInsert.getColumns().size(); i++) {
-			NewValue value = new NewValue(newInsert.getColumns().get(i),
-					statementTransform.transform(expressionList.getExpressions().get(i)));
-			newValues.add(value);
-		}
-		newValues = transformItems(newValues);
 		newList.setExpressions(new ArrayList<Expression>());
-		for (NewValue next : newValues) {
-			newList.getExpressions().add(next.getExpression());
+
+		if(newInsert.getColumns() != null){
+			List<NewValue> newValues = new ArrayList<NewValue>();
+			for (int i = 0;  i < newInsert.getColumns().size(); i++) {
+				NewValue value = new NewValue(newInsert.getColumns().get(i),
+						statementTransform.transform(expressionList.getExpressions().get(i)));
+				newValues.add(value);
+			}
+			newValues = transformItems(newValues);			
+			for (NewValue next : newValues) {
+				newList.getExpressions().add(next.getExpression());
+			}
+		}else {
+			for( Expression e : expressionList.getExpressions()){
+				newList.getExpressions().add(statementTransform.transform(e));
+			}
+
 		}
-		
+
 	}
 
 	public void visit(SubSelect subSelect) {
 		SubSelect newSubselect = new SubSelect();
 		newSubselect.setSelectBody(statementTransform.transform(subSelect.getSelectBody()));		
 		newInsert.setItemsList(newSubselect);
-		
+
 	}
 
 

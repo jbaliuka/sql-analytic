@@ -24,8 +24,10 @@ public class UpdatePolicy extends UpdateTransform {
 	
 	@Override
 	protected Expression transformWhere(Expression where) {
+		
 		SelectPolicy policy = new SelectPolicy("UPDATE", false,values, policyTransform);
-		policy.addTable(getTable());		
+		policy.addFrom(getTable());		
+		
 		return policy.transformWhere(where);
 	}
 

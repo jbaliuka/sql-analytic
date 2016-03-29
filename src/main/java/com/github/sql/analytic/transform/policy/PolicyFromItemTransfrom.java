@@ -25,7 +25,7 @@ public class PolicyFromItemTransfrom extends FromItemTransform {
 			cte = cte || item.getName().equalsIgnoreCase(tableName.getWholeTableName());
 		}
 		if(!cte){
-		  policySelectTransform.addTable(tableName);
+		  policySelectTransform.addFrom(tableName);
 		}
 	}
 

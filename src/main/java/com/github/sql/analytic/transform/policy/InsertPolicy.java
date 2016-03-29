@@ -52,7 +52,7 @@ public class InsertPolicy extends InsertTransform {
 		}
 		
 		SelectPolicy policy = new SelectPolicy("INSERT", false,values, policyTransform);
-		policy.getTables().add(getTable());			
+		policy.setToTable(getTable());			
 		policy.visit(body);
 		body = (PlainSelect) policy.getSelectBody();
 		newSubselect.setSelectBody(body);
@@ -83,7 +83,7 @@ public class InsertPolicy extends InsertTransform {
 			newValues.add(value);				
 		}		
 		SelectPolicy policy = new SelectPolicy("INSERT", true,newValues, policyTransform);
-		policy.getTables().add(getTable());
+		policy.setToTable(getTable());
 		policy.visit((PlainSelect)subSelect.getSelectBody());		
 		SubSelect newSubselect = new SubSelect();
 		PlainSelect selectBody = (PlainSelect) policy.getSelectBody();

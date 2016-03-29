@@ -74,6 +74,9 @@ public class UpdateTransform {
 		return newTable;
 	}
 	protected Expression transformWhere(Expression where) {		
+		if(where == null){
+			return null;
+		}
 		return statementTransform.transform(where);
 	}
 

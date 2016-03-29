@@ -24,7 +24,7 @@ public final class ColumnsPolicy extends SelectItemTransfrom {
 
 	@Override
 	public void visit(AllColumns allColumns) {
-		for(Table table : selectTransform.getTables()){
+		for(Table table : selectTransform.getFromTables()){
 			List<CreatePolicy> policyList = statementTransform.findTablePolicies("select", table);				
 				for(CreatePolicy policy : policyList){
 					if(policy.getColumns() == null){
@@ -37,7 +37,7 @@ public final class ColumnsPolicy extends SelectItemTransfrom {
 
 	@Override
 	public void visit(AllTableColumns allTableColumns) {
-		for(Table table : selectTransform.getTables()){
+		for(Table table : selectTransform.getFromTables()){
 			List<CreatePolicy> policyList = statementTransform.findTablePolicies("select", table);
 			if(table.getWholeTableName().equalsIgnoreCase(allTableColumns.getTable().getWholeTableName())||
 					allTableColumns.getTable().getName().equalsIgnoreCase(table.getAlias())
@@ -59,7 +59,7 @@ public final class ColumnsPolicy extends SelectItemTransfrom {
 			throw new PolicyException(" Access denied: " + column);
 		}
 		
-		for(Table table : selectTransform.getTables()){
+		for(Table table : selectTransform.getFromTables()){
 			List<CreatePolicy> policyList = statementTransform.findTablePolicies("select", table);
 			if(table.getWholeTableName().equalsIgnoreCase(column.getTable().getWholeTableName())||
 					column.getTable().getName().equalsIgnoreCase(table.getAlias())

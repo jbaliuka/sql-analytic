@@ -22,7 +22,7 @@ import com.github.sql.analytic.transform.StatementTransform;
 public class SelectPolicy extends SelectTransform {
 
 	private Policy statementTransform; 
-	private List<Table> tables = new ArrayList<Table>();
+	private Table toTable ;
 	private List<Table> fromTables = new ArrayList<Table>();
 	private List<CreatePolicy> appliedPolicies = new ArrayList<CreatePolicy>();
 	private String action;
@@ -40,9 +40,7 @@ public class SelectPolicy extends SelectTransform {
 		
 	}
 
-	public List<Table> getTables() {		
-		return tables;
-	}
+	
 
 	public Policy getStatementTransform() {
 		return statementTransform;
@@ -57,8 +55,7 @@ public class SelectPolicy extends SelectTransform {
 		return statementTransform;
 	}
 
-	public void addTable(Table table) {
-		tables.add(table);
+	public void addFrom(Table table) {		
 		statementTransform.getTables().add(table);
 		fromTables.add(table);
 	}
@@ -140,6 +137,7 @@ public class SelectPolicy extends SelectTransform {
 	private Expression getPolicyFilter() {
 
 		Expression filter = null;
+		List<Table> tables = getAllTables();
 		for(Table table: tables){
 			Expression tableFilter = getTablePolicyFilter(table);
 			if(tableFilter != null){
@@ -152,6 +150,17 @@ public class SelectPolicy extends SelectTransform {
 		}
 
 		return filter;
+	}
+
+
+
+	protected List<Table> getAllTables() {
+		
+		List<Table> tables = new ArrayList<Table>(fromTables);
+		if(toTable != null){
+			tables.add(toTable);
+		}
+		return tables;
 	}
 
 	private Expression getTablePolicyFilter(Table table) {
@@ -261,6 +270,28 @@ public class SelectPolicy extends SelectTransform {
 	public void setCheckColumns(boolean checkColumns) {
 		this.checkColumns = checkColumns;
 	}
+
+
+
+	public Table getToTable() {
+		return toTable;
+	}
+
+
+
+	public void setToTable(Table table) {
+		statementTransform.getTables().add(table);
+		this.toTable = table;
+	}
+
+
+
+	public List<Table> getFromTables() {		
+		return fromTables;
+	}
+
+
+
 
 
 
