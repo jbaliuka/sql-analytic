@@ -9,6 +9,7 @@ import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.select.WithItem;
 import com.github.sql.analytic.transform.DeleteTransform;
+import com.github.sql.analytic.transform.InsertTransform;
 import com.github.sql.analytic.transform.SelectTransform;
 import com.github.sql.analytic.transform.StatementTransform;
 import com.github.sql.analytic.transform.UpdateTransform;
@@ -73,7 +74,7 @@ public class Policy extends StatementTransform {
 
 	@Override
 	protected SelectTransform createSelectTransform() {
-		return new SelectPolicy("SELECT",true, this);
+		return new SelectPolicy("SELECT",true,null,this);
 	}
 
 	@Override
@@ -85,6 +86,14 @@ public class Policy extends StatementTransform {
 	protected UpdateTransform createUpdateTransform() {		
 		return new UpdatePolicy(this);
 	}
+	
+	 protected InsertTransform createInsertTransform() {
+		 
+		 return new InsertPolicy(this);
+		 
+	 };
+		
+	
 
 	public List<CreatePolicy> getPolicyList() {
 		return policyList;

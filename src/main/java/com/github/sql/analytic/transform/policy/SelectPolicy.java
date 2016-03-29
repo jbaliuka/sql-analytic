@@ -15,6 +15,7 @@ import com.github.sql.analytic.statement.select.SelectItem;
 import com.github.sql.analytic.statement.select.WithItem;
 import com.github.sql.analytic.transform.ExpressionTransform;
 import com.github.sql.analytic.transform.FromItemTransform;
+import com.github.sql.analytic.transform.NewValue;
 import com.github.sql.analytic.transform.SelectTransform;
 import com.github.sql.analytic.transform.StatementTransform;
 
@@ -22,17 +23,21 @@ public class SelectPolicy extends SelectTransform {
 
 	private Policy statementTransform; 
 	private List<Table> tables = new ArrayList<Table>();
+	private List<Table> fromTables = new ArrayList<Table>();
 	private List<CreatePolicy> appliedPolicies = new ArrayList<CreatePolicy>();
 	private String action;
-	private boolean checkColumns;
+	private boolean checkColumns;	
+	private List<NewValue> newValues;
 
 
 
-	public SelectPolicy(String action,boolean checkColumns,Policy statementTransform) {
+	public SelectPolicy(String action,boolean checkColumns,List<NewValue> newValues,Policy statementTransform) {
 		super(statementTransform);
 		this.statementTransform = statementTransform;
 		this.action = action;
-		this.setCheckColumns(checkColumns);
+		this.checkColumns = checkColumns;
+		this.newValues = newValues;
+		
 	}
 
 	public List<Table> getTables() {		
@@ -55,6 +60,7 @@ public class SelectPolicy extends SelectTransform {
 	public void addTable(Table table) {
 		tables.add(table);
 		statementTransform.getTables().add(table);
+		fromTables.add(table);
 	}
 
 	@Override
@@ -151,17 +157,75 @@ public class SelectPolicy extends SelectTransform {
 	private Expression getTablePolicyFilter(Table table) {
 
 		Expression filter = null;
-		List<CreatePolicy> list = statementTransform.findTablePolicies(action, table);
-		for(CreatePolicy policy: list){
-			if(policy.getUsing() != null){
-				if(filter == null){
-					filter = getUsing(table,policy.getUsing());
-				}else {
-					filter = or(filter,getUsing(table,policy.getUsing()));
+		List<CreatePolicy> list = statementTransform.findTablePolicies(action, table);		
+		boolean oldValues = false;
+		
+		for( Table next : fromTables ){
+			if(table.getWholeTableName().equalsIgnoreCase(next.getWholeTableName())){
+				oldValues = true;
+				break;
+			}
+		}
+		
+		if(oldValues){
+			for(CreatePolicy policy: list){
+				if(policy.getUsing() != null){
+					if(filter == null){
+						filter = getUsing(table,policy.getUsing());
+					}else {
+						filter = or(filter,getUsing(table,policy.getUsing()));
+					}
 				}
 			}
 		}
+
+		if( newValues != null ){
+			Expression checkFilter = null;		
+			for(CreatePolicy policy: list){
+				if(policy.getUsing() != null){
+					if(checkFilter == null){
+						checkFilter = getCheckNewValues(table,policy.getUsing());						
+					}else {						
+						checkFilter = or(checkFilter,getCheckNewValues(table,policy.getUsing()));						
+					}
+				}
+				if(policy.getCheck() != null){
+					if(checkFilter == null){
+						checkFilter = getCheckNewValues(table,policy.getCheck());						
+					}else {						
+						checkFilter = or(checkFilter,getCheckNewValues(table,policy.getCheck()));						
+					}
+				}
+			}
+
+			if(filter == null){
+				filter = checkFilter;
+			}else if(checkFilter != null){
+				filter = and(filter,checkFilter);
+			}
+		}
 		return filter;
+	}
+
+	private Expression getCheckNewValues(final Table table,Expression check) {
+
+		return  new StatementTransform(){
+			@Override
+			protected ExpressionTransform createExpressionTransform() {		    		
+				return new ExpressionTransform(this){		    			
+					public void visit(Column column){				
+						for(NewValue value : newValues){
+							if(value.getColumn().getColumnName().equalsIgnoreCase(column.getColumnName())){
+								setExpression(value.getExpression());
+							}
+						}
+					}
+
+				};
+			}
+		}.transform(check);
+
+
 	}
 
 	private Expression getUsing(final Table table,Expression using) {

@@ -1,11 +1,13 @@
 package com.github.sql.analytic.transform;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.expression.operators.relational.ExpressionList;
 import com.github.sql.analytic.expression.operators.relational.ItemsListVisitor;
 import com.github.sql.analytic.schema.Column;
+import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.Statement;
 import com.github.sql.analytic.statement.insert.Insert;
 import com.github.sql.analytic.statement.select.SubSelect;
@@ -16,6 +18,7 @@ public class InsertTransform implements ItemsListVisitor {
 
 	private StatementTransform statementTransform;
 	private Insert newInsert = new Insert();
+		private Table table;
 
 	public InsertTransform(StatementTransform statementTransform) {
 		super();
@@ -26,6 +29,7 @@ public class InsertTransform implements ItemsListVisitor {
 	public Statement transform(Insert insert) {
 		
 		newInsert.setTable(statementTransform.copy(insert.getTable()));
+		table = newInsert.getTable();
 		newInsert.setUseValues(insert.isUseValues());
 
 		if (insert.getColumns() != null) {	
@@ -35,10 +39,13 @@ public class InsertTransform implements ItemsListVisitor {
 				newInsert.getColumns().add(column);				
 			}
 
-		}
-		
+		}		
 		insert.getItemsList().accept(this);
 		return newInsert;
+	}
+	
+	protected List<NewValue> transformItems(List<NewValue> newValues) {
+		return newValues;
 	}
 
 
@@ -46,10 +53,17 @@ public class InsertTransform implements ItemsListVisitor {
 
 		ExpressionList newList = new ExpressionList(); 
 		newInsert.setItemsList(newList);
-		newList.setExpressions(new ArrayList<Expression>());
 		
-		for (Expression next : expressionList.getExpressions()) {
-			newList.getExpressions().add(statementTransform.transform(next));
+		List<NewValue> newValues = new ArrayList<NewValue>();
+		for (int i = 0; i < newInsert.getColumns().size(); i++) {
+			NewValue value = new NewValue(newInsert.getColumns().get(i),
+					statementTransform.transform(expressionList.getExpressions().get(i)));
+			newValues.add(value);
+		}
+		newValues = transformItems(newValues);
+		newList.setExpressions(new ArrayList<Expression>());
+		for (NewValue next : newValues) {
+			newList.getExpressions().add(next.getExpression());
 		}
 		
 	}
@@ -59,6 +73,24 @@ public class InsertTransform implements ItemsListVisitor {
 		newSubselect.setSelectBody(statementTransform.transform(subSelect.getSelectBody()));		
 		newInsert.setItemsList(newSubselect);
 		
+	}
+
+
+	public Table getTable() {
+		return table;
+	}
+
+
+	public void setTable(Table table) {
+		this.table = table;
+	}
+	public Insert getNewInsert() {
+		return newInsert;
+	}
+
+
+	public void setNewInsert(Insert newInsert) {
+		this.newInsert = newInsert;
 	}
 
 

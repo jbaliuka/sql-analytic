@@ -47,11 +47,32 @@ public class PolicySelectTransformTest extends TestCase {
 		assertTransform(Arrays.asList(policy1,policy3),"SELECT * FROM TEST,TEST3","SELECT * FROM TEST,TEST3 WHERE (3 = 3) AND (1=1)");
 		
 		assertTransform(Arrays.asList(policy1),"DELETE FROM TEST","DELETE FROM TEST WHERE 1 = 1");
-		assertTransform(Arrays.asList(policy1),"UPDATE TEST SET col=1","UPDATE TEST SET col=1 WHERE 1 = 1");		
+		assertTransform(Arrays.asList(policy1),"UPDATE TEST SET col=1","UPDATE TEST SET col=1 WHERE (1 = 1) AND (1 = 1)");		
 		assertTransform(Arrays.asList(policy1),"INSERT INTO TEST SELECT * FROM TEST","INSERT INTO TEST SELECT * FROM TEST WHERE 1 = 1");
 
 
 	}
+	
+	public void testNewValus() throws JSQLParserException{
+
+		String policy1 = "CREATE POLICY P_1 ON TEST USING ( user = :current ) ";
+		String policy2 = "CREATE POLICY P_2 ON TEST2 ";
+
+		assertTransform(Arrays.asList(policy1),"UPDATE TEST SET user = 'tom'",
+				"UPDATE TEST SET user = 'tom' WHERE ('tom' = :current) AND (TEST.user = :current)");
+		
+		assertTransform(Arrays.asList(policy1),"INSERT INTO TEST(user) VALUES ('tom')",
+				"INSERT INTO TEST(user) SELECT 'tom' FROM (SELECT 1) WHERE 'tom' = :current");
+		
+		assertTransform(Arrays.asList(policy1),"INSERT INTO TEST(user) SELECT 'tom'",
+				"INSERT INTO TEST(user) SELECT 'tom' FROM (SELECT 1) WHERE 'tom' = :current");
+		
+		assertTransform(Arrays.asList(policy1,policy2),"INSERT INTO TEST(user) SELECT 'tom' FROM TEST2",
+				"INSERT INTO TEST(user) SELECT 'tom' FROM TEST2 WHERE 'tom' = :current");
+		
+
+	}
+	
 
 	public void testUsingAlias() throws JSQLParserException{
 

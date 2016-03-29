@@ -48,7 +48,11 @@ public class StatementTransform  implements StatementVisitor {
 	}
 
 	public void visit(Insert insert) {
-		statement = new InsertTransform(this).transform(insert);
+		statement = createInsertTransform().transform(insert);
+	}
+
+	protected InsertTransform createInsertTransform() {
+		return new InsertTransform(this);
 	}
 
 	public void visit(Replace replace) {
