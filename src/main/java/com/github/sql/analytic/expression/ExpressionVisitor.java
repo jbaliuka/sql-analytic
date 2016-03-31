@@ -86,8 +86,10 @@ public interface ExpressionVisitor {
 	public void visit(ColumnIndex columnIndex);
 	public void visit(OrderByElement orderByElement);
 	public void visit(GroupingExpression groupingExpression);
-	public void visit(AnalyticCause analyticCause);
+	public void visit(AnalyticClause analyticCause);
 	public void visit(CastExpression castExpression);
+	public void visit(NamedParameter namedParameter);
+	public void visit(QueryPartitionClause queryPartitionClause);
 
 
 }

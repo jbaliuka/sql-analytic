@@ -10,12 +10,25 @@ public class AllComparisonExpression implements Expression {
 		this.subSelect = subSelect;
 	}
 	
-	public SubSelect GetSubSelect() {
+	public AllComparisonExpression() {		
+	}
+
+	public SubSelect getSubSelect() {
 		return subSelect;
 	}
 	
 	public void accept(ExpressionVisitor expressionVisitor) {
 		expressionVisitor.visit(this);
+	}
+
+	public void setSubSelect(SubSelect epr) {
+		subSelect = epr;
+		
+	}
+	
+	@Override
+	public String toString() {		
+		return " ALL " + subSelect;
 	}
 
 }

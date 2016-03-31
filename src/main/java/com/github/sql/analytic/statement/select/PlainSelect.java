@@ -22,6 +22,7 @@
 
 package com.github.sql.analytic.statement.select;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.github.sql.analytic.expression.Expression;
@@ -37,7 +38,7 @@ import com.github.sql.analytic.schema.Table;
 public class PlainSelect implements SelectBody {
 	private Distinct distinct = null;
 
-	private List<?> selectItems;
+	private List<SelectItem> selectItems;
 	private Table into;
 	private FromItem fromItem;
 
@@ -50,6 +51,7 @@ public class PlainSelect implements SelectBody {
 	private Expression having;
 	private Limit limit;
 	private Top top;
+	private String hints;
 
 
 
@@ -65,12 +67,20 @@ public class PlainSelect implements SelectBody {
 		return into;
 	}
 
+	public String getHints() {
+		return hints;
+	}
+
+	public void setHints(String hints) {
+		this.hints = hints;
+	}
+
 	/**
 	 * The {@link SelectItem}s in this query (for example the A,B,C in "SELECT A,B,C")
 	 * @return a list of {@link SelectItem}s
 	 */
 
-	public List<?> getSelectItems() {
+	public List<SelectItem> getSelectItems() {
 		return selectItems;
 	}
 
@@ -88,7 +98,7 @@ public class PlainSelect implements SelectBody {
 
 
 
-	public void setSelectItems(List<?> list) {
+	public void setSelectItems(List<SelectItem> list) {
 		selectItems = list;
 	}
 
@@ -175,6 +185,10 @@ public class PlainSelect implements SelectBody {
 	public String toString() {
 		StringBuilder sql = new StringBuilder("SELECT ");
 
+		if(hints != null) {
+			sql.append(hints).append(" ");
+		}
+
 		if(distinct != null){
 			sql.append(distinct + " ");
 		}
@@ -183,19 +197,21 @@ public class PlainSelect implements SelectBody {
 		}
 
 		sql.append(getStringList(selectItems));
-		sql.append(" FROM " + fromItem);
-		sql.append(getFormatedList(joins, "", false, false));
-		if(where != null){
-			sql.append(" WHERE " + where);	
-		}
+		if(fromItem != null ){
+			sql.append(" FROM " + fromItem);
+			sql.append(getFormatedList(joins, "", false, false));
+			if(where != null){
+				sql.append(" WHERE " + where);	
+			}
 
-		sql.append(getFormatedList(groupByColumnReferences, "GROUP BY"));
-		if(having != null){
-			sql.append(" HAVING " + having);	
-		}	
-		sql.append(orderByToString(orderByElements));
-		if(limit != null){
-			sql.append(limit);
+			sql.append(getFormatedList(groupByColumnReferences, "GROUP BY"));
+			if(having != null){
+				sql.append(" HAVING " + having);	
+			}	
+			sql.append(orderByToString(orderByElements));
+			if(limit != null){
+				sql.append(limit);
+			}
 		}
 
 		return sql.toString();
@@ -254,7 +270,7 @@ public class PlainSelect implements SelectBody {
 	 * @return comma separated list of the elements in the list
 	 */
 
-	public static String getStringList(List<?> list, boolean useComma, boolean useBrackets) {
+	public static String getStringList(Collection<?> list, boolean useComma, boolean useBrackets) {
 		StringBuilder ans = new StringBuilder();
 		String comma = ",";
 		if (!useComma) {
@@ -265,9 +281,10 @@ public class PlainSelect implements SelectBody {
 				ans.append("(");
 			}
 
-			for (int i = 0; i < list.size(); i++) {
-				ans.append(list.get(i)); 
-				if(i < list.size() - 1){
+			int i = 0;
+			for (Object element : list) {
+				ans.append(element); 
+				if(i++ < list.size() - 1){
 					ans.append(comma + " ");	
 				}				
 			}

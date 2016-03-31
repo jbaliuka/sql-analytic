@@ -25,6 +25,7 @@ package com.github.sql.analytic.schema;
 
 import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
+import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.select.ColumnReference;
 import com.github.sql.analytic.statement.select.ColumnReferenceVisitor;
 import com.github.sql.analytic.statement.select.SelectItem;
@@ -69,7 +70,7 @@ public class Column implements Expression, ColumnReference,SelectItem {
 	public String getWholeColumnName() {
 		
 		String columnWholeName = null;
-		String tableWholeName = table.getWholeTableName();
+		String tableWholeName = table == null ? null : table.getWholeTableName();
 		
 		if (tableWholeName != null && tableWholeName.length() != 0) {
 			columnWholeName = tableWholeName + "." + columnName;
@@ -98,4 +99,6 @@ public class Column implements Expression, ColumnReference,SelectItem {
 		selectItemVisitor.visit(this);
 		
 	}
+
+	
 }

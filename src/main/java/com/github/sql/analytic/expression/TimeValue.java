@@ -36,6 +36,9 @@ public class TimeValue implements Expression {
 		this.value = Time.valueOf(value.substring(1, value.length()-1));
 	}
 	
+	public TimeValue() {	
+	}
+
 	public void accept(ExpressionVisitor expressionVisitor) {
 		expressionVisitor.visit(this);
 	}
@@ -43,10 +46,6 @@ public class TimeValue implements Expression {
 
 	public Time getValue() {
 		return value;
-	}
-
-	public void setValue(Time d) {
-		value = d;
 	}
 
 	public String toString() {

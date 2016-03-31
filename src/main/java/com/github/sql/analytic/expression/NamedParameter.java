@@ -19,55 +19,34 @@
  * library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
-package com.github.sql.analytic.test;
-
+ 
+package com.github.sql.analytic.expression;
 
 /**
- * An exception class with stack trace informations
+ * A '?' in a statement
  */
-public class TestException extends Exception {
-	private Throwable cause = null;
 
-	public TestException() {
-		super();
+public class NamedParameter implements Expression {
+	
+	private String name;
+
+	public String getName() {
+		return name;
 	}
 
-	public TestException(String arg0) {
-		super(arg0);
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public TestException(Throwable arg0) {
-		this.cause = arg0;
-	}
-
-	public TestException(String arg0, Throwable arg1) {
-		super(arg0);
-		this.cause = arg1;
+	public NamedParameter(String name){
+		this.name = name;
 	}
 	
-	public Throwable getCause() {
-		return cause;
+	public void accept(ExpressionVisitor expressionVisitor) {
+		expressionVisitor.visit(this);
 	}
 
-	public void printStackTrace() {
-		printStackTrace(System.err);
+	public String toString() {
+		return ":" + name;
 	}
-
-	public void printStackTrace(java.io.PrintWriter pw) {
-		super.printStackTrace(pw);
-		if (cause != null) {
-			pw.println("Caused by:");
-			cause.printStackTrace(pw);
-		}
-	}
-
-	public void printStackTrace(java.io.PrintStream ps) {
-		super.printStackTrace(ps);
-		if (cause != null) {
-			ps.println("Caused by:");
-			cause.printStackTrace(ps);
-		}
-	}
-
 }

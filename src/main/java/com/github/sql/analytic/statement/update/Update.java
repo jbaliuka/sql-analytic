@@ -25,6 +25,7 @@ package com.github.sql.analytic.statement.update;
 import java.util.List;
 
 import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.Statement;
 import com.github.sql.analytic.statement.StatementVisitor;
@@ -37,10 +38,8 @@ import com.github.sql.analytic.statement.StatementVisitor;
 public class Update implements Statement {
 	private Table table;
 	private Expression where;
-	@SuppressWarnings("unchecked")
-	private List columns;
-	@SuppressWarnings("unchecked")
-	private List expressions;
+	private List<Column> columns;
+	private List<Expression> expressions;
 
 	public void accept(StatementVisitor statementVisitor) {
 		statementVisitor.visit(this);
@@ -66,8 +65,7 @@ public class Update implements Statement {
 	 * The {@link com.github.sql.analytic.schema.Column}s in this update (as col1 and col2 in UPDATE col1='a', col2='b')
 	 * @return a list of {@link com.github.sql.analytic.schema.Column}s
 	 */
-	@SuppressWarnings("unchecked")
-	public List getColumns() {
+	public List<Column> getColumns() {
 		return columns;
 	}
 
@@ -75,19 +73,38 @@ public class Update implements Statement {
 	 * The {@link Expression}s in this update (as 'a' and 'b' in UPDATE col1='a', col2='b')
 	 * @return a list of {@link Expression}s
 	 */
-	@SuppressWarnings("unchecked")
-	public List getExpressions() {
+	
+	public List<Expression> getExpressions() {
 		return expressions;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void setColumns(List list) {
+	public void setColumns(List<Column> list) {
 		columns = list;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void setExpressions(List list) {
+	public void setExpressions(List<Expression> list) {
 		expressions = list;
+	}
+	
+	@Override
+	public String toString() {		
+		StringBuilder buffer = new StringBuilder("UPDATE ");
+		buffer.append(table);
+		buffer.append(" SET ");
+		for(int i = 0; i < columns.size(); i++ ){
+			buffer.append(columns.get(i));
+			buffer.append("=");
+			buffer.append(expressions.get(i));
+			if( i < columns.size() - 1){
+				buffer.append(",");
+			}
+		}
+		if(where != null){
+			buffer.append(" WHERE ");
+			buffer.append(where);
+		}
+		
+		return buffer.toString();		
 	}
 
 }

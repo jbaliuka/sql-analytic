@@ -34,6 +34,10 @@ public class StringValue implements Expression {
 		value = escapedValue.substring(1, escapedValue.length() - 1);
 	}
 	
+	public StringValue() {
+		
+	}
+
 	public String getValue() {
 		return value;
 	}

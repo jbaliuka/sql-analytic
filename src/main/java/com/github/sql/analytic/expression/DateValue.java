@@ -35,6 +35,9 @@ public class DateValue implements Expression {
 		this.value = Date.valueOf(value.substring(1, value.length()-1));
 	}
 	
+	public DateValue() {		
+	}
+
 	public void accept(ExpressionVisitor expressionVisitor) {
 		expressionVisitor.visit(this);
 	}
@@ -44,9 +47,7 @@ public class DateValue implements Expression {
 		return value;
 	}
 
-	public void setValue(Date d) {
-		value = d;
-	}
+	
 
 
 }

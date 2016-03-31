@@ -37,6 +37,17 @@ public class SelectTest extends TestCase {
 
 	}
 	
+	
+	public void testNamedParam() throws JSQLParserException {
+		String statement = "SELECT * FROM mytable WHERE col = :1";
+
+		Select select = (Select) parserManager.parse(new StringReader(statement));
+
+		assertEquals(statement,select.toString());
+		
+
+	}
+	
 	public void testPartition() throws JSQLParserException {
 		String statement = "SELECT col FROM mytable PARTITION  FOR('2016-01-01')";
 
@@ -93,6 +104,21 @@ public class SelectTest extends TestCase {
 	assertEquals(sql,normalize(select.toString()));
 	 
 	}
+
+	public void testHints() throws JSQLParserException{
+
+		String sql = "SELECT /*+ NO_PARALLEL */ CASE WHEN COUNT(NUMBER_OF_TEST) = 0 THEN 0 " +
+				"ELSE  (CASE WHEN STATUS = 'test' THEN 0 ELSE 1 END) / COUNT(NUMBER_OF_TEST)" +
+				" END AS HIT_RATIO	FROM TEST";
+
+
+		sql = normalize(sql);
+
+		Select select = (Select) parserManager.parse(new StringReader(sql));
+
+		assertEquals(sql,normalize(select.toString()));
+
+	}
 	
 	public void testIF() throws JSQLParserException {
 		String statement = "SELECT CASE WHEN 1 > 0 THEN 0 ELSE 1 END FROM TEST";
@@ -136,17 +162,11 @@ public class SelectTest extends TestCase {
 
 		// toString uses standard syntax
 		statement =
-			"(SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?) UNION "
-				+ "(SELECT * FROM mytable2 WHERE mytable2.col = 9 OFFSET ?) LIMIT 4 OFFSET 3";
+			"SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ? UNION "
+				+ "SELECT * FROM mytable2 WHERE mytable2.col = 9 OFFSET ? LIMIT 4 OFFSET 3";
 		assertEquals(statement, ""+select);
 
-		statement =
-			"(SELECT * FROM mytable WHERE mytable.col = 9 OFFSET ?) UNION ALL "
-			+ "(SELECT * FROM mytable2 WHERE mytable2.col = 9 OFFSET ?) UNION ALL "
-			+ "(SELECT * FROM mytable3 WHERE mytable4.col = 9 OFFSET ?) LIMIT 4 OFFSET 3";
-		select = (Select) parserManager.parse(new StringReader(statement));
-		assertEquals(statement, ""+select);
-
+		
 	
 	}
 
@@ -211,9 +231,9 @@ public class SelectTest extends TestCase {
 		//use brakets for toString
 		//use standard limit syntax
 		String statementToString =
-			"(SELECT * FROM mytable WHERE mytable.col = 9) UNION "
-				+ "(SELECT * FROM mytable3 WHERE mytable3.col = ?) UNION "
-				+ "(SELECT * FROM mytable2 LIMIT 4 OFFSET 3)";
+			"SELECT * FROM mytable WHERE mytable.col = 9 UNION "
+				+ "SELECT * FROM mytable3 WHERE mytable3.col = ? UNION "
+				+ "SELECT * FROM mytable2 LIMIT 4 OFFSET 3";
 		assertEquals(statementToString, ""+union);
 	}
 

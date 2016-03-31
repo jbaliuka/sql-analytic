@@ -3,6 +3,7 @@ package com.github.sql.analytic.util.deparser;
 import java.util.Iterator;
 import java.util.List;
 
+import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.Function;
 import com.github.sql.analytic.schema.Column;
@@ -87,10 +88,10 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 
 		if (plainSelect.getGroupByColumnReferences() != null) {
 			buffer.append(" GROUP BY ");
-			for (Iterator iter = plainSelect.getGroupByColumnReferences().iterator(); iter.hasNext();) {
-				ColumnReference columnReference = (ColumnReference) iter.next();
-				columnReference.accept(expressionVisitor);
-				if (iter.hasNext()) {
+			int i = 0;
+			for (Expression next  : plainSelect.getGroupByColumnReferences()) {				
+				next.accept(expressionVisitor);
+				if (i++ < plainSelect.getGroupByColumnReferences().size() - 1) {
 					buffer.append(", ");
 				}
 			}
@@ -142,8 +143,11 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 			PlainSelect plainSelect = (PlainSelect) iter.next();
 			plainSelect.accept(this);
 			buffer.append(")");
-			if (iter.hasNext()) {
+			if (iter.hasNext()) {				
 				buffer.append(" UNION ");
+				if(union.isAll()){
+					buffer.append(" ALL ");	
+				}
 			}
 
 		}
@@ -195,10 +199,18 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 		buffer.append("(");
 		subSelect.getSelectBody().accept(this);
 		buffer.append(")");
+		if(subSelect.getAlias() != null){
+			buffer.append(" ");
+			buffer.append(subSelect.getAlias());
+		}
 	}
 
 	public void visit(Table tableName) {
 		buffer.append(tableName.getWholeTableName());
+		if(tableName.getAlias() != null){
+			buffer.append(" ");
+			buffer.append(tableName.getAlias());
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -290,9 +302,7 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 		
 		FromItem fromItem = join.getRightItem();
 		fromItem.accept(this);
-		if (fromItem.getAlias() != null) {
-			buffer.append(" AS ").append(fromItem.getAlias());
-		}
+		
 		if (join.getOnExpression() != null) {
 			buffer.append(" ON ");
 			join.getOnExpression().accept(expressionVisitor);
@@ -311,9 +321,9 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 
 	}
 
-	public void visit(Function function) {
-		
+	public void visit(Function function) {		
 		buffer.append(function.toString() );
+		
 	}
 
 }

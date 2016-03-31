@@ -25,6 +25,7 @@ package com.github.sql.analytic.statement.insert;
 import java.util.List;
 
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
+import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.Statement;
 import com.github.sql.analytic.statement.StatementVisitor;
@@ -38,9 +39,9 @@ import com.github.sql.analytic.statement.select.PlainSelect;
  */
 
 public class Insert implements Statement {
-	private Table table;
-	@SuppressWarnings("unchecked")
-	private List columns;
+	
+	private Table table;	
+	private List<Column> columns;
 	private ItemsList itemsList;
 	private boolean useValues = true;
 	
@@ -56,17 +57,13 @@ public class Insert implements Statement {
 		table = name;
 	}
 
-	/**
-	 * Get the columns (found in "INSERT INTO (col1,col2..) [...]" )
-	 * @return a list of {@link com.github.sql.analytic.schema.Column}
-	 */
-	@SuppressWarnings("unchecked")
-	public List getColumns() {
+	
+	public List<Column> getColumns() {
 		return columns;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void setColumns(List list) {
+	
+	public void setColumns(List<Column> list) {
 		columns = list;
 	}
 
