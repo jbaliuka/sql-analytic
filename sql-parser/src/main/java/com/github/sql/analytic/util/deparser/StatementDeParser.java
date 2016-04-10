@@ -31,7 +31,7 @@ public class StatementDeParser implements StatementVisitor {
 	}
 
 	public void visit(Delete delete) {
-		SelectDeParser selectDeParser = new SelectDeParser();
+		SelectDeParser selectDeParser = createSelectDeParser();
 		selectDeParser.setBuffer(buffer);
 		ExpressionDeParser expressionDeParser = createExpressionDeparser(selectDeParser, buffer);
 		selectDeParser.setExpressionVisitor(expressionDeParser);
@@ -45,7 +45,7 @@ public class StatementDeParser implements StatementVisitor {
 	}
 
 	public void visit(Insert insert) {
-		SelectDeParser selectDeParser = new SelectDeParser();
+		SelectDeParser selectDeParser = createSelectDeParser();
 		selectDeParser.setBuffer(buffer);
 		ExpressionDeParser expressionDeParser = createExpressionDeparser(selectDeParser, buffer);
 		selectDeParser.setExpressionVisitor(expressionDeParser);
@@ -55,7 +55,7 @@ public class StatementDeParser implements StatementVisitor {
 	}
 
 	public void visit(Replace replace) {
-		SelectDeParser selectDeParser = new SelectDeParser();
+		SelectDeParser selectDeParser = createSelectDeParser();
 		selectDeParser.setBuffer(buffer);
 		ExpressionDeParser expressionDeParser = createExpressionDeparser(selectDeParser, buffer);
 		selectDeParser.setExpressionVisitor(expressionDeParser);
@@ -102,7 +102,7 @@ public class StatementDeParser implements StatementVisitor {
 	}
 
 	public void visit(Update update) {
-		SelectDeParser selectDeParser = new SelectDeParser();
+		SelectDeParser selectDeParser = createSelectDeParser();
 		selectDeParser.setBuffer(buffer);
 		ExpressionDeParser expressionDeParser = createExpressionDeparser(selectDeParser, buffer);
 		UpdateDeParser updateDeParser = new UpdateDeParser(expressionDeParser, buffer);

@@ -73,10 +73,7 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 
 		buffer.append(" ");
 		
-		if (plainSelect.getFromItem() != null) {
-			buffer.append("FROM ");
-			plainSelect.getFromItem().accept(this);
-		}
+		deparseFrom(plainSelect);
 
 		if (plainSelect.getJoins() != null) {
             for (Join join : plainSelect.getJoins()) {
@@ -110,6 +107,13 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 			deparseLimit(plainSelect.getLimit());
 		}
 
+	}
+
+	protected void deparseFrom(PlainSelect plainSelect) {
+		if (plainSelect.getFromItem() != null) {
+			buffer.append("FROM ");
+			plainSelect.getFromItem().accept(this);
+		}
 	}
 
 	protected void deparseWhere(PlainSelect plainSelect) {

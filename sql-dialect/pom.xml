@@ -11,5 +11,6 @@
   <description>Parent pom for SQL dialect specific rls</description>
   <modules>
   	<module>sql-dialect-h2</module>
+  	<module>sql-dialect-orcl</module>
   </modules>
 </project>
