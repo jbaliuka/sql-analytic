@@ -2,27 +2,33 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>sql-analytic</groupId>
-	<artifactId>sql-analytic-parser</artifactId>
+	<artifactId>sql-analytic-parent</artifactId>
 	<version>1.0.5</version>
-	<name>SQL Parser</name>
+	<packaging>pom</packaging>
+	<name>SQL Utilities for analytics appp</name>
+	
+  	
+
+	<modules>
+                 <module>sql-parser</module>
+                 <module>sql-session</module>
+	</modules>
 	
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>javacc-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>javacc</id>
-						<goals>
-							<goal>javacc</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
+	 <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.7</source>
+                        <target>1.7</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+         </pluginManagement>
+		
 	</build>
-	
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -31,4 +37,15 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>sql-analytic</groupId>
+				<artifactId>sql-analytic-parser</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>

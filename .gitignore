@@ -1,9 +1,0 @@
-# maven output directory
-target/
-
-# Eclipse files
-bin/
-.settings/
-.classpath
-.project
-
