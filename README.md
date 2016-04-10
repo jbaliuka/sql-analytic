@@ -7,7 +7,7 @@ sql-analytic is derived from [jsqlparser](http://jsqlparser.sourceforge.net)  to
 Row Level Security
 ============
 
-New library supports basic AST transformations to copy tree. Row level security is also implemented as a AST transformation to add security policy, filters. Security rules use extended [PostgreSQL Policy] (http://www.postgresql.org/docs/9.5/static/sql-createpolicy.html) declaration syntax and also supports optional column list to restrict column level access. See [unit test] (./src/test/java/com/github/sql/analytic/transform/policy/PolicySelectTransformTest.java) for sample code.  
+New library supports basic AST transformations to copy tree. Row level security is also implemented as a AST transformation to add security policy, filters. Security rules use extended [PostgreSQL Policy] (http://www.postgresql.org/docs/9.5/static/sql-createpolicy.html) declaration syntax and also supports optional column list to restrict column level access. See [unit test] (./sql-parser/src/test/java/com/github/sql/analytic/transform/policy/PolicySelectTransformTest.java) for sample code.  
 
 <pre>
 CREATE POLICY name ON table_name [( column_name [,...] )]
