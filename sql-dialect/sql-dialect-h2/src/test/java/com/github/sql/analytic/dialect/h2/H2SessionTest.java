@@ -48,6 +48,16 @@ public class H2SessionTest extends TestCase {
 			
 			assertFalse(session.createStatement().
 					executeQuery("SELECT * FROM TEST_TABLE ").next());
+			
+			assertEquals(0,session.createStatement().
+					executeUpdate("DELETE FROM TEST_TABLE"));
+			
+			parameters.put("session_user", "testUser");
+			
+			assertEquals(1,session.createStatement().
+					executeUpdate("DELETE FROM TEST_TABLE"));
+			
+			
 		}
 	}
 	
