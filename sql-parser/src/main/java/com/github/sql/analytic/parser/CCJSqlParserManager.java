@@ -49,7 +49,7 @@ public class CCJSqlParserManager implements JSqlParser {
 			try {
 				return transform.trasform(parser.Statement());
 			} catch (ParseException e) {
-				throw new JSQLParserException();
+				throw new JSQLParserException(e);
 			}
 		
 	}

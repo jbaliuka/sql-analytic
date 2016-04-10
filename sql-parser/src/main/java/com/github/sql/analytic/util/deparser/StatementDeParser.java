@@ -33,7 +33,7 @@ public class StatementDeParser implements StatementVisitor {
 	public void visit(Delete delete) {
 		SelectDeParser selectDeParser = new SelectDeParser();
 		selectDeParser.setBuffer(buffer);
-		ExpressionDeParser expressionDeParser = new ExpressionDeParser(selectDeParser, buffer);
+		ExpressionDeParser expressionDeParser = createExpressionDeparser(selectDeParser, buffer);
 		selectDeParser.setExpressionVisitor(expressionDeParser);
 		DeleteDeParser deleteDeParser = new DeleteDeParser(expressionDeParser, buffer);
 		deleteDeParser.deParse(delete);
@@ -47,7 +47,7 @@ public class StatementDeParser implements StatementVisitor {
 	public void visit(Insert insert) {
 		SelectDeParser selectDeParser = new SelectDeParser();
 		selectDeParser.setBuffer(buffer);
-		ExpressionDeParser expressionDeParser = new ExpressionDeParser(selectDeParser, buffer);
+		ExpressionDeParser expressionDeParser = createExpressionDeparser(selectDeParser, buffer);
 		selectDeParser.setExpressionVisitor(expressionDeParser);
 		InsertDeParser insertDeParser = new InsertDeParser(expressionDeParser, selectDeParser, buffer);
 		insertDeParser.deParse(insert);
@@ -57,7 +57,7 @@ public class StatementDeParser implements StatementVisitor {
 	public void visit(Replace replace) {
 		SelectDeParser selectDeParser = new SelectDeParser();
 		selectDeParser.setBuffer(buffer);
-		ExpressionDeParser expressionDeParser = new ExpressionDeParser(selectDeParser, buffer);
+		ExpressionDeParser expressionDeParser = createExpressionDeparser(selectDeParser, buffer);
 		selectDeParser.setExpressionVisitor(expressionDeParser);
 		ReplaceDeParser replaceDeParser = new ReplaceDeParser(expressionDeParser, selectDeParser, buffer);
 		replaceDeParser.deParse(replace);
@@ -104,7 +104,7 @@ public class StatementDeParser implements StatementVisitor {
 	public void visit(Update update) {
 		SelectDeParser selectDeParser = new SelectDeParser();
 		selectDeParser.setBuffer(buffer);
-		ExpressionDeParser expressionDeParser = new ExpressionDeParser(selectDeParser, buffer);
+		ExpressionDeParser expressionDeParser = createExpressionDeparser(selectDeParser, buffer);
 		UpdateDeParser updateDeParser = new UpdateDeParser(expressionDeParser, buffer);
 		selectDeParser.setExpressionVisitor(expressionDeParser);
 		updateDeParser.deParse(update);

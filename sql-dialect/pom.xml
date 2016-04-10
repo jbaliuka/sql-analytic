@@ -1,0 +1,15 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>sql-analytic</groupId>
+    <artifactId>sql-analytic-parent</artifactId>
+    <version>1.0.5</version>
+  </parent>
+  <artifactId>sql-dialect</artifactId>
+  <packaging>pom</packaging>
+  <name>Dialect</name>
+  <description>Parent pom for SQL dialect specific rls</description>
+  <modules>
+  	<module>sql-dialect-h2</module>
+  </modules>
+</project>

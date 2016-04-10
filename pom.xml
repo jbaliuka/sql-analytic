@@ -1,50 +1,65 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>sql-analytic</groupId>
 	<artifactId>sql-analytic-parent</artifactId>
 	<version>1.0.5</version>
 	<packaging>pom</packaging>
 	<name>SQL Utilities for analytics appp</name>
-	
-  	
+	<properties>
+		<h2.version>1.4.191</h2.version>
+		<junit.version>4.11</junit.version>
+	</properties>
+
 
 	<modules>
-                 <module>sql-parser</module>
-                 <module>sql-session</module>
+		<module>sql-parser</module>
+		<module>sql-session</module>
+		<module>sql-dialect</module>
 	</modules>
-	
+
 	<build>
-	 <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>1.7</source>
-                        <target>1.7</target>
-                    </configuration>
-                </plugin>
-            </plugins>
-         </pluginManagement>
-		
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<source>1.7</source>
+						<target>1.7</target>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 	</build>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
-	
+
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>sql-analytic</groupId>
 				<artifactId>sql-analytic-parser</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>sql-analytic</groupId>
+				<artifactId>sql-analytic-session</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.h2database</groupId>
+				<artifactId>h2</artifactId>
+				<version>${h2.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
