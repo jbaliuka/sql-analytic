@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+	<display-name>sql-odata</display-name>
+	<servlet>
+  <servlet-name>SQLODataServlet</servlet-name>
+  <servlet-class>com.github.sql.analytic.odata.web.SQLODataServlet</servlet-class>
+  <load-on-startup>1</load-on-startup>
+</servlet>
+
+<servlet-mapping>
+  <servlet-name>SQLODataServlet</servlet-name>
+  <url-pattern>/SQLODataService.svc/*</url-pattern>
+</servlet-mapping>
+</web-app>
