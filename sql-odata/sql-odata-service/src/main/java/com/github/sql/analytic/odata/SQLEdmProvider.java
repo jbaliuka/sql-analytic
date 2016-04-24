@@ -28,7 +28,10 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	private static final String COLUMN_DEF = "COLUMN_DEF";
 	private static final String NULLABLE = "NULLABLE";
 	private static final String COLUMN_NAME = "COLUMN_NAME";
-	private static final String CONTAINER_NAME = "Tables";
+	private static final String CONTAINER_NAME = "Container";
+	
+	private static FullQualifiedName container = new FullQualifiedName("SQLODataService",CONTAINER_NAME);
+	
 	private DatabaseMetaData metadata;
 	private Map<String, String> schemaMap;
 
@@ -134,7 +137,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	@Override
 	public CsdlEntityContainer getEntityContainer() throws ODataException {
 
-		FullQualifiedName container = new FullQualifiedName("OData.SQL",CONTAINER_NAME);
+		
 
 		List<CsdlEntitySet> entitySets = new ArrayList<CsdlEntitySet>();
 		for(Entry<String, String> entry : schemaMap.entrySet()){
@@ -171,7 +174,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	@Override
 	public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName entityContainerName) throws ODataException {
 		CsdlEntityContainerInfo entityContainerInfo = new CsdlEntityContainerInfo();
-        entityContainerInfo.setContainerName(entityContainerName);      
+        entityContainerInfo.setContainerName( container );      
         return entityContainerInfo;
 	}
 

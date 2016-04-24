@@ -3,6 +3,7 @@ package com.github.sql.analytic.odata.web;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,7 +16,12 @@ import javax.sql.DataSource;
 public class SQLODataServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private DataSource datasource;
-	private Map<String, String> mapping = new ConcurrentHashMap<>();
+	private Map<String, String> mapping = new HashMap<>();
+
+
+	public Map<String, String> getMapping() {
+		return mapping;
+	}
 
 
 	@Override
@@ -24,6 +30,9 @@ public class SQLODataServlet extends HttpServlet {
 			try(Connection connection = datasource.getConnection()){
 				try{	
 
+					if(mapping.isEmpty()){
+						mapping.put("Public", null);
+					}
 					Connection session = createWrapper(connection,request);
 					SQLOdataHandler handler = new SQLOdataHandler(session);
 					handler.setMapping(mapping);
