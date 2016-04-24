@@ -40,7 +40,6 @@ public class SQLODataServletTest {
 
 	@Test
 	public void test() throws ServletException, IOException {
-
 		servlet.service(request, response);
 	}
 
