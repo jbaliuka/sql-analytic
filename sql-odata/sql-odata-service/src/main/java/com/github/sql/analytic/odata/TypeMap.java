@@ -42,10 +42,11 @@ public enum TypeMap {
 	LONGNVARCHAR(Types.LONGNVARCHAR,EdmPrimitiveTypeKind.String),
 	NCLOB(Types.NCLOB,EdmPrimitiveTypeKind.Stream),
 	SQLXML(Types.SQLXML,EdmPrimitiveTypeKind.Stream),
-	REF_CURSOR(Types.REF_CURSOR,EdmPrimitiveTypeKind.Stream),
-	TIME_WITH_TIMEZONE(Types.TIME_WITH_TIMEZONE,EdmPrimitiveTypeKind.TimeOfDay),
-	TIMESTAMP_WITH_TIMEZONE(Types.TIMESTAMP_WITH_TIMEZONE,EdmPrimitiveTypeKind.Date);
-	
+//----- since java 8 ----
+	REF_CURSOR(2012,EdmPrimitiveTypeKind.Stream),
+	TIME_WITH_TIMEZONE(2013,EdmPrimitiveTypeKind.TimeOfDay),
+	TIMESTAMP_WITH_TIMEZONE(2014,EdmPrimitiveTypeKind.Date);
+//----------------------	
 	private final int jdbcType;
 	private EdmPrimitiveTypeKind oDataType;
 
