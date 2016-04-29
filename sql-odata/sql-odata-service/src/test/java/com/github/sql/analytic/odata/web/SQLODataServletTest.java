@@ -50,7 +50,7 @@ public class SQLODataServletTest {
 		ClientServiceDocument body = res.getBody();
 		
 		Collection<String> names = body.getEntitySetNames();
-		Assert.assertFalse(names.isEmpty());
+		Assert.assertTrue(names.isEmpty());
 	
 		
 	}
@@ -101,11 +101,17 @@ public class SQLODataServletTest {
 		
 		try(InputStream in = getClass().getClassLoader().getResourceAsStream("mywind/northwind.sql")){
 			BufferedReader reader = new BufferedReader( new InputStreamReader(in));
-			connection.createStatement().execute(reader.readLine());			
+			String line;
+			while((line = reader.readLine()) != null){
+				connection.createStatement().execute(line);
+			}
 		}
 		try(InputStream in = getClass().getClassLoader().getResourceAsStream("mywind/northwind-data.sql")){
 			BufferedReader reader = new BufferedReader( new InputStreamReader(in));
-			connection.createStatement().execute(reader.readLine());			
+			String line;
+			while((line = reader.readLine()) != null){
+				connection.createStatement().execute(line);
+			}			
 		}
 	}
 

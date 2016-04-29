@@ -29,15 +29,14 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	private static final String NULLABLE = "NULLABLE";
 	private static final String COLUMN_NAME = "COLUMN_NAME";
 	private static final String CONTAINER_NAME = "Container";
-	
-	private static FullQualifiedName container = new FullQualifiedName("SQLODataService",CONTAINER_NAME);
-	
-	private DatabaseMetaData metadata;
-	private Map<String, String> schemaMap;
 
-	public SQLEdmProvider(DatabaseMetaData metadata,Map<String,String> schemaMap) {
-		this.metadata = metadata;
-		this.schemaMap = schemaMap;
+	private static FullQualifiedName container = new FullQualifiedName("SQLODataService",CONTAINER_NAME);
+
+	private DatabaseMetaData metadata;
+
+
+	public SQLEdmProvider(DatabaseMetaData metadata) {
+		this.metadata = metadata;		
 	}
 
 	@Override
@@ -47,7 +46,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		List<CsdlProperty> properties = new ArrayList<>();
 		List<CsdlPropertyRef> key = new ArrayList<>();
 
-		String schema = schemaMap.get(entityTypeName.getNamespace());
+		String schema = entityTypeName.getNamespace();
 
 		try {
 			ResultSet rs = metadata.getColumns(null, schema, entityTypeName.getName(), "%");
@@ -90,7 +89,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 				setName(rs.getString(COLUMN_NAME)).
 				setNullable(rs.getInt(NULLABLE) == DatabaseMetaData.columnNullable ).
 				setDefaultValue(rs.getString(COLUMN_DEF)).
-				setMaxLength(rs.getInt(rs.getInt(COLUMN_SIZE))).
+				setMaxLength(rs.getInt(COLUMN_SIZE)).
 				setPrecision(rs.getInt(COLUMN_SIZE)).
 				setScale(rs.getInt(DECIMAL_DIGITS)).
 				setType(TypeMap.toODataType(rs.getInt(DATA_TYPE)).getFullQualifiedName());
@@ -102,30 +101,24 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 		List<CsdlSchema> schemas = new ArrayList<CsdlSchema>();
 
-		for(Entry<String, String> entry : schemaMap.entrySet()){
-
-			CsdlSchema schema = new CsdlSchema();
-			schema.setNamespace(entry.getKey());		  
-			List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();		 
-			schema.setEntityTypes(entityTypes);
-
-			try {
-				ResultSet rs = metadata.getTables(null, entry.getValue(),"%",null);
-				try{
-					while(rs.next()){	
-						entityTypes.add(getEntityType(new FullQualifiedName(schema.getNamespace(),
-								rs.getString(TABLE_NAME))));							
-					}
-				}finally{
-					rs.close();
-				}
-
-			} catch (SQLException e) {
-				throw new ODataException(e);
+		try(ResultSet schemasRs = metadata.getSchemas()){
+			while(schemasRs.next()){
+				CsdlSchema schema = new CsdlSchema();
+				schema.setNamespace(schemasRs.getString("TABLE_SCHEM"));		  
+				List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();		 
+				schema.setEntityTypes(entityTypes);
+				try (ResultSet rs = metadata.getTables(null, schema.getNamespace(),"%",null);){					
+				
+						while(rs.next()){	
+							entityTypes.add(getEntityType(new FullQualifiedName(schema.getNamespace(),
+									rs.getString(TABLE_NAME))));							
+						}				
+				} 
+				schema.setEntityContainer(getEntityContainer());
+				schemas.add(schema);
 			}
-
-			schema.setEntityContainer(getEntityContainer());
-			schemas.add(schema);
+		} catch (SQLException sqle) {
+			throw new ODataException(sqle);
 		}
 
 
@@ -134,59 +127,16 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	}
 
 
-	@Override
-	public CsdlEntityContainer getEntityContainer() throws ODataException {
 
-		
-
-		List<CsdlEntitySet> entitySets = new ArrayList<CsdlEntitySet>();
-		for(Entry<String, String> entry : schemaMap.entrySet()){
-			
-			try {
-				ResultSet rs = metadata.getTables(null, entry.getValue(),"%",null);
-				try{
-					while(rs.next()){						
-						
-						entitySets.add(getEntitySet(container , rs.getString(TABLE_NAME) + "Set"));
-													
-					}
-				}finally{
-					rs.close();
-				}
-
-			} catch (SQLException e) {
-				throw new ODataException(e);
-			}
-			
-			
-		}
-
-		CsdlEntityContainer entityContainer = new CsdlEntityContainer();
-		entityContainer.setName(CONTAINER_NAME);		
-		entityContainer.setEntitySets(entitySets);
-
-		return entityContainer;
-
-
-
-	}
 
 	@Override
 	public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName entityContainerName) throws ODataException {
 		CsdlEntityContainerInfo entityContainerInfo = new CsdlEntityContainerInfo();
-        entityContainerInfo.setContainerName( container );      
-        return entityContainerInfo;
+		entityContainerInfo.setContainerName( container );      
+		return entityContainerInfo;
 	}
 
-	public CsdlEntitySet getEntitySet(FullQualifiedName entityContainer, String entitySetName) {
 
-		CsdlEntitySet entitySet = new CsdlEntitySet();
-		entitySet.setName(entitySetName);
-		entitySet.setType(new FullQualifiedName(entityContainer.getNamespace(),entitySetName.substring(0, entitySetName.length() - 3)) );
-
-		return entitySet;
-		
-	}
 
 
 }

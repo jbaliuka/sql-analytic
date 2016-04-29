@@ -20,15 +20,6 @@ import com.github.sql.analytic.odata.SQLEntityCollectionProcessor;
 public class SQLOdataHandler {
 	
 	private Connection connection;
-	private Map<String, String> mapping = new HashMap<>();
-
-	public Map<String, String> getMapping() {
-		return mapping;
-	}
-
-	public void setMapping(Map<String, String> mapping) {
-		this.mapping = mapping;
-	}
 
 	public SQLOdataHandler(Connection connection){
 		this.connection = connection;
@@ -37,7 +28,7 @@ public class SQLOdataHandler {
 	public void process(HttpServletRequest request, HttpServletResponse response) throws SQLException{
 					
 					OData odata = OData.newInstance();
-					ServiceMetadata edm = odata.createServiceMetadata(new SQLEdmProvider(connection.getMetaData(),mapping ), new ArrayList<EdmxReference>());
+					ServiceMetadata edm = odata.createServiceMetadata(new SQLEdmProvider(connection.getMetaData()), new ArrayList<EdmxReference>());
 					ODataHttpHandler handler = odata.createHandler(edm);
 					handler.register(new SQLEntityCollectionProcessor());	      
 					handler.process(request, response);		

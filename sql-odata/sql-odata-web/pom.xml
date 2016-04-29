@@ -11,7 +11,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>sql-odata-web</artifactId>
+	<artifactId>sql-odata-web-test</artifactId>
 	<packaging>war</packaging>
 	<name>sql-odata-web</name>
 
@@ -21,12 +21,22 @@
 		<finalName>${project.name}</finalName>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
-				<configuration>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>compile</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>exploded</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>										
 				</configuration>
 			</plugin>
+
 
 		</plugins>
 	</build>
@@ -36,7 +46,19 @@
 	<dependencies>
 		<dependency>
 			<groupId>sql-analytic</groupId>
-			<artifactId>sql-odata-service</artifactId>			
+			<artifactId>sql-odata-service</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>sql-analytic</groupId>
+			<artifactId>sql-odate-test-data</artifactId>			
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 		</dependency>
 	</dependencies>
+
+
+
+
 </project>

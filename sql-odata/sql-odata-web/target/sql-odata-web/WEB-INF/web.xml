@@ -3,7 +3,7 @@
 	<display-name>sql-odata</display-name>
 	<servlet>
   <servlet-name>SQLODataServlet</servlet-name>
-  <servlet-class>com.github.sql.analytic.odata.web.SQLODataServlet</servlet-class>
+  <servlet-class>com.github.sql.analytic.odata.web.test.TestSQLODataServlet</servlet-class>
   <load-on-startup>1</load-on-startup>
 </servlet>
 

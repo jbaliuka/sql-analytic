@@ -24,6 +24,7 @@
 	<modules>
 		<module>sql-odata-web</module>
 		<module>sql-odata-service</module>
+		<module>sql-odate-test-data</module>
 	</modules>
 
 
@@ -58,11 +59,11 @@
 			<artifactId>odata-commons-core</artifactId>
 			<version>${odata.version}</version>
 		</dependency>
-		 <dependency>
-            <groupId>org.apache.olingo</groupId>
-            <artifactId>odata-client-core</artifactId>
-            <version>${odata.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.olingo</groupId>
+			<artifactId>odata-client-core</artifactId>
+			<version>${odata.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
@@ -82,6 +83,11 @@
 				<groupId>sql-analytic</groupId>
 				<artifactId>sql-odata-service</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>sql-analytic</groupId>
+				<version>${project.version}</version>
+				<artifactId>sql-odate-test-data</artifactId>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
