@@ -163,7 +163,24 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		
 		return root;
 	}
-	
+
+	@Override
+	public CsdlEntitySet getEntitySet(FullQualifiedName entityContainer, String entitySetName) throws ODataException {
+				  
+		try (ResultSet rs = metadata.getTables(null, null,entitySetName,null)){
+			while(rs.next()){	
+				FullQualifiedName entityTypeName = new FullQualifiedName(rs.getString(TABLE_SCHEM),
+						rs.getString(TABLE_NAME));										
+				return new CsdlEntitySet().
+						setType(entityTypeName).
+						setName( entityTypeName.getName() );					
+			}				
+		} catch (SQLException e) {
+			throw new ODataException(e);
+		} 
+		return null;
+		
+	}
 	public List<CsdlSchema> getSchemas() throws ODataException {
 
 		List<CsdlSchema> schemas = new ArrayList<CsdlSchema>();
@@ -184,12 +201,13 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 					while(rs.next()){	
 						FullQualifiedName entityTypeName = new FullQualifiedName(schema.getNamespace(),
 								rs.getString(TABLE_NAME));
-						CsdlEntityType entityType = getEntityType(entityTypeName);
-						
+						CsdlEntityType entityType = getEntityType(entityTypeName);		
+						if(entityType.getKey().size() == 1){
 						entitySets.add( new CsdlEntitySet().
 								setType(entityTypeName).
-								setName( entityTypeName.getNamespace() + "_"  + entityTypeName.getName() )
+								setName( entityTypeName.getName() )
 								);
+						}
 						entityTypes.add(entityType);							
 					}				
 				} 
