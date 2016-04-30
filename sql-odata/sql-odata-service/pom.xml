@@ -26,6 +26,10 @@
 			<artifactId>sql-odate-test-data</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>sql-analytic</groupId>
+			<artifactId>sql-analytic-session</artifactId>
+		</dependency>
 	</dependencies>
 
 </project>

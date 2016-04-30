@@ -6,7 +6,7 @@ public interface SessionContext {
 
 	String getCurrentUser();
 	boolean isUserInRole(String role);
-	Map<String, Object> getParameters();
+	Object getParameter(String name);
 	
 	
 }

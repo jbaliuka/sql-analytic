@@ -36,8 +36,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	private static final String PKTABLE_NAME = "PKTABLE_NAME"; 
 	private static final String FKTABLE_SCHEM = "FKTABLE_SCHEM"; 
 	private static final String FKTABLE_NAME = "FKTABLE_NAME"; 
-	private static final String	KEY_SEQ = "KEY_SEQ";  
-	private static final String UPDATE_RULE = "UPDATE_RULE"; 			
+	private static final String	KEY_SEQ = "KEY_SEQ";
 	private static final String DELETE_RULE = "DELETE_RULE";
 	private static final String	FK_NAME = "FK_NAME"; 
 

@@ -36,7 +36,7 @@ public class SQLPreparedCommand extends SQLCommand implements PreparedStatement{
 
 	protected void setSessionParams() throws SQLException {
 		for( ParamNamePosition param: deparsed.getSessionParams()){
-			Object value = getSession().getContext().getParameters().get(param.getName());
+			Object value = getSession().getContext().getParameter(param.getName());
 			if(value != null){
 				preparedStatement.setObject(param.getPosition() + 1, value);
 			}else {

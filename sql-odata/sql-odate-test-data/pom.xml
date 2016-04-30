@@ -6,4 +6,10 @@
     <version>2.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>sql-odate-test-data</artifactId>
+  <dependencies>
+  	<dependency>
+  		<groupId>sql-analytic</groupId>
+  		<artifactId>sql-analytic-parser</artifactId>
+  	</dependency>
+  </dependencies>
 </project>

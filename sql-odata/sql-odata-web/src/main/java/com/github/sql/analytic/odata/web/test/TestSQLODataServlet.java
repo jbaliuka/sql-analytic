@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -12,8 +13,10 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
 
+import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
 import com.github.sql.analytic.odata.web.SQLODataServlet;
+import com.github.sql.analytic.statement.policy.CreatePolicy;
 
 public class TestSQLODataServlet extends SQLODataServlet {
 
@@ -27,8 +30,7 @@ public class TestSQLODataServlet extends SQLODataServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {		
 		super.init(config);
-
-		setDatasource(new H2Datasource());
+		
 		try{
 			try(Connection connection = getDatasource().getConnection()){
 				Loader.execute(connection);
@@ -39,6 +41,24 @@ public class TestSQLODataServlet extends SQLODataServlet {
 			throw new ServletException(e);
 		}
 
+	}
+
+
+
+	@Override
+	protected List<CreatePolicy> getPolicy() {		
+		try {
+			return Loader.getPolicyList();
+		} catch (IOException | JSQLParserException e) {
+			throw new AssertionError(e);
+		}
+	}
+
+
+
+	@Override
+	protected DataSource getDatasource() {		
+		return new H2Datasource();
 	}
 
 

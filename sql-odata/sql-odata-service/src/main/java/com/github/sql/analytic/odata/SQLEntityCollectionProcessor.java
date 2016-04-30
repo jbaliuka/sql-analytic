@@ -12,13 +12,15 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.processor.EntityCollectionProcessor;
 import org.apache.olingo.server.api.uri.UriInfo;
 
+import com.github.sql.analytic.session.SQLSession;
+
 public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 
 	private OData odata;
 	private ServiceMetadata metadata;
-	private Connection connection;
+	private SQLSession connection;
 	
-	public SQLEntityCollectionProcessor(Connection connection){
+	public SQLEntityCollectionProcessor(SQLSession connection){
 		this.connection = connection;
 	}
 

@@ -33,12 +33,8 @@ public class OrclSessionTest extends TestCase {
 			}
 
 			@Override
-			public Map<String, Object> getParameters() {
-
-				HashMap<String, Object> map = new HashMap<>();
-				map.put("session_user","testUser");
-
-				return map;
+			public Object getParameter(String name) {
+				return "testUser";
 			}
 
 			@Override

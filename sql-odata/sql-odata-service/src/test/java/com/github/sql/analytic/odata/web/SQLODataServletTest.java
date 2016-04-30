@@ -1,5 +1,6 @@
 package com.github.sql.analytic.odata.web;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -32,7 +34,10 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
+import com.github.sql.analytic.statement.policy.CreatePolicy;
+import com.github.sql.analytic.test.TestUtil;
 
 public class SQLODataServletTest {
 
@@ -50,7 +55,7 @@ public class SQLODataServletTest {
 		ODataRetrieveResponse<ClientServiceDocument> serviceRes = serviceReq.execute();
 		ClientServiceDocument serviceBody = serviceRes.getBody();		
 		Collection<String> names = serviceBody.getEntitySetNames();
-		assertTrue(names.isEmpty());	
+		assertFalse(names.isEmpty());	
 
 
 
@@ -91,8 +96,28 @@ public class SQLODataServletTest {
 
 	private ODataClient setupMockClient() {
 
-		final SQLODataServlet servlet = new SQLODataServlet();		
-		servlet.setDatasource(datasource);
+		final SQLODataServlet servlet = new SQLODataServlet(){
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected List<CreatePolicy> getPolicy() {
+				
+				try {
+					return Loader.getPolicyList();
+				} catch (IOException | JSQLParserException e) {
+					throw new AssertionError(e);
+				}
+			}
+
+			@Override
+			protected DataSource getDatasource() {
+				
+				return datasource;
+			}
+			
+		};		
+		
 		ODataClient client = ODataClientFactory.getClient();
 		client.getConfiguration().setDefaultPubFormat(ContentType.JSON);
 

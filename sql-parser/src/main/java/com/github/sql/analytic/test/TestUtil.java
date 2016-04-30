@@ -73,9 +73,9 @@ public class TestUtil {
 			}
 
 			@Override
-			public Map<String, Object> getParameters() {
+			public Object getParameter(String name) {
 				
-				return new HashMap<>();
+				return null;
 			}
 
 		};

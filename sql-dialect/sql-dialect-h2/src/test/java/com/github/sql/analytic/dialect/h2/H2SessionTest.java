@@ -106,8 +106,8 @@ public class H2SessionTest extends TestCase {
 		}
 
 		@Override
-		public Map<String, Object> getParameters() {			
-			return parameters;
+		public Object getParameter(String name) {			
+			return parameters.get(name);
 		}
 
 	};
