@@ -1,5 +1,7 @@
 package com.github.sql.analytic.odata;
 
+import java.sql.Connection;
+
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -14,6 +16,11 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 
 	private OData odata;
 	private ServiceMetadata metadata;
+	private Connection connection;
+	
+	public SQLEntityCollectionProcessor(Connection connection){
+		this.connection = connection;
+	}
 
 	@Override
 	public void init(OData odata, ServiceMetadata metadata) {

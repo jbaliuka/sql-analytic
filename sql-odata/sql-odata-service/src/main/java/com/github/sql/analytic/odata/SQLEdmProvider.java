@@ -5,15 +5,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlOnDelete;
+import org.apache.olingo.commons.api.edm.provider.CsdlOnDeleteAction;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
@@ -21,6 +22,7 @@ import org.apache.olingo.commons.api.ex.ODataException;
 
 public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
+	private static final String TABLE_SCHEM = "TABLE_SCHEM";
 	private static final String TABLE_NAME = "TABLE_NAME";
 	private static final String DATA_TYPE = "DATA_TYPE";
 	private static final String DECIMAL_DIGITS = "DECIMAL_DIGITS";
@@ -29,6 +31,17 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	private static final String NULLABLE = "NULLABLE";
 	private static final String COLUMN_NAME = "COLUMN_NAME";
 	private static final String CONTAINER_NAME = "Container";
+	private static final String PKTABLE_SCHEM = "PKTABLE_SCHEM"; 
+	private static final String PKTABLE_NAME = "PKTABLE_NAME"; 
+	private static final String FKTABLE_SCHEM = "FKTABLE_SCHEM"; 
+	private static final String FKTABLE_NAME = "FKTABLE_NAME"; 
+	private static final String	KEY_SEQ = "KEY_SEQ";  
+	private static final String UPDATE_RULE = "UPDATE_RULE"; 			
+	private static final String DELETE_RULE = "DELETE_RULE";
+	private static final String	FK_NAME = "FK_NAME"; 
+
+
+
 
 	private static FullQualifiedName container = new FullQualifiedName("SQLODataService",CONTAINER_NAME);
 
@@ -45,39 +58,78 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		CsdlEntityType entityType = new CsdlEntityType().setName(entityTypeName.getName()); 
 		List<CsdlProperty> properties = new ArrayList<>();
 		List<CsdlPropertyRef> key = new ArrayList<>();
+		List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
+
 
 		String schema = entityTypeName.getNamespace();
-
 		try {
-			ResultSet rs = metadata.getColumns(null, schema, entityTypeName.getName(), "%");
-			try{
+			try(ResultSet rs = metadata.getColumns(null, schema, entityTypeName.getName(), "%")){			
 				while(rs.next()){					
 					properties.add(createProperty(rs));	
 				}
-			}finally{
-				rs.close();
 			}
 
-		} catch (SQLException e) {
-			throw new ODataException(e);
-		}
-
-		try {
-			ResultSet rs = metadata.getPrimaryKeys(null, schema, entityTypeName.getName());
-			try{
+			try( ResultSet rs = metadata.getPrimaryKeys(null, schema, entityTypeName.getName()) ){
 				while(rs.next()){					
-					key.add(createKeyProperty(rs));	
+					key.add(createKeyProperty(rs));
 				}
-			}finally{
-				rs.close();
+			}
+
+			try( ResultSet rs = metadata.getImportedKeys(null, schema, entityTypeName.getName()) ){
+				while(rs.next()){		
+					if(rs.getInt(KEY_SEQ) == 1){
+						navPropList.add(createImporteNavProperty(rs));
+					}
+				}
+			}
+			
+			try( ResultSet rs = metadata.getExportedKeys(null,schema, entityTypeName.getName()) ){
+				while(rs.next()){		
+					if(rs.getInt(KEY_SEQ) == 1){
+						navPropList.add(createExportedNavProperty(rs));
+					}
+				}
 			}
 
 		} catch (SQLException e) {
 			throw new ODataException(e);
 		}
 
+		return entityType.setProperties(properties).setKey(key).setNavigationProperties(navPropList);
+	}
 
-		return entityType.setProperties(properties).setKey(key);
+	private CsdlNavigationProperty createExportedNavProperty(ResultSet rs) throws SQLException {
+		return new CsdlNavigationProperty().
+				setName(rs.getString(FKTABLE_NAME)).
+				setType(new FullQualifiedName(rs.getString(FKTABLE_SCHEM), rs.getString(FKTABLE_NAME))).
+				setCollection(true).
+				setPartner(rs.getString(FK_NAME)).
+				setOnDelete(new CsdlOnDelete().setAction(onDeleteAction(rs.getInt(DELETE_RULE))));
+
+	}
+
+	private CsdlNavigationProperty createImporteNavProperty(ResultSet rs) throws SQLException {
+		return new CsdlNavigationProperty().
+				setName(rs.getString(FK_NAME)).
+				setType(new FullQualifiedName(rs.getString(PKTABLE_SCHEM), rs.getString(PKTABLE_NAME))).
+				setCollection(false).
+				setPartner(rs.getString(FKTABLE_NAME)).
+				setOnDelete(new CsdlOnDelete().setAction(onDeleteAction(rs.getInt(DELETE_RULE))));
+				
+
+	}
+
+	private CsdlOnDeleteAction onDeleteAction(int action) {
+		switch (action) {
+		case DatabaseMetaData.importedKeyCascade:
+			return CsdlOnDeleteAction.Cascade;
+		case DatabaseMetaData.importedKeySetDefault:
+			return CsdlOnDeleteAction.SetDefault;
+		case DatabaseMetaData.importedKeySetNull:
+			return CsdlOnDeleteAction.SetNull;
+		default:
+			return CsdlOnDeleteAction.None;
+		}
 	}
 
 	protected CsdlPropertyRef createKeyProperty(ResultSet rs) throws SQLException {
@@ -95,24 +147,23 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 				setType(TypeMap.toODataType(rs.getInt(DATA_TYPE)).getFullQualifiedName());
 
 	}
-
+	
+	
 	public List<CsdlSchema> getSchemas() throws ODataException {
-
 
 		List<CsdlSchema> schemas = new ArrayList<CsdlSchema>();
 
 		try(ResultSet schemasRs = metadata.getSchemas()){
 			while(schemasRs.next()){
 				CsdlSchema schema = new CsdlSchema();
-				schema.setNamespace(schemasRs.getString("TABLE_SCHEM"));		  
+				schema.setNamespace(schemasRs.getString(TABLE_SCHEM));		  
 				List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();		 
 				schema.setEntityTypes(entityTypes);
-				try (ResultSet rs = metadata.getTables(null, schema.getNamespace(),"%",null);){					
-				
-						while(rs.next()){	
-							entityTypes.add(getEntityType(new FullQualifiedName(schema.getNamespace(),
-									rs.getString(TABLE_NAME))));							
-						}				
+				try (ResultSet rs = metadata.getTables(null, schema.getNamespace(),"%",null)){
+					while(rs.next()){	
+						entityTypes.add(getEntityType(new FullQualifiedName(schema.getNamespace(),
+								rs.getString(TABLE_NAME))));							
+					}				
 				} 
 				schema.setEntityContainer(getEntityContainer());
 				schemas.add(schema);

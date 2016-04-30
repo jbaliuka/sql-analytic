@@ -3,8 +3,6 @@ package com.github.sql.analytic.odata.web;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,7 +28,7 @@ public class SQLOdataHandler {
 					OData odata = OData.newInstance();
 					ServiceMetadata edm = odata.createServiceMetadata(new SQLEdmProvider(connection.getMetaData()), new ArrayList<EdmxReference>());
 					ODataHttpHandler handler = odata.createHandler(edm);
-					handler.register(new SQLEntityCollectionProcessor());	      
+					handler.register(new SQLEntityCollectionProcessor(connection));	      
 					handler.process(request, response);		
 
 		
