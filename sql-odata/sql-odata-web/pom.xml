@@ -23,21 +23,8 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<inherited>true</inherited>
-				<executions>
-					<execution>
-						<id>compile</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>exploded</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>										
-				</configuration>
+				<inherited>true</inherited>				
 			</plugin>
-
-
 		</plugins>
 	</build>
 

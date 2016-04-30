@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
@@ -148,24 +149,52 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 	}
 	
+	@Override
+	public CsdlEntityContainer getEntityContainer() throws ODataException {
+		
+		CsdlEntityContainer root = new CsdlEntityContainer();
+		List<CsdlEntitySet> entitySets = new ArrayList<>();
+		root.setEntitySets(entitySets);
+		
+		for(CsdlSchema schema : getSchemas()){
+			for(CsdlEntitySet set : schema.getEntityContainer().getEntitySets()){
+				entitySets.add(set);
+			}
+		}
+		
+		return root;
+	}
 	
 	public List<CsdlSchema> getSchemas() throws ODataException {
 
 		List<CsdlSchema> schemas = new ArrayList<CsdlSchema>();
-
+		
 		try(ResultSet schemasRs = metadata.getSchemas()){
+			
 			while(schemasRs.next()){
+				
+				CsdlEntityContainer schemaContainer = new CsdlEntityContainer();
+				List<CsdlEntitySet> entitySets = new ArrayList<>();
+				schemaContainer.setEntitySets(entitySets);
+				
 				CsdlSchema schema = new CsdlSchema();
 				schema.setNamespace(schemasRs.getString(TABLE_SCHEM));		  
 				List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();		 
 				schema.setEntityTypes(entityTypes);
 				try (ResultSet rs = metadata.getTables(null, schema.getNamespace(),"%",null)){
 					while(rs.next()){	
-						entityTypes.add(getEntityType(new FullQualifiedName(schema.getNamespace(),
-								rs.getString(TABLE_NAME))));							
+						FullQualifiedName entityTypeName = new FullQualifiedName(schema.getNamespace(),
+								rs.getString(TABLE_NAME));
+						CsdlEntityType entityType = getEntityType(entityTypeName);
+						
+						entitySets.add( new CsdlEntitySet().
+								setType(entityTypeName).
+								setName( entityTypeName.getNamespace() + "_"  + entityTypeName.getName() )
+								);
+						entityTypes.add(entityType);							
 					}				
 				} 
-				schema.setEntityContainer(getEntityContainer());
+				schema.setEntityContainer(schemaContainer.setName(schema.getNamespace()));
 				schemas.add(schema);
 			}
 		} catch (SQLException sqle) {
@@ -176,6 +205,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 		return schemas;
 	}
+
 
 
 
