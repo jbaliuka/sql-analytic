@@ -6,11 +6,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.olingo.server.api.deserializer.ODataDeserializer;
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
@@ -25,6 +28,7 @@ import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
+import org.apache.olingo.server.api.deserializer.DeserializerResult;
 import org.apache.olingo.server.api.processor.EntityProcessor;
 import org.apache.olingo.server.api.serializer.EntitySerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
@@ -54,63 +58,129 @@ public class SQLEntityProcessor implements EntityProcessor {
 	@Override
 	public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat)
 			throws ODataApplicationException, ODataLibraryException {
-		
-	    List<UriResource> resourcePaths = uriInfo.getUriResourceParts();	    
-	    UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
-	    EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
-	    EdmEntityType entityType = edmEntitySet.getEntityType();	    
-	    List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-	    Entity entity = null;
-	    
-	    StringBuilder sql = EntityData.buildSelect(entityType);
-	    
-	    EntityData.buildWhere(keyPredicates, sql);
-	    
-	    try(PreparedStatement ps = session.prepareStatement(sql.toString())){
-	    	 for(int i = 0; i < keyPredicates.size(); i++){
-	 	    	UriParameter key = keyPredicates.get(i);
-	 	    	EdmProperty keyProperty = (EdmProperty)entityType.getProperty(key.getName());	
-	 	    	EdmPrimitiveType type = (EdmPrimitiveType) keyProperty.getType();
-	 	    	Object value = type.valueOfString(key.getText(), 
-	 	    			keyProperty.isNullable(),
-	 	    			keyProperty.getMaxLength(),
-	 	    			keyProperty.getPrecision(), 
-	 	    			keyProperty.getScale(), true, type.getDefaultType());
-	 	    	ps.setObject(i + 1, value);
-	 	    }
-	    	 try(ResultSet rs = ps.executeQuery()){
-	    		 if(rs.next()){
-	    			 entity = EntityData.createEntity(edmEntitySet,entityType,rs); 
-	    		 }
-	    	 } 
-	    	
-	    } catch (SQLException | EdmPrimitiveTypeException | IOException e) {
-	    	throw new ODataApplicationException("Internal Error", HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
+
+		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();	    
+		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
+		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
+		EdmEntityType entityType = edmEntitySet.getEntityType();	    
+		List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
+		Entity entity = null;
+
+		StringBuilder sql = EntityData.buildSelect(entityType);
+
+		EntityData.buildWhere(keyPredicates, sql);
+
+		try(PreparedStatement ps = session.prepareStatement(sql.toString())){
+			setKeyParams(entityType, keyPredicates, ps);
+			try(ResultSet rs = ps.executeQuery()){
+				if(rs.next()){
+					entity = EntityData.createEntity(edmEntitySet,entityType,rs); 
+				}
+			} 
+
+		} catch (SQLException | EdmPrimitiveTypeException | IOException e) {
+			throw new ODataApplicationException("Internal Error", HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
 					Locale.ENGLISH,e);
 		}
-	   
 
-	    ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();	    
-	    EntitySerializerOptions options = EntitySerializerOptions.with().contextURL(contextUrl).build();
 
-	    ODataSerializer serializer = odata.createSerializer(responseFormat);
-	    SerializerResult serializerResult = serializer.entity(serviceMetadata, entityType, entity, options);
-	    InputStream entityStream = serializerResult.getContent();
+		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();	    
+		EntitySerializerOptions options = EntitySerializerOptions.with().contextURL(contextUrl).build();
 
-	    
-	    response.setContent(entityStream);
-	    response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-	    response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
+		ODataSerializer serializer = odata.createSerializer(responseFormat);
+		SerializerResult serializerResult = serializer.entity(serviceMetadata, entityType, entity, options);
+		InputStream entityStream = serializerResult.getContent();
+
+
+		response.setContent(entityStream);
+		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+		response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
 
 	}
 
-	
+	private void setKeyParams(EdmEntityType entityType, List<UriParameter> keyPredicates, PreparedStatement ps)
+			throws EdmPrimitiveTypeException, SQLException {
+		for(int i = 0; i < keyPredicates.size(); i++){
+			UriParameter key = keyPredicates.get(i);
+			EdmProperty keyProperty = (EdmProperty)entityType.getProperty(key.getName());	
+			EdmPrimitiveType type = (EdmPrimitiveType) keyProperty.getType();
+			Object value = type.valueOfString(key.getText(), 
+					keyProperty.isNullable(),
+					keyProperty.getMaxLength(),
+					keyProperty.getPrecision(), 
+					keyProperty.getScale(), true, type.getDefaultType());
+			ps.setObject(i + 1, value);
+		}
+	}
+
+
 
 	@Override
 	public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat,
 			ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-		// TODO Auto-generated method stub
 
+		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
+		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
+		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
+		EdmEntityType entityType = edmEntitySet.getEntityType();	
+		InputStream requestInputStream = request.getBody();
+		ODataDeserializer deserializer = this.odata.createDeserializer(requestFormat);
+		DeserializerResult result = deserializer.entity(requestInputStream, entityType);
+		Entity requestEntity = result.getEntity();		  
+		Entity createdEntity = createEntityData(edmEntitySet, requestEntity);		  
+		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();		  
+		EntitySerializerOptions options = EntitySerializerOptions.with().contextURL(contextUrl).build();
+		ODataSerializer serializer = this.odata.createSerializer(responseFormat);
+		SerializerResult serializedResponse = serializer.entity(serviceMetadata, entityType, createdEntity, options);
+		response.setContent(serializedResponse.getContent());
+		response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());
+		response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
+
+	}
+
+	private Entity createEntityData(EdmEntitySet edmEntitySet, Entity requestEntity) throws ODataApplicationException {
+		
+		EdmEntityType entityType = edmEntitySet.getEntityType();
+		List<String> propertyNames = entityType.getPropertyNames();
+		StringBuilder builder = new StringBuilder("INSERT INTO ");		
+		builder.append(entityType.getFullQualifiedName());
+		builder.append("(");
+		for(int i = 0; i < propertyNames.size(); i++){
+			builder.append(propertyNames.get(i));
+			if( i < propertyNames.size() - 1){
+				builder.append(",");
+			}
+		}
+		
+		builder.append(")VALUES(");
+		for(int i = 0; i < propertyNames.size(); i++){
+			builder.append("?");
+			if( i < propertyNames.size() - 1){
+				builder.append(",");
+			}
+		}
+		builder.append(")");
+		try(PreparedStatement ps = session.prepareStatement(builder.toString())){
+		
+			for(int i = 0; i < propertyNames.size(); i++){				
+				Property p = requestEntity.getProperty(propertyNames.get(i));	
+				if(p != null){
+				ps.setObject(i + 1, p.getValue());
+				}else {
+					ps.setNull(i + 1, Types.CHAR);
+				}
+			}
+			if(ps.executeUpdate() != 1){
+				throw new ODataApplicationException("Unable to insert", HttpStatusCode.CONFLICT.getStatusCode(), 
+						Locale.ENGLISH);
+			}
+			
+		} catch (SQLException e) {
+			throw new ODataApplicationException("Internal Error", HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
+					Locale.ENGLISH,e);
+		}
+		
+		return requestEntity;
 	}
 
 	@Override

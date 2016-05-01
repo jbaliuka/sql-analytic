@@ -1,11 +1,14 @@
 package com.github.sql.analytic.odata.web;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -20,45 +23,48 @@ import javax.sql.DataSource;
 
 import org.apache.http.client.HttpClient;
 import org.apache.olingo.client.api.ODataClient;
+import org.apache.olingo.client.api.communication.request.cud.CUDRequestFactory;
+import org.apache.olingo.client.api.communication.request.retrieve.ODataEntityRequest;
+import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataServiceDocumentRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
+import org.apache.olingo.client.api.communication.response.ODataEntityCreateResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
+import org.apache.olingo.client.api.domain.ClientEntity;
+import org.apache.olingo.client.api.domain.ClientEntitySet;
+import org.apache.olingo.client.api.domain.ClientPrimitiveValue;
+import org.apache.olingo.client.api.domain.ClientProperty;
 import org.apache.olingo.client.api.domain.ClientServiceDocument;
+import org.apache.olingo.client.api.domain.ClientValue;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.api.http.HttpClientFactory;
 import org.apache.olingo.client.core.ODataClientFactory;
+import org.apache.olingo.client.core.domain.ClientEntityImpl;
+import org.apache.olingo.client.core.domain.ClientPrimitiveValueImpl;
+import org.apache.olingo.client.core.domain.ClientPropertyImpl;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpMethod;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
-import com.github.sql.analytic.test.TestUtil;
 
 public class SQLODataServletTest {
 
 	static final String url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";		
 	private static final String serviceRoot = "http://mock.server/SQLODataService.svc/";
 	private DataSource datasource = new MockDataSource();	
+	private ODataClient client;
 
 
 	@Test
-	public void test() throws ServletException, IOException {
-
-		ODataClient client = setupMockClient();
-		ODataServiceDocumentRequest serviceReq =
-				client.getRetrieveRequestFactory().getServiceDocumentRequest(serviceRoot);
-		ODataRetrieveResponse<ClientServiceDocument> serviceRes = serviceReq.execute();
-		ClientServiceDocument serviceBody = serviceRes.getBody();		
-		Collection<String> names = serviceBody.getEntitySetNames();
-		assertFalse(names.isEmpty());	
-
-
-
+	public void testMetadataReq() {
 		XMLMetadataRequest req =
 				client.getRetrieveRequestFactory().getXMLMetadataRequest(serviceRoot);
 		ODataRetrieveResponse<XMLMetadata> res = req.execute();
@@ -78,21 +84,78 @@ public class SQLODataServletTest {
 		CsdlEntityType joinTable = publicSchema.getEntityType("EMPLOYEE_PRIVILEGES");
 		assertTrue(joinTable.getKey().size() == 2);
 		assertTrue(joinTable.getNavigationProperties().size() == 2 );
+	}
 
+	@Test
+	public void testEntityReq() throws URISyntaxException {
+		URI uri = new URI(serviceRoot + "CUSTOMERS(1)");
+		ODataEntityRequest<ClientEntity> req =
+				client.getRetrieveRequestFactory().getEntityRequest(uri);
+		ODataRetrieveResponse<ClientEntity> res = req.execute();
+		ClientEntity entity = res.getBody();		
+		ClientProperty id = entity.getProperty("ID");
+		assertEquals(1,id.getValue().asPrimitive().toValue());
 
+	}
+	
+	@Test
+	public void testCreateEntityReq() throws URISyntaxException {
+		URI uri = new URI(serviceRoot + "CUSTOMERS");
+		CUDRequestFactory req = client.getCUDRequestFactory();				
+		FullQualifiedName name = new FullQualifiedName("PUBLIC","CUSTOMERS");
+		ClientEntityImpl entity = new ClientEntityImpl(name);
+		ClientPrimitiveValue value = new ClientPrimitiveValueImpl.BuilderImpl().buildInt32(666);
+		entity.getProperties().add( new ClientPropertyImpl("ID", value ) );
+		
+		ODataEntityCreateResponse<ClientEntityImpl> res = req.getEntityCreateRequest(uri, entity).execute();
+		ClientEntity newEntity = res.getBody();		
+		ClientProperty id = newEntity.getProperty("ID");
+		assertEquals(666,id.getValue().asPrimitive().toValue());
+
+	}
+
+	@Test
+	public void testEntitySetReq() throws URISyntaxException {
+		
+		URI uri = new URI(serviceRoot + "CUSTOMERS");
+		ODataEntitySetRequest<ClientEntitySet> req =
+				client.getRetrieveRequestFactory().getEntitySetRequest(uri);
+		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
+		ClientEntitySet entity = res.getBody();		
+		assertFalse( entity.getEntities().isEmpty() );
+
+	}
+
+	@Test
+	public void testServiceReq() {
+		ODataServiceDocumentRequest serviceReq =
+				client.getRetrieveRequestFactory().getServiceDocumentRequest(serviceRoot);
+		ODataRetrieveResponse<ClientServiceDocument> serviceRes = serviceReq.execute();
+		ClientServiceDocument serviceBody = serviceRes.getBody();		
+		Collection<String> names = serviceBody.getEntitySetNames();
+		assertFalse(names.isEmpty());
 	}
 
 
 
 	@Before
 	public void init() throws ServletException, IOException, SQLException{
-
 		try(Connection connection = datasource.getConnection() ){				
 			Loader.execute(connection);
+		} catch (SQLException | IOException e) {
+			throw new AssertionError(e);
 		}
-
+		client = setupMockClient();
 	}
 
+	@After
+	public void drop(){
+		try(Connection connection = datasource.getConnection() ){				
+			Loader.drop(connection);
+		} catch (SQLException | IOException e) {
+			throw new AssertionError(e);
+		}		
+	}
 
 	private ODataClient setupMockClient() {
 
@@ -102,7 +165,7 @@ public class SQLODataServletTest {
 
 			@Override
 			protected List<CreatePolicy> getPolicy() {
-				
+
 				try {
 					return Loader.getPolicyList();
 				} catch (IOException | JSQLParserException e) {
@@ -112,12 +175,12 @@ public class SQLODataServletTest {
 
 			@Override
 			protected DataSource getDatasource() {
-				
+
 				return datasource;
 			}
-			
+
 		};		
-		
+
 		ODataClient client = ODataClientFactory.getClient();
 		client.getConfiguration().setDefaultPubFormat(ContentType.JSON);
 
@@ -151,12 +214,12 @@ class MockDataSource implements DataSource{
 
 	@Override
 	public void setLogWriter(PrintWriter out) throws SQLException {
-		
+
 	}
 
 	@Override
 	public void setLoginTimeout(int seconds) throws SQLException {
-		
+
 	}
 
 	@Override
@@ -189,6 +252,6 @@ class MockDataSource implements DataSource{
 	public Connection getConnection(String username, String password) throws SQLException {
 		return null;
 	}
-	
+
 }
 

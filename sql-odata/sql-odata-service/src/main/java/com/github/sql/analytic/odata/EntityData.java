@@ -1,6 +1,7 @@
 package com.github.sql.analytic.odata;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -12,7 +13,7 @@ import java.sql.SQLException;
 import java.util.Base64;
 import java.util.List;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
@@ -73,6 +74,8 @@ public class EntityData {
 			List<EdmKeyPropertyRef> key = edmEntityType.getKeyPropertyRefs();
 			StringBuilder builder = new StringBuilder(name).append("(");
 			for(int i = 0; i< key.size(); i++ ){
+				builder.append(key.get(i).getName());
+				builder.append("=");
 				builder.append(rs.getObject(key.get(i).getName()));
 				if( i < key.size() - 1 ){
 					builder.append(",");

@@ -46,4 +46,8 @@ public class Loader {
 		return TestUtil.parsePolicyList(policyList);
 	}
 
+	public static void drop(Connection connection) throws IOException, SQLException {
+		loadFile(connection,"mywind/northwind-drop.sql");		
+	}
+
 }

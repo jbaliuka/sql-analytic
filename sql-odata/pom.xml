@@ -63,6 +63,7 @@
 			<groupId>org.apache.olingo</groupId>
 			<artifactId>odata-client-core</artifactId>
 			<version>${odata.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
