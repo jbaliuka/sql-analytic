@@ -24,11 +24,15 @@ import javax.sql.DataSource;
 import org.apache.http.client.HttpClient;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.cud.CUDRequestFactory;
+import org.apache.olingo.client.api.communication.request.cud.ODataDeleteRequest;
+import org.apache.olingo.client.api.communication.request.cud.ODataEntityUpdateRequest;
+import org.apache.olingo.client.api.communication.request.cud.UpdateType;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntityRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataServiceDocumentRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataEntityCreateResponse;
+import org.apache.olingo.client.api.communication.response.ODataEntityUpdateResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
@@ -112,6 +116,33 @@ public class SQLODataServletTest {
 		ClientProperty id = newEntity.getProperty("ID");
 		assertEquals(666,id.getValue().asPrimitive().toValue());
 
+	}
+	
+	@Test
+	public void testPatchEntityReq() throws URISyntaxException {
+		
+		URI uri = new URI(serviceRoot + "CUSTOMERS(1)");
+		CUDRequestFactory req = client.getCUDRequestFactory();				
+		FullQualifiedName name = new FullQualifiedName("PUBLIC","CUSTOMERS");
+		ClientEntityImpl entity = new ClientEntityImpl(name);
+		ClientPrimitiveValue value = new ClientPrimitiveValueImpl.BuilderImpl().buildInt32(1);
+		entity.getProperties().add( new ClientPropertyImpl("ID", value ) );
+		 value = new ClientPrimitiveValueImpl.BuilderImpl().buildString("TEST");
+		entity.getProperties().add( new ClientPropertyImpl("COMPANY", value ) );		
+		
+		ODataEntityUpdateRequest<ClientEntityImpl> res = req.getEntityUpdateRequest(uri,UpdateType.PATCH, entity);
+		res.execute();
+		
+		res = req.getEntityUpdateRequest(uri,UpdateType.PATCH, entity);
+		res.execute();
+	}
+	
+	@Test
+	public void testDeleteEntityReq() throws URISyntaxException {
+		URI uri = new URI(serviceRoot + "STRINGS(2)");
+		CUDRequestFactory req = client.getCUDRequestFactory();
+		ODataDeleteRequest res = req.getDeleteRequest(uri);
+		res.execute();
 	}
 
 	@Test
