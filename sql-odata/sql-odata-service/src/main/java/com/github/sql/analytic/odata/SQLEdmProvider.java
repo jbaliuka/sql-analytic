@@ -13,6 +13,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlOnDelete;
 import org.apache.olingo.commons.api.edm.provider.CsdlOnDeleteAction;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
@@ -152,18 +153,19 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	@Override
 	public CsdlEntitySet getEntitySet(FullQualifiedName entityContainer, String entitySetName) throws ODataException {
 
+		CsdlEntitySet entitySet = new CsdlEntitySet();
 		try (ResultSet rs = metadata.getTables(null, null,entitySetName,null)){
-			while(rs.next()){	
+			if(rs.next()){	
 				FullQualifiedName entityTypeName = new FullQualifiedName(rs.getString(TABLE_SCHEM),
 						rs.getString(TABLE_NAME));										
-				return new CsdlEntitySet().
-						setType(entityTypeName).
-						setName( entityTypeName.getName() );					
-			}				
+				entitySet.setType(entityTypeName).setName(entityTypeName.getName());
+				addBindings(entityTypeName, entitySet);
+			}	
+
 		} catch (SQLException e) {
 			throw new ODataException(e);
 		} 
-		return null;
+		return entitySet;
 
 	}
 	public List<CsdlSchema> getSchemas() throws ODataException {
@@ -173,7 +175,6 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 				CsdlEntityContainer schemaContainer = new CsdlEntityContainer();
 				List<CsdlEntitySet> entitySets = new ArrayList<>();
 				schemaContainer.setEntitySets(entitySets);
-
 				CsdlSchema schema = new CsdlSchema();
 				schema.setNamespace(schemasRs.getString(TABLE_SCHEM));		  
 				List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();		 
@@ -183,12 +184,12 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 						FullQualifiedName entityTypeName = new FullQualifiedName(schema.getNamespace(),
 								rs.getString(TABLE_NAME));
 						CsdlEntityType entityType = getEntityType(entityTypeName);		
-
-						entitySets.add( new CsdlEntitySet().
+						CsdlEntitySet entitySet = new CsdlEntitySet();
+						entitySets.add( entitySet.
 								setType(entityTypeName).
 								setName( entityTypeName.getName() )
 								);
-
+						addBindings(entityTypeName, entitySet);
 						entityTypes.add(entityType);							
 					}				
 				} 
@@ -200,6 +201,32 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		}
 
 		return schemas;
+	}
+
+	private void addBindings(FullQualifiedName entityTypeName, CsdlEntitySet entitySet)
+			throws SQLException {
+		List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
+		entitySet.setNavigationPropertyBindings(navPropBindingList);		
+		try( ResultSet rs = metadata.getImportedKeys(null, null, entityTypeName.getName()) ){						
+			while(rs.next()){		
+				if(rs.getInt(KEY_SEQ) == 1){
+					CsdlNavigationPropertyBinding navPropBinding = new CsdlNavigationPropertyBinding();
+					navPropBinding.setPath(rs.getString(FK_NAME)); 
+					navPropBinding.setTarget(rs.getString(PKTABLE_NAME)); 
+					navPropBindingList.add(navPropBinding);						
+				}
+			}
+		}
+		try( ResultSet rs = metadata.getExportedKeys(null, null, entityTypeName.getName()) ){						
+			while(rs.next()){		
+				if(rs.getInt(KEY_SEQ) == 1){
+					CsdlNavigationPropertyBinding navPropBinding = new CsdlNavigationPropertyBinding();
+					navPropBinding.setPath(rs.getString(FK_NAME)); 
+					navPropBinding.setTarget(rs.getString(FKTABLE_NAME)); 
+					navPropBindingList.add(navPropBinding);						
+				}
+			}
+		}
 	}
 
 	@Override
