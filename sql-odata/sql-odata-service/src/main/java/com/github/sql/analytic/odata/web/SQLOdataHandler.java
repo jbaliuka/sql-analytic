@@ -15,6 +15,7 @@ import org.apache.olingo.server.api.edmx.EdmxReference;
 
 import com.github.sql.analytic.odata.SQLEdmProvider;
 import com.github.sql.analytic.odata.SQLEntityCollectionProcessor;
+import com.github.sql.analytic.odata.SQLEntityProcessor;
 import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.policy.SessionContext;
@@ -38,6 +39,7 @@ public class SQLOdataHandler {
 					ServiceMetadata edm = odata.createServiceMetadata(new SQLEdmProvider(session.getMetaData()), new ArrayList<EdmxReference>());
 					ODataHttpHandler handler = odata.createHandler(edm);
 					handler.register(new SQLEntityCollectionProcessor(session));	      
+					handler.register(new SQLEntityProcessor(session));
 					handler.process(request, response);	
 		
 	}
