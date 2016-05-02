@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,9 +36,9 @@ public class SQLOdataHandler {
 	
 	public void process(final HttpServletRequest request, HttpServletResponse response) throws SQLException{
 		             
-		            SessionContext context = createContext(request);
-										
+		            SessionContext context = createContext(request);										
 					SQLSession session = createSession(context);
+					
 					OData odata = OData.newInstance();
 					ServiceMetadata edm = odata.createServiceMetadata(new SQLEdmProvider(session.getMetaData()), new ArrayList<EdmxReference>());
 					ODataHttpHandler handler = odata.createHandler(edm);

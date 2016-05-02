@@ -42,7 +42,6 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
-import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 
 import com.github.sql.analytic.expression.BinaryExpression;
@@ -67,7 +66,7 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 	private OData odata;
 	private ServiceMetadata metadata;
 	private SQLSession connection;
-
+	
 	public SQLEntityCollectionProcessor(SQLSession connection){
 		this.connection = connection;
 	}
@@ -120,12 +119,13 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 				edmEntitySet = getNavigationTargetEntitySet(edmEntitySet, edmNavigationProperty);
 				EdmEntityType rightType = edmEntitySet.getEntityType();
 				Join join = appendFrom(select, edmEntitySet);
-				appendOn(join,edmNavigationProperty.getName(),leftType,rightType);				
+				appendOn(join,edmNavigationProperty.getName(),leftType,rightType);
+				appendWhere(statementParams,edmEntitySet.getEntityType(),select, uriResourceNavigation.getKeyPredicates());
 			}else if (segment instanceof UriResourceEntitySet){				
 				UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) segment;
 				edmEntitySet = uriResourceEntitySet.getEntitySet();			
 				appendFrom(select, edmEntitySet);
-				appendWhere(statementParams, select, uriResourceEntitySet);				
+				appendWhere(statementParams,edmEntitySet.getEntityType(),select, uriResourceEntitySet.getKeyPredicates());				
 			}else {
 				throw new ODataApplicationException(segment.toString(), HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), 
 						Locale.ENGLISH);
@@ -248,13 +248,13 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 
 	}
 
-	private void appendWhere(Map<String, Object> statementParams, PlainSelect select,
-			UriResourceEntitySet uriResourceEntitySet) throws EdmPrimitiveTypeException {
+	private void appendWhere(Map<String, Object> statementParams, EdmEntityType entityType,PlainSelect select,
+			List<UriParameter> list) throws EdmPrimitiveTypeException {
 
 		Expression expression = null;		
 
-		for( UriParameter key :  uriResourceEntitySet.getKeyPredicates()){
-			expression = appendKey(statementParams, uriResourceEntitySet, expression, key);
+		for( UriParameter key :  list){
+			expression = appendKey(statementParams, entityType, expression, key);
 		}
 
 		if(expression != null){
@@ -268,13 +268,13 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 		}
 	}
 
-	private Expression appendKey(Map<String, Object> statementParams, UriResourceEntitySet uriResourceEntitySet,
+	private Expression appendKey(Map<String, Object> statementParams, EdmEntityType entityType,
 			Expression expression, UriParameter key) throws EdmPrimitiveTypeException {
 
-		EdmEntityType entityType = uriResourceEntitySet.getEntitySet().getEntityType();
+		
 		String name = entityType.getName() + "_" + key.getName();
 
-		EdmProperty keyProperty = (EdmProperty)uriResourceEntitySet.getEntityType().getProperty(key.getName());	
+		EdmProperty keyProperty = (EdmProperty)entityType.getProperty(key.getName());	
 		Object value = getValue(key, keyProperty);
 		statementParams.put(name, value);
 

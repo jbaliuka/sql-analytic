@@ -1,10 +1,7 @@
 package com.github.sql.analytic.odata;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Types;
@@ -12,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.olingo.server.api.deserializer.ODataDeserializer;
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -32,6 +28,7 @@ import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.deserializer.DeserializerResult;
+import org.apache.olingo.server.api.deserializer.ODataDeserializer;
 import org.apache.olingo.server.api.processor.EntityProcessor;
 import org.apache.olingo.server.api.serializer.EntitySerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
@@ -41,13 +38,15 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 
+import com.github.sql.analytic.session.SQLSession;
+
 public class SQLEntityProcessor implements EntityProcessor {
 
-	private Connection session;
+	private SQLSession session;
 	private ServiceMetadata serviceMetadata;
 	private OData odata;
 
-	public SQLEntityProcessor(Connection session) {
+	public SQLEntityProcessor(SQLSession session) {
 		this.session = session;
 	}
 
@@ -61,47 +60,11 @@ public class SQLEntityProcessor implements EntityProcessor {
 	@Override
 	public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat)
 			throws ODataApplicationException, ODataLibraryException {
-
-		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();	    
-		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(resourcePaths.size() - 1);
-		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
-		EdmEntityType entityType = edmEntitySet.getEntityType();	    
-		List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-		Entity entity = null;
-
-		StringBuilder sql = EntityData.buildSelect(entityType);
-
-		EntityData.buildWhere(keyPredicates, sql);
-
-		try(PreparedStatement ps = session.prepareStatement(sql.toString())){
-			setKeyParams(entityType, keyPredicates, ps,0);
-			try(ResultSet rs = ps.executeQuery()){
-				if(rs.next()){
-					entity = EntityData.createEntity(edmEntitySet,null,rs); 
-				}else {
-					throw new ODataApplicationException("Not Found", HttpStatusCode.NOT_FOUND.getStatusCode(), 
-							Locale.ENGLISH);
-				}
-			} 
-
-		} catch (SQLException | EdmPrimitiveTypeException | IOException e) {
-			throw new ODataApplicationException("Internal Error", HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
-					Locale.ENGLISH,e);
-		}
-
-
-		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();	    
-		EntitySerializerOptions options = EntitySerializerOptions.with().contextURL(contextUrl).build();
-
-		ODataSerializer serializer = odata.createSerializer(responseFormat);
-		SerializerResult serializerResult = serializer.entity(serviceMetadata, entityType, entity, options);
-		InputStream entityStream = serializerResult.getContent();
-
-
-		response.setContent(entityStream);
-		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-		response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
-
+		
+		SQLEntityCollectionProcessor processor = new SQLEntityCollectionProcessor(session);
+		processor.init(odata, serviceMetadata);		
+		processor.readEntityCollection(request, response, uriInfo, responseFormat);
+		
 	}
 
 	private void setKeyParams(EdmEntityType entityType, List<UriParameter> keyPredicates, PreparedStatement ps, int first)
