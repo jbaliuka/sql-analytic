@@ -105,7 +105,7 @@ import com.github.sql.analytic.expression.operators.relational.MinorThanEquals;
 import com.github.sql.analytic.expression.operators.relational.NotEqualsTo;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.create.table.ColDataType;
 import com.github.sql.analytic.statement.create.table.ColumnDefinition;
 import com.github.sql.analytic.statement.create.table.CreateTable;
@@ -279,8 +279,8 @@ TOKEN:
 }
 
 
-Statement Statement() :
-{ Statement stm;}
+SQLStatement Statement() :
+{ SQLStatement stm;}
 {
 	(
     stm = Select()
@@ -309,8 +309,8 @@ Statement Statement() :
 
 
 
-Statement Create():
-{  Statement statement = null; }
+SQLStatement Create():
+{  SQLStatement statement = null; }
 {       (
     	<K_TABLE>   statement = CreateTable()  
 		| 

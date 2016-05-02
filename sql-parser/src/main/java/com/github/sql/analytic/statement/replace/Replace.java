@@ -26,7 +26,7 @@ import java.util.List;
 
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.select.PlainSelect;
 
@@ -35,7 +35,7 @@ import com.github.sql.analytic.statement.select.PlainSelect;
  * The replace statement.
  */
 
-public class Replace implements Statement {
+public class Replace implements SQLStatement {
 	private Table table;
 	@SuppressWarnings("unchecked")
 	private List columns;

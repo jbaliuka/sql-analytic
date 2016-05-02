@@ -25,12 +25,12 @@ package com.github.sql.analytic.statement.select;
 import java.util.Iterator;
 import java.util.List;
 
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
 
 
 
-public class Select implements Statement {
+public class Select implements SQLStatement {
 	private SelectBody selectBody;
 	
 	private List<WithItem> withItemsList;
@@ -43,8 +43,9 @@ public class Select implements Statement {
 		return selectBody;
 	}
 
-	public void setSelectBody(SelectBody body) {
+	public Select setSelectBody(SelectBody body) {
 		selectBody = body;
+		return this;
 	}
 	
 	
@@ -71,7 +72,8 @@ public class Select implements Statement {
 	}
 
 	
-	public void setWithItemsList(List<WithItem> withItemsList) {
+	public Select setWithItemsList(List<WithItem> withItemsList) {
 		this.withItemsList = withItemsList;
+		return this;
 	}
 }

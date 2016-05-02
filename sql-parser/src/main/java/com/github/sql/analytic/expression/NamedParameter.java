@@ -22,6 +22,8 @@
  
 package com.github.sql.analytic.expression;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import com.github.sql.analytic.parser.Token;
 
 /**
@@ -44,6 +46,11 @@ public class NamedParameter implements Expression {
 
 	public NamedParameter(Token token){		
 		this.token = token;
+	}
+	
+	public NamedParameter(String name){		
+		this.token = new Token();
+		this.token.image = ":" + name;
 	}
 	
 	public String getName() {

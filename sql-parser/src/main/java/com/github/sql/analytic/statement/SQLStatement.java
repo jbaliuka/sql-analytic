@@ -27,6 +27,6 @@ package com.github.sql.analytic.statement;
  * An operation on the db (SELECT, UPDATE ecc.) 
  */
 
-public interface Statement {
+public interface SQLStatement {
 	public void accept(StatementVisitor statementVisitor);
 }

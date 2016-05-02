@@ -24,6 +24,7 @@ import java.util.concurrent.Executor;
 
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.parser.CCJSqlParserManager;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.policy.Policy;
 import com.github.sql.analytic.transform.policy.SessionContext;
@@ -34,7 +35,7 @@ public class SQLSession implements Connection{
 	private SessionContext context;
 	private List<CreatePolicy> policy;
 	private Map<String, DeparsedSQL> sqlCache = createCache();
-	
+
 
 	public SQLSession(SessionContext context, Connection connection, List<CreatePolicy> policy) {
 		super();
@@ -42,44 +43,59 @@ public class SQLSession implements Connection{
 		this.policy = policy;
 		this.context = context;
 	}
-	
+
 
 	protected Map<String, DeparsedSQL> createCache() {
 		return new HashMap<>();
 	}
 
-	
+
 	public DeparsedSQL transform(String sql) throws SQLException{
-		
+
 		DeparsedSQL cached = sqlCache.get(sql);
 		if(cached != null){
 			return cached;
 		}
-		
+
 		CCJSqlParserManager parserManager = new CCJSqlParserManager();				
-		Policy transform = new Policy(policy, context );		
+		Policy transform = createPolicy();		
 		try {
-			
-			com.github.sql.analytic.statement.Statement stmt = parserManager.transform(new StringReader(sql), transform);
+
+			com.github.sql.analytic.statement.SQLStatement stmt = parserManager.transform(new StringReader(sql), transform);
 			StringBuffer buffer = new StringBuffer();
 			ParamsDeparser deparser = createDeparser(buffer);
 			stmt.accept(deparser);			
 			cached = deparser.getDeparsedSQL();			
 			sqlCache.put(sql, cached);
-			
+
 			return cached;
-			
+
 		} catch (JSQLParserException e) {
 			throw new SQLException(e);
 		}		
 	}
 
+	public PreparedStatement create(SQLStatement stmt,Map<String,Object> statementParams)throws SQLException{
+
+		Policy transform = createPolicy();
+		stmt = transform.trasform(stmt);
+		StringBuffer buffer = new StringBuffer();
+		ParamsDeparser deparser = createDeparser(buffer);
+		stmt.accept(deparser);			
+		DeparsedSQL deparsed = deparser.getDeparsedSQL();	
+		return new SQLPreparedCommand(this, statementParams,
+				connection.prepareStatement(deparsed.getSql()),deparsed);
+	}
+
+	protected Policy createPolicy() {		
+		return  new Policy(policy, context);
+	}
 
 	protected ParamsDeparser createDeparser(StringBuffer buffer) {
-				
+
 		return new ParamsDeparser(buffer);
 	} 
-		
+
 
 	public List<CreatePolicy> getPolicy() {
 		return policy;
@@ -178,7 +194,7 @@ public class SQLSession implements Connection{
 
 	public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {		
 		return  new SQLCommand(this,resultSetType,resultSetConcurrency);
-		
+
 	}
 
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
@@ -323,5 +339,5 @@ public class SQLSession implements Connection{
 	public int getNetworkTimeout() throws SQLException {
 		return connection.getNetworkTimeout();
 	}
-	
+
 }

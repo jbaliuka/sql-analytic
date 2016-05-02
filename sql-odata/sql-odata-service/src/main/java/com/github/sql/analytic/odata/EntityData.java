@@ -26,8 +26,9 @@ import org.apache.olingo.server.api.uri.UriParameter;
 
 public class EntityData {
 
-	public static Entity createEntity(EdmEntitySet edmEntitySet, EdmEntityType edmEntityType, ResultSet rs) throws SQLException, IOException {
+	public static Entity createEntity(EdmEntitySet edmEntitySet, ResultSet rs) throws SQLException, IOException {
 
+		EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 		Entity entity = new Entity();
 		entity.setType(edmEntityType.getFullQualifiedName().toString());
 

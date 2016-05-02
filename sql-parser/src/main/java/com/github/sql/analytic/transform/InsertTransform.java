@@ -8,7 +8,7 @@ import com.github.sql.analytic.expression.operators.relational.ExpressionList;
 import com.github.sql.analytic.expression.operators.relational.ItemsListVisitor;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.insert.Insert;
 import com.github.sql.analytic.statement.select.SubSelect;
 
@@ -26,7 +26,7 @@ public class InsertTransform implements ItemsListVisitor {
 	}
 
 
-	public Statement transform(Insert insert) {
+	public SQLStatement transform(Insert insert) {
 
 		newInsert.setTable(statementTransform.copy(insert.getTable()));
 		table = newInsert.getTable();

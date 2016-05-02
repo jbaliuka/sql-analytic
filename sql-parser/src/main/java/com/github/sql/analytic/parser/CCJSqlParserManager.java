@@ -25,7 +25,7 @@ package com.github.sql.analytic.parser;
 import java.io.Reader;
 
 import com.github.sql.analytic.JSQLParserException;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.transform.StatementTransform;
 
 
@@ -35,7 +35,7 @@ import com.github.sql.analytic.transform.StatementTransform;
 
 public class CCJSqlParserManager implements JSqlParser {
 
-	public Statement parse(Reader statementReader) throws JSQLParserException {
+	public SQLStatement parse(Reader statementReader) throws JSQLParserException {
 		CCJSqlParser parser = new CCJSqlParser(statementReader);
 		try {
 			return parser.Statement();
@@ -44,7 +44,7 @@ public class CCJSqlParserManager implements JSqlParser {
 		}
 	}
 	
-	public Statement transform(Reader statementReader,StatementTransform transform) throws  JSQLParserException {
+	public SQLStatement transform(Reader statementReader,StatementTransform transform) throws  JSQLParserException {
 		CCJSqlParser parser = new CCJSqlParser(statementReader);							
 			try {
 				return transform.trasform(parser.Statement());

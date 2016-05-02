@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -32,14 +31,12 @@ import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySe
 import org.apache.olingo.client.api.communication.request.retrieve.ODataServiceDocumentRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataEntityCreateResponse;
-import org.apache.olingo.client.api.communication.response.ODataEntityUpdateResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientPrimitiveValue;
 import org.apache.olingo.client.api.domain.ClientProperty;
 import org.apache.olingo.client.api.domain.ClientServiceDocument;
-import org.apache.olingo.client.api.domain.ClientValue;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.api.http.HttpClientFactory;
 import org.apache.olingo.client.core.ODataClientFactory;
@@ -92,13 +89,25 @@ public class SQLODataServletTest {
 
 	@Test
 	public void testEntityReq() throws URISyntaxException {
-		URI uri = new URI(serviceRoot + "CUSTOMERS(1)");
+		URI uri = new URI(serviceRoot + "CUSTOMERS(3)");
 		ODataEntityRequest<ClientEntity> req =
 				client.getRetrieveRequestFactory().getEntityRequest(uri);
 		ODataRetrieveResponse<ClientEntity> res = req.execute();
 		ClientEntity entity = res.getBody();		
 		ClientProperty id = entity.getProperty("ID");
-		assertEquals(1,id.getValue().asPrimitive().toValue());
+		assertEquals(3,id.getValue().asPrimitive().toValue());
+
+	}
+	
+	@Test
+	public void testNavEntityReq() throws URISyntaxException {
+		
+		URI uri = new URI(serviceRoot + "CUSTOMERS(3)/FK_ORDERS_CUSTOMERS");		
+		ODataEntitySetRequest<ClientEntitySet> req =
+				client.getRetrieveRequestFactory().getEntitySetRequest(uri);
+		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
+		ClientEntitySet entity = res.getBody();		
+		assertFalse( entity.getEntities().isEmpty() );
 
 	}
 	

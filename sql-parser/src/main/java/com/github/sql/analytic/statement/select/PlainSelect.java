@@ -88,22 +88,26 @@ public class PlainSelect implements SelectBody {
 		return where;
 	}
 
-	public void setFromItem(FromItem item) {
+	public PlainSelect setFromItem(FromItem item) {
 		fromItem = item;
+		return this;
 	}
 
-	public void setInto(Table table) {
+	public PlainSelect setInto(Table table) {
 		into = table;
+		return this;
 	}
 
 
 
-	public void setSelectItems(List<SelectItem> list) {
+	public PlainSelect setSelectItems(List<SelectItem> list) {
 		selectItems = list;
+		return this;
 	}
 
-	public void setWhere(Expression where) {
+	public PlainSelect setWhere(Expression where) {
 		this.where = where;
+		return this;
 	}
 
 
@@ -117,8 +121,9 @@ public class PlainSelect implements SelectBody {
 	}
 
 
-	public void setJoins(List<Join> list) {
+	public PlainSelect setJoins(List<Join> list) {
 		joins = list;
+		return this;
 	}
 
 	public void accept(SelectVisitor selectVisitor){
@@ -131,40 +136,45 @@ public class PlainSelect implements SelectBody {
 	}
 
 
-	public void setOrderByElements(List<OrderByElement> orderByElements) {
+	public PlainSelect setOrderByElements(List<OrderByElement> orderByElements) {
 		this.orderByElements = orderByElements;
+		return this;
 	}
 
 	public Limit getLimit() {
 		return limit;
 	}
 
-	public void setLimit(Limit limit) {
+	public PlainSelect setLimit(Limit limit) {
 		this.limit = limit;
+		return this;
 	}
 
 	public Top getTop() {
 		return top;
 	}
 
-	public void setTop(Top top) {
+	public PlainSelect setTop(Top top) {
 		this.top = top;
+		return this;
 	}
 
 	public Distinct getDistinct() {
 		return distinct;
 	}
 
-	public void setDistinct(Distinct distinct) {
+	public PlainSelect setDistinct(Distinct distinct) {
 		this.distinct = distinct;
+		return this;
 	}
 
 	public Expression getHaving() {
 		return having;
 	}
 
-	public void setHaving(Expression expression) {
+	public PlainSelect setHaving(Expression expression) {
 		having = expression;
+		return this;
 	}
 
 	/**
@@ -178,8 +188,9 @@ public class PlainSelect implements SelectBody {
 	}
 
 
-	public void setGroupByColumnReferences(List<Expression> list) {
+	public PlainSelect setGroupByColumnReferences(List<Expression> list) {
 		groupByColumnReferences = list;
+		return this;
 	}
 
 	public String toString() {

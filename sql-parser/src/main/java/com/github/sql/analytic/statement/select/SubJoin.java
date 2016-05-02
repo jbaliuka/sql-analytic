@@ -40,16 +40,18 @@ public class SubJoin implements FromItem {
 		return left;
 	}
 
-	public void setLeft(FromItem l) {
+	public SubJoin setLeft(FromItem l) {
 		left = l;
+		return this;
 	}
 	
 	public Join getJoin() {
 		return join;
 	}
 
-	public void setJoin(Join j) {
+	public SubJoin setJoin(Join j) {
 		join = j;
+		return this;
 	}
 
 	public String getAlias() {

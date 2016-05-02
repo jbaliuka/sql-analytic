@@ -10,7 +10,7 @@ import java.util.Set;
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.parser.CCJSqlParserManager;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.test.TestUtil;
 
@@ -136,7 +136,7 @@ public class PolicySelectTransformTest extends TestCase {
 
 		CCJSqlParserManager parserManager = new CCJSqlParserManager();				
 		Policy transform = new Policy(list, TestUtil.mockContext("test") );		
-		Statement stmt = parserManager.transform(new StringReader(sql), transform);		
+		SQLStatement stmt = parserManager.transform(new StringReader(sql), transform);		
 		TestUtil.assertEqual(expected, stmt);
 
 	}

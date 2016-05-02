@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.sql.analytic.parser.CCJSqlParserManager;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.policy.SessionContext;
 
@@ -41,7 +41,7 @@ public class ParamsDeparserTest extends TestCase {
 		List<CreatePolicy> policyList = new ArrayList<>();
 		CCJSqlParserManager parserManager = new CCJSqlParserManager();
 		String policy = "CREATE POLICY TEST_POLICY ON TEST_TABLE USING(user = :session_user)";
-		Statement stmt =  parserManager.parse(new StringReader(policy));
+		SQLStatement stmt =  parserManager.parse(new StringReader(policy));
 		policyList.add((CreatePolicy) stmt);
 		session = new SQLSession(context , null, policyList );
 		

@@ -3,7 +3,7 @@ package com.github.sql.analytic.statement.create.table;
 import java.util.List;
 
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.select.PlainSelect;
 
@@ -12,7 +12,7 @@ import com.github.sql.analytic.statement.select.PlainSelect;
  * A "CREATE TABLE" statement
  */
 
-public class CreateTable implements Statement {
+public class CreateTable implements SQLStatement {
 
     private Table table;
     

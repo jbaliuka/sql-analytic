@@ -27,7 +27,7 @@ import java.util.List;
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.select.PlainSelect;
 
@@ -38,7 +38,7 @@ import com.github.sql.analytic.statement.select.PlainSelect;
  * Every column name in <code>columnNames</code> matches an item in <code>itemsList</code>
  */
 
-public class Insert implements Statement {
+public class Insert implements SQLStatement {
 	
 	private Table table;	
 	private List<Column> columns;

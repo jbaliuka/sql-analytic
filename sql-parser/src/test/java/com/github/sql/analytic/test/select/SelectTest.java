@@ -10,7 +10,7 @@ import com.github.sql.analytic.expression.operators.relational.LikeExpression;
 import com.github.sql.analytic.parser.CCJSqlParserManager;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.select.*;
 import com.github.sql.analytic.util.deparser.ExpressionDeParser;
 import com.github.sql.analytic.util.deparser.SelectDeParser;
@@ -440,7 +440,7 @@ public class SelectTest extends TestCase {
 		String statement = "SELECT * FROM tab1 WHERE";
 		String where = " EXISTS (SELECT * FROM tab2)";
 		statement += where;
-		Statement parsed = parserManager.parse(new StringReader(statement));
+		SQLStatement parsed = parserManager.parse(new StringReader(statement));
 		assertEquals(statement, ""+parsed);
 
 		PlainSelect plainSelect =	(PlainSelect) ((Select) parsed).getSelectBody();
@@ -498,7 +498,7 @@ public class SelectTest extends TestCase {
 
 	public void testCase() throws JSQLParserException {
 		String statement = "SELECT a, CASE b WHEN 1 THEN 2 END FROM tab1";
-		Statement parsed = parserManager.parse(new StringReader(statement));
+		SQLStatement parsed = parserManager.parse(new StringReader(statement));
 		assertEquals(statement, ""+parsed);
 
 		statement = "SELECT a, (CASE WHEN (a > 2) THEN 3 END) AS b FROM tab1";
@@ -559,13 +559,13 @@ public class SelectTest extends TestCase {
 
 	public void testReplaceAsFunction() throws JSQLParserException {
 		String statement = "SELECT REPLACE(a, 'b', c) FROM tab1";
-		Statement parsed = parserManager.parse(new StringReader(statement));
+		SQLStatement parsed = parserManager.parse(new StringReader(statement));
 		assertEquals(statement, ""+parsed);
 	}
 	
 	public void testAnalyticFunction() throws JSQLParserException {
 		String statement = "SELECT SUM(a) OVER (PARTITION BY b ORDER BY c) FROM tab1";
-		Statement parsed = parserManager.parse(new StringReader(statement));
+		SQLStatement parsed = parserManager.parse(new StringReader(statement));
 		assertEquals(statement, ""+parsed);
 		
 		statement = "SELECT SUM(a) OVER () FROM tab1";
@@ -612,13 +612,13 @@ public class SelectTest extends TestCase {
 
 	public void testSelectOrderHaving() throws JSQLParserException {
 		String statement = "SELECT units, count(units) AS num FROM currency GROUP BY units HAVING count(units) > 1 ORDER BY num";
-		Statement parsed = parserManager.parse(new StringReader(statement));
+		SQLStatement parsed = parserManager.parse(new StringReader(statement));
 		assertEquals(statement, ""+parsed);
 	}
 
 	public void testSelectOrderExpr() throws JSQLParserException {
 		String statement = "SELECT * FROM currency ORDER BY CASE a WHEN 1 THEN 0 ELSE 1 END";
-		Statement parsed = parserManager.parse(new StringReader(statement));
+		SQLStatement parsed = parserManager.parse(new StringReader(statement));
 		assertEquals(statement, ""+parsed);
 	}
 	
@@ -653,7 +653,7 @@ public class SelectTest extends TestCase {
 							"FROM EMPLOYEE AS THIS_EMP INNER JOIN DINFO INNER JOIN DINFOMAX " +
 							"WHERE THIS_EMP.JOB = 'SALESREP' AND THIS_EMP.WORKDEPT = DINFO.DEPTNO";
 		Select select = (Select) parserManager.parse(new StringReader(statement));
-		Statement parsed = parserManager.parse(new StringReader(statement));
+		SQLStatement parsed = parserManager.parse(new StringReader(statement));
 		assertEquals(statement, ""+parsed);
 	}
 	

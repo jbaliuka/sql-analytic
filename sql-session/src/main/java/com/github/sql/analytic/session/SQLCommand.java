@@ -22,9 +22,7 @@ public class SQLCommand implements Statement{
 	private int poolable = -1;
 	private int closeOnCompletion = -1;
 	private int resultSetConcurrency;
-	private int resultSetType = -1;
 	
-
 	public SQLSession getSession() {
 		return session;
 	}
@@ -34,13 +32,11 @@ public class SQLCommand implements Statement{
 	}
 	public SQLCommand(SQLSession session, int resultSetType, int resultSetConcurrency) {
 		this.session = session;		
-		this.resultSetType = resultSetType;
 		this.resultSetConcurrency = resultSetConcurrency;
 		
 	}
 	public SQLCommand(SQLSession session, int resultSetType, int resultSetConcurrency, int resultSetHoldability) {
 		this.session = session;		
-		this.resultSetType = resultSetType;
 		this.resultSetConcurrency = resultSetConcurrency;
 		this.resultSetHoldability = resultSetHoldability;
 	}

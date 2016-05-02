@@ -54,12 +54,14 @@ public class Table implements FromItem {
 		return schemaName;
 	}
 
-	public void setName(String string) {
+	public Table setName(String string) {
 		name = string;
+		return this;
 	}
 
-	public void setSchemaName(String string) {
+	public Table setSchemaName(String string) {
 		schemaName = string;
+		return this;
 	}
 
 	public String getAlias() {

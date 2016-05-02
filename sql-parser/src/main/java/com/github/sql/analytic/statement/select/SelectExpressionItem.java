@@ -40,12 +40,14 @@ public class SelectExpressionItem implements SelectItem {
 		return expression;
 	}
 
-	public void setAlias(String string) {
+	public SelectExpressionItem setAlias(String string) {
 		alias = string;
+		return this;
 	}
 
-	public void setExpression(Expression expression) {
+	public SelectExpressionItem setExpression(Expression expression) {
 		this.expression = expression;
+		return this;
 	}
 
 	public void accept(SelectItemVisitor selectItemVisitor) {

@@ -26,7 +26,7 @@ import java.io.Reader;
 
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.expression.Expression;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 
 
 /**
@@ -34,5 +34,5 @@ import com.github.sql.analytic.statement.Statement;
  */
 
 public interface JSqlParser {
-	public Statement parse(Reader statementReader) throws JSQLParserException;
+	public SQLStatement parse(Reader statementReader) throws JSQLParserException;
 }

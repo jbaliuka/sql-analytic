@@ -12,7 +12,7 @@ import com.github.sql.analytic.parser.CCJSqlParserManager;
 import com.github.sql.analytic.session.DeparsedSQL;
 import com.github.sql.analytic.session.ParamNamePosition;
 import com.github.sql.analytic.session.SQLSession;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.test.TestUtil;
 import com.github.sql.analytic.transform.policy.SessionContext;
@@ -45,7 +45,7 @@ public class OrclSessionTest extends TestCase {
 		List<CreatePolicy> policyList = new ArrayList<>();
 		CCJSqlParserManager parserManager = new CCJSqlParserManager();
 		String policy = "CREATE POLICY TEST_POLICY ON TEST_TABLE USING(user = :session_user)";
-		Statement stmt =  parserManager.parse(new StringReader(policy));
+		SQLStatement stmt =  parserManager.parse(new StringReader(policy));
 		policyList.add((CreatePolicy) stmt);
 		session = new OrclSession(context , null, policyList );
 		

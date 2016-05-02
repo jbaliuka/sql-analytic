@@ -27,7 +27,7 @@ import java.util.List;
 import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
 
 
@@ -35,7 +35,7 @@ import com.github.sql.analytic.statement.StatementVisitor;
  * The update statement.
  */
 
-public class Update implements Statement {
+public class Update implements SQLStatement {
 	private Table table;
 	private Expression where;
 	private List<Column> columns;

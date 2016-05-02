@@ -45,16 +45,19 @@ public abstract class BinaryExpression implements Expression {
 		return rightExpression;
 	}
 
-	public void setLeftExpression(Expression expression) {
+	public BinaryExpression setLeftExpression(Expression expression) {
 		leftExpression = expression;
+		return this;
 	}
 
-	public void setRightExpression(Expression expression) {
+	public BinaryExpression setRightExpression(Expression expression) {
 		rightExpression = expression;
+		return this;
 	}
 
-	public void setNot() {
+	public BinaryExpression setNot() {
 		not = true;
+		return this;
 	}
 
 	public boolean isNot() {

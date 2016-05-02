@@ -7,7 +7,7 @@ import java.util.List;
 import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.create.table.CreateTable;
 import com.github.sql.analytic.statement.create.view.CreateView;
@@ -27,7 +27,7 @@ import com.github.sql.analytic.statement.update.Update;
 
 public class StatementTransform  implements StatementVisitor {
 
-	private Statement statement;
+	private SQLStatement statement;
 
 	public void visit(CreateTable createTable) {
 
@@ -154,7 +154,7 @@ public class StatementTransform  implements StatementVisitor {
 
 	}
 
-	public Statement trasform(Statement statement) {
+	public SQLStatement trasform(SQLStatement statement) {
 		statement.accept(this);
 		return this.statement;
 	}

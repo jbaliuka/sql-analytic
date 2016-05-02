@@ -1,7 +1,7 @@
 package com.github.sql.analytic.statement.truncate;
 
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
 
 
@@ -9,7 +9,7 @@ import com.github.sql.analytic.statement.StatementVisitor;
  * A TRUNCATE TABLE statement
  */
 
-public class Truncate implements Statement {
+public class Truncate implements SQLStatement {
 	private Table table;
 
 	public void accept(StatementVisitor statementVisitor) {

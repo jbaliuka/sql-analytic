@@ -24,12 +24,12 @@ package com.github.sql.analytic.statement.delete;
 
 import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
 
 
 
-public class Delete implements Statement {
+public class Delete implements SQLStatement {
 	private Table table;
 	private Expression where;
 	

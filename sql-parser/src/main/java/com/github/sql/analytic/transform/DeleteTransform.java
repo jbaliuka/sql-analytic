@@ -2,7 +2,7 @@ package com.github.sql.analytic.transform;
 
 import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.delete.Delete;
 
 
@@ -16,7 +16,7 @@ public class DeleteTransform {
 		this.statementTransform = statementTransform;
 	}
 
-	public Statement transform(Delete delete) {
+	public SQLStatement transform(Delete delete) {
 
 		Delete newDelete = new Delete();
 		newDelete.setTable(statementTransform.copy(delete.getTable()));	

@@ -56,12 +56,14 @@ public class Column implements Expression, ColumnReference,SelectItem {
 		return table;
 	}
 
-	public void setColumnName(String string) {
+	public Column setColumnName(String string) {
 		columnName = string;
+		return this;
 	}
 
-	public void setTable(Table table) {
+	public Column setTable(Table table) {
 		this.table = table;
+		return this;
 	}
 	
 	/**

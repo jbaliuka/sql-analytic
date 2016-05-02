@@ -40,13 +40,9 @@ public class ParamsDeparser extends StatementDeParser{
 			}
 
 			@Override
-			public void visit(NamedParameter namedParameter) {
-				if(namedParameter.getName().startsWith("session_")){
+			public void visit(NamedParameter namedParameter) {				
 					super.visit(new JdbcParameter(null));
-					namedParams.add(new ParamNamePosition(namedParameter.getName(), position ++ ));
-				}else {
-					super.visit(namedParameter);
-				}
+					namedParams.add(new ParamNamePosition(namedParameter.getName(), position ++ ));				
 			}
 
 		};

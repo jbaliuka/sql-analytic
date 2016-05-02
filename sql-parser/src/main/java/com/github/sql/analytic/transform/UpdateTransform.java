@@ -6,7 +6,7 @@ import java.util.List;
 import com.github.sql.analytic.expression.Expression;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.update.Update;
 
 
@@ -21,7 +21,7 @@ public class UpdateTransform {
 		this.statementTransform = statementTransform;
 	}
 
-	public Statement transform(Update update) {
+	public SQLStatement transform(Update update) {
 
 		Update newUpdate = new Update();		
 		newUpdate.setTable(transformTable(update.getTable()));

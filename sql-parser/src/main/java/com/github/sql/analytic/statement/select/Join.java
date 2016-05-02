@@ -52,8 +52,9 @@ public class Join {
 		return simple;
 	}
 
-	public void setSimple(boolean b) {
+	public Join setSimple(boolean b) {
 		simple = b;
+		return this;
 	}
 	/**
 	 * Whether is a "INNER" join
@@ -63,8 +64,9 @@ public class Join {
 		return inner;
 	}
 
-	public void setInner(boolean b) {
+	public Join setInner(boolean b) {
 		inner = b;
+		return this;
 	}
 	
 	/**
@@ -75,8 +77,9 @@ public class Join {
 		return outer;
 	}
 
-	public void setOuter(boolean b) {
+	public Join setOuter(boolean b) {
 		outer = b;
+		return this;
 	}
 
 	/**
@@ -87,8 +90,9 @@ public class Join {
 		return left;
 	}
 
-	public void setLeft(boolean b) {
+	public Join setLeft(boolean b) {
 		left = b;
+		return this;
 	}
 
 	/**
@@ -99,8 +103,9 @@ public class Join {
 		return right;
 	}
 
-	public void setRight(boolean b) {
+	public Join setRight(boolean b) {
 		right = b;
+		return this;
 	}
 
 	/**
@@ -111,8 +116,9 @@ public class Join {
 		return natural;
 	}
 
-	public void setNatural(boolean b) {
+	public Join setNatural(boolean b) {
 		natural = b;
+		return this;
 	}
 
 	/**
@@ -123,8 +129,9 @@ public class Join {
 		return full;
 	}
 
-	public void setFull(boolean b) {
+	public Join setFull(boolean b) {
 		full = b;
+		return this;
 	}
 
 	/**
@@ -134,8 +141,9 @@ public class Join {
 		return rightItem;
 	}
 
-	public void setRightItem(FromItem item) {
+	public Join setRightItem(FromItem item) {
 		rightItem = item;
+		return this;
 	}
 
 	/**
@@ -145,8 +153,9 @@ public class Join {
 		return onExpression;
 	}
 
-	public void setOnExpression(Expression expression) {
+	public Join setOnExpression(Expression expression) {
 		onExpression = expression;
+		return this;
 	}
 
 	/**
@@ -157,8 +166,9 @@ public class Join {
 	}
 
 
-	public void setUsingColumns(List<Column> list) {
+	public Join setUsingColumns(List<Column> list) {
 		usingColumns = list;
+		return this;
 	}
 
 	public String toString() {

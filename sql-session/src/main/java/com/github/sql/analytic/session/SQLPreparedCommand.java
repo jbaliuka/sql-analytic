@@ -21,28 +21,44 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Map;
 
 public class SQLPreparedCommand extends SQLCommand implements PreparedStatement{
 
 	private PreparedStatement preparedStatement;	
 	private DeparsedSQL deparsed;
+	private Map<String,Object> statementParms;
 
 	public SQLPreparedCommand(SQLSession session, PreparedStatement statement,DeparsedSQL deparsed) throws SQLException {
+		this(session,Collections.<String,Object>emptyMap(),statement,deparsed);
+		
+	}
+	
+	public SQLPreparedCommand(SQLSession session,Map<String,Object> statementParms, PreparedStatement statement,DeparsedSQL deparsed) throws SQLException {
 		super(session);
 		this.preparedStatement = statement;
 		this.deparsed = deparsed;
-		
+		this.statementParms = statementParms;
 	}
 
 	protected void setSessionParams() throws SQLException {
 		for( ParamNamePosition param: deparsed.getSessionParams()){
-			Object value = getSession().getContext().getParameter(param.getName());
+			Object value = getParameter(param);
 			if(value != null){
 				preparedStatement.setObject(param.getPosition() + 1, value);
 			}else {
 				preparedStatement.setNull(param.getPosition() + 1, Types.CHAR);	
 			}
 		}
+	}
+
+	private Object getParameter(ParamNamePosition param) {
+		Object value = getSession().getContext().getParameter(param.getName());
+		if(value != null){
+			return value;
+		}
+		return statementParms.get(param.getName());
 	}
 
 	private int position(int original){

@@ -8,7 +8,7 @@ import java.util.Map;
 
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.parser.CCJSqlParserManager;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.StatementTransform;
 import com.github.sql.analytic.transform.policy.SessionContext;
@@ -21,18 +21,18 @@ public class TestUtil {
 
 	public static void  assertParseable(String sql) throws JSQLParserException{
 		CCJSqlParserManager parserManager = new CCJSqlParserManager();
-		Statement stmt =  parserManager.parse(new StringReader(sql));
+		SQLStatement stmt =  parserManager.parse(new StringReader(sql));
 		assertEqual(sql, stmt);
 	}
 
 	public static void  assertTransformable(String sql) throws JSQLParserException{
 
 		CCJSqlParserManager parserManager = new CCJSqlParserManager();
-		Statement stmt =  parserManager.transform(new StringReader(sql), new StatementTransform());
+		SQLStatement stmt =  parserManager.transform(new StringReader(sql), new StatementTransform());
 		assertEqual(sql, stmt);
 	}
 
-	protected static String deparse(Statement stmt) {
+	protected static String deparse(SQLStatement stmt) {
 		StringBuffer buffer = new StringBuffer();
 		StatementDeParser deparser = new StatementDeParser(buffer );
 		stmt.accept(deparser);		
@@ -51,7 +51,7 @@ public class TestUtil {
 		}
 	}
 
-	public static void assertEqual(String sql, Statement stmt) throws ComparisonFailure {		
+	public static void assertEqual(String sql, SQLStatement stmt) throws ComparisonFailure {		
 		String deparsed = deparse(stmt);					
 		assertSQLEqual(sql,deparsed);		
 	}
@@ -87,7 +87,7 @@ public class TestUtil {
 		List<CreatePolicy> list = new ArrayList<CreatePolicy>();	
 		for(String policy : policyList){		
 			CCJSqlParserManager parserManager = new CCJSqlParserManager();
-			Statement stmt =  parserManager.parse(new StringReader(policy));
+			SQLStatement stmt =  parserManager.parse(new StringReader(policy));
 			list.add((CreatePolicy) stmt);
 		}
 		return list;

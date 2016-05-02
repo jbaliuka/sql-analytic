@@ -3,14 +3,14 @@ package com.github.sql.analytic.statement.create.view;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.Select;
 
 
 
-public class CreateView implements Statement{
+public class CreateView implements SQLStatement{
 
 	private String schema,name;
 	private Select select;

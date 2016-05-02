@@ -12,7 +12,7 @@ import java.util.Properties;
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.parser.CCJSqlParserManager;
 import com.github.sql.analytic.session.SQLSession;
-import com.github.sql.analytic.statement.Statement;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.policy.SessionContext;
 
@@ -76,7 +76,7 @@ public class H2SessionTest extends TestCase {
 	List<CreatePolicy> policyList = new ArrayList<>();
 	{
 		CCJSqlParserManager parserManager = new CCJSqlParserManager();
-		Statement stmt;
+		SQLStatement stmt;
 		try {
 			stmt = parserManager.parse(new StringReader(policy));
 		} catch (JSQLParserException e) {

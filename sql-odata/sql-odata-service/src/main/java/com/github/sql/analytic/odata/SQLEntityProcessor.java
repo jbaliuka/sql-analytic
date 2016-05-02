@@ -77,7 +77,10 @@ public class SQLEntityProcessor implements EntityProcessor {
 			setKeyParams(entityType, keyPredicates, ps,0);
 			try(ResultSet rs = ps.executeQuery()){
 				if(rs.next()){
-					entity = EntityData.createEntity(edmEntitySet,entityType,rs); 
+					entity = EntityData.createEntity(edmEntitySet,rs); 
+				}else {
+					throw new ODataApplicationException("Not Found", HttpStatusCode.NOT_FOUND.getStatusCode(), 
+							Locale.ENGLISH);
 				}
 			} 
 
