@@ -67,9 +67,6 @@ public class ReadEntityCollectionCommand{
 	private Map<String, Object> statementParams = new HashMap<>();
 	private PlainSelect select = new PlainSelect().setSelectItems(new ArrayList<SelectListItem>());
 	private int index = 0;
-	private EntityCollection collection = new EntityCollection();
-	private SelectOption selectOption;
-	private SQLSession connection;
 	private OData odata;
 	private ServiceMetadata metadata;
 
@@ -79,7 +76,6 @@ public class ReadEntityCollectionCommand{
 		this.response = response;
 		this.uriInfo = uriInfo;
 		this.contentType = contentType;
-		this.selectOption = uriInfo.getSelectOption();
 	}
 	
 	public void init(OData odata, ServiceMetadata metadata) {
@@ -88,16 +84,15 @@ public class ReadEntityCollectionCommand{
 
 	}
 
-	public void execute(SQLSession connection)throws SerializerException, ODataApplicationException, EdmPrimitiveTypeException  {
+	public void execute(SQLSession connection)throws SerializerException, 
+	ODataApplicationException, EdmPrimitiveTypeException  {
 		
-		this.connection = connection;
-		
-		processUriResource();
+		processUriResource(connection);
 		
 		Set<String> projection = new HashSet<>(); 
 
 		for(String name : edmEntitySet.getEntityType().getPropertyNames()){
-			if(EntityData.inSelection(selectOption,name)){
+			if(EntityData.inSelection(uriInfo.getSelectOption(),name)){
 				SelectExpressionItem item = new SelectExpressionItem().setAlias(name);
 				Column column = new Column().
 						setTable(new Table(null,edmEntitySet.getEntityType().getName() + "_" + index));			
@@ -105,7 +100,7 @@ public class ReadEntityCollectionCommand{
 				projection.add(name);
 			}
 		}
-		
+		EntityCollection collection = new EntityCollection();
 		try(PreparedStatement statement = connection.create(new Select().setSelectBody(select), statementParams ) ){
 			try(ResultSet rs = statement.executeQuery()){		  
 				while(rs.next()){
@@ -116,8 +111,8 @@ public class ReadEntityCollectionCommand{
 		} catch (SQLException | IOException e) {
 			throw inernalError(e);
 		}
-		
-		serialize();
+		String selectList = getSelectList(connection,edmEntitySet, uriInfo.getSelectOption());
+		serialize(collection,selectList);
 	}
 
 	private ODataApplicationException inernalError(Exception e) {
@@ -125,7 +120,7 @@ public class ReadEntityCollectionCommand{
 				Locale.ROOT,e);
 	}
 
-	private void processUriResource() throws ODataApplicationException, EdmPrimitiveTypeException {
+	private void processUriResource(SQLSession connection) throws ODataApplicationException, EdmPrimitiveTypeException {
 		
 		for(UriResource segment : uriInfo.getUriResourceParts() ){
 			index++;
@@ -136,7 +131,7 @@ public class ReadEntityCollectionCommand{
 				edmEntitySet = getNavigationTargetEntitySet(edmNavigationProperty);
 				EdmEntityType rightType = edmEntitySet.getEntityType();
 				Join join = appendFrom();
-				appendOn(join,edmNavigationProperty.getName(),leftType,rightType);
+				appendOn(connection,join,edmNavigationProperty.getName(),leftType,rightType);
 				appendWhere(uriResourceNavigation.getKeyPredicates());
 			}else if (segment instanceof UriResourceEntitySet){				
 				UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) segment;
@@ -150,32 +145,28 @@ public class ReadEntityCollectionCommand{
 		}
 	}
 
-	private void serialize() throws SerializerException {
+	protected void serialize(EntityCollection collection,String selectList) throws SerializerException {
 		
 		ODataSerializer serializer = odata.createSerializer(contentType);
-
-		String selectList = getSelectList(edmEntitySet, selectOption);
 
 		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).selectList(selectList).build();
 
 		final String id = request.getRawBaseUri() + "/" + edmEntitySet.getName();
 		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with().id(id).
-				select(selectOption).contextURL(contextUrl).build();
+				select(uriInfo.getSelectOption()).contextURL(contextUrl).build();
 		SerializerResult serializerResult = serializer.entityCollection(metadata, edmEntitySet.getEntityType(), collection, opts);
-		InputStream serializedContent = serializerResult.getContent();
-
-
-		response.setContent(serializedContent);
+		
+		response.setContent(serializerResult.getContent());
 		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 		response.setHeader(HttpHeader.CONTENT_TYPE, contentType.toContentTypeString());
 	}
 
-	private String getSelectList(EdmEntitySet edmEntitySet, SelectOption selectOption) throws SerializerException {
+	private String getSelectList(SQLSession connection,EdmEntitySet edmEntitySet, SelectOption selectOption) throws SerializerException {
 		return odata.createUriHelper().buildContextURLSelectList(edmEntitySet.getEntityType(),
 				null, selectOption);
 	}
 
-	private void appendOn(Join join, String fKname, EdmEntityType leftType, EdmEntityType rightType) throws ODataApplicationException {
+	private void appendOn(SQLSession connection,Join join, String fKname, EdmEntityType leftType, EdmEntityType rightType) throws ODataApplicationException {
 
 		boolean found = false;
 		try(ResultSet rs = connection.getMetaData().getImportedKeys(null, rightType.getNamespace(), rightType.getName())){			
@@ -292,7 +283,7 @@ public class ReadEntityCollectionCommand{
 		return value;
 	}
 
-	public EdmEntitySet getNavigationTargetEntitySet(EdmNavigationProperty edmNavigationProperty)
+	private EdmEntitySet getNavigationTargetEntitySet(EdmNavigationProperty edmNavigationProperty)
 					throws ODataApplicationException {
 
 		if ( edmEntitySet == null) {
