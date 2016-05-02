@@ -8,7 +8,7 @@ import java.util.List;
 public class WithItem {
 	private String name;
 	
-	private	List<SelectItem> withItemList;
+	private	List<SelectListItem> withItemList;
 	private SelectBody selectBody;
 
 	/**
@@ -34,15 +34,15 @@ public class WithItem {
 	}
 	
 	/**
-	 * The {@link SelectItem}s in this WITH (for example the A,B,C in "WITH mywith (A,B,C) AS ...")
-	 * @return a list of {@link SelectItem}s
+	 * The {@link SelectListItem}s in this WITH (for example the A,B,C in "WITH mywith (A,B,C) AS ...")
+	 * @return a list of {@link SelectListItem}s
 	 */
 	
-	public List<SelectItem> getWithItemList() {
+	public List<SelectListItem> getWithItemList() {
 		return withItemList;
 	}
 	
-	public void setWithItemList(List<SelectItem> withItemList) {
+	public void setWithItemList(List<SelectListItem> withItemList) {
 		this.withItemList = withItemList;
 	}
 	

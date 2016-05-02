@@ -5,13 +5,13 @@ import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.select.AllColumns;
 import com.github.sql.analytic.statement.select.AllTableColumns;
 import com.github.sql.analytic.statement.select.SelectExpressionItem;
-import com.github.sql.analytic.statement.select.SelectItem;
+import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.SelectItemVisitor;
 
 public class SelectItemTransfrom implements SelectItemVisitor{
 	
 	private StatementTransform transform;
-	private SelectItem item;
+	private SelectListItem item;
 
 	public SelectItemTransfrom(StatementTransform transform){
 		this.transform = transform;
@@ -41,7 +41,7 @@ public class SelectItemTransfrom implements SelectItemVisitor{
 		newCol.setTable(new Table(column.getTable().getSchemaName(),column.getTable().getName()));
 	}
 
-	public SelectItem getItem() {
+	public SelectListItem getItem() {
 		return item;
 	}
 

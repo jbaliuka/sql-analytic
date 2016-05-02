@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,11 +26,14 @@ public class SQLOdataHandler {
 	
 	private Connection connection;
 	private List<CreatePolicy> policy;
+	private ServletConfig config;
 
-	public SQLOdataHandler(Connection connection,List<CreatePolicy> policy){
+	public SQLOdataHandler(ServletConfig config,Connection connection,List<CreatePolicy> policy){
 		this.connection = connection;
 		this.policy = policy;
+		this.config = config;
 	}
+	
 	
 	public void process(final HttpServletRequest request, HttpServletResponse response) throws SQLException{
 		             
@@ -63,8 +68,8 @@ public class SQLOdataHandler {
 				if(value == null && request.getSession(false) != null){
 					value =  request.getSession(false).getAttribute(name);								
 				}
-				if(value == null && request.getServletContext() != null ){
-					value = request.getServletContext().getAttribute(name);
+				if(value == null && config != null ){
+					value = config.getServletContext().getAttribute(name);
 				}
 				
 				return value;

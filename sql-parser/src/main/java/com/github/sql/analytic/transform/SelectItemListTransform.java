@@ -47,14 +47,14 @@ import com.github.sql.analytic.statement.select.AllTableColumns;
 import com.github.sql.analytic.statement.select.ColumnIndex;
 import com.github.sql.analytic.statement.select.OrderByElement;
 import com.github.sql.analytic.statement.select.SelectExpressionItem;
-import com.github.sql.analytic.statement.select.SelectItem;
+import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.SelectItemVisitor;
 import com.github.sql.analytic.statement.select.SubSelect;
 
 public class SelectItemListTransform implements SelectItemVisitor{
-	private List<SelectItem> itemList;
+	private List<SelectListItem> itemList;
 
-	public SelectItemListTransform(List<SelectItem> itemList) {
+	public SelectItemListTransform(List<SelectListItem> itemList) {
 		super();
 		this.itemList = itemList;
 	}
@@ -84,11 +84,11 @@ public class SelectItemListTransform implements SelectItemVisitor{
 		
 	}
 
-	public List<SelectItem> getItemList() {
+	public List<SelectListItem> getItemList() {
 		return itemList;
 	}
 
-	public void setItemList(List<SelectItem> itemList) {
+	public void setItemList(List<SelectListItem> itemList) {
 		this.itemList = itemList;
 	}
 	

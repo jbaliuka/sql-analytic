@@ -11,7 +11,7 @@ import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.select.PlainSelect;
-import com.github.sql.analytic.statement.select.SelectItem;
+import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.WithItem;
 import com.github.sql.analytic.transform.ExpressionTransform;
 import com.github.sql.analytic.transform.FromItemTransform;
@@ -107,12 +107,12 @@ public class SelectPolicy extends SelectTransform {
 
 	}
 
-	protected List<SelectItem> transformSelectItems(List<SelectItem> list) {
+	protected List<SelectListItem> transformSelectItems(List<SelectListItem> list) {
 
-		List<SelectItem> newList = super.transformSelectItems(list);
+		List<SelectListItem> newList = super.transformSelectItems(list);
 
 		if(statementTransform.isCheckColumns()){
-			for(SelectItem item : list){			
+			for(SelectListItem item : list){			
 				item.accept(new ColumnsPolicy(this));
 			}
 		}

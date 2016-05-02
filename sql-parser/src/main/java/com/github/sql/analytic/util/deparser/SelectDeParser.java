@@ -20,7 +20,7 @@ import com.github.sql.analytic.statement.select.OrderByElement;
 import com.github.sql.analytic.statement.select.OrderByVisitor;
 import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.SelectExpressionItem;
-import com.github.sql.analytic.statement.select.SelectItem;
+import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.SelectItemVisitor;
 import com.github.sql.analytic.statement.select.SelectVisitor;
 import com.github.sql.analytic.statement.select.SubJoin;
@@ -62,8 +62,8 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 
 		
 
-		for (Iterator<SelectItem> iter = plainSelect.getSelectItems().iterator(); iter.hasNext();) {
-			SelectItem selectItem = (SelectItem) iter.next();
+		for (Iterator<SelectListItem> iter = plainSelect.getSelectItems().iterator(); iter.hasNext();) {
+			SelectListItem selectItem = (SelectListItem) iter.next();
 			selectItem.accept(this);
 			if (iter.hasNext()) {
 				buffer.append(", ");
@@ -128,7 +128,7 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 		if (plainSelect.getDistinct().getOnSelectItems() != null) {
 			buffer.append("ON (");
 			for (Iterator<?> iter = plainSelect.getDistinct().getOnSelectItems().iterator(); iter.hasNext();) {
-				SelectItem selectItem = (SelectItem) iter.next();
+				SelectListItem selectItem = (SelectListItem) iter.next();
 				selectItem.accept(this);
 				if (iter.hasNext()) {
 					buffer.append(", ");

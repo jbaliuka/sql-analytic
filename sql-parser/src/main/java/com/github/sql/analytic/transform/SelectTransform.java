@@ -12,7 +12,7 @@ import com.github.sql.analytic.statement.select.Limit;
 import com.github.sql.analytic.statement.select.OrderByElement;
 import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.SelectBody;
-import com.github.sql.analytic.statement.select.SelectItem;
+import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.SelectVisitor;
 import com.github.sql.analytic.statement.select.Top;
 import com.github.sql.analytic.statement.select.Union;
@@ -107,9 +107,9 @@ public class SelectTransform implements SelectVisitor   {
 	}
 
 
-	protected List<SelectItem> transformSelectItems(List<SelectItem> list) {
-		List<SelectItem> newList = new ArrayList<SelectItem>();
-		for (SelectItem item : list) {
+	protected List<SelectListItem> transformSelectItems(List<SelectListItem> list) {
+		List<SelectListItem> newList = new ArrayList<SelectListItem>();
+		for (SelectListItem item : list) {
 			SelectItemTransfrom transform = statementTransform.createSelectItemTransform();
 			item.accept(transform);	
 			newList.add(transform.getItem());					
@@ -134,9 +134,9 @@ public class SelectTransform implements SelectVisitor   {
 			((PlainSelect) selectBody).setDistinct(distinct);
 
 			if (plainSelect.getDistinct().getOnSelectItems() != null) {
-				List<SelectItem> itemList = new ArrayList<SelectItem>();
+				List<SelectListItem> itemList = new ArrayList<SelectListItem>();
 				distinct.setOnSelectItems(itemList);
-				for (SelectItem item : plainSelect.getDistinct().getOnSelectItems()) {	
+				for (SelectListItem item : plainSelect.getDistinct().getOnSelectItems()) {	
 					SelectItemTransfrom transform = statementTransform.createSelectItemTransform();
 					item.accept(transform);
 					itemList.add(transform.getItem());				

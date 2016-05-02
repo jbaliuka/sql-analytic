@@ -27,6 +27,6 @@ package com.github.sql.analytic.statement.select;
  * (that is, any column or expression etc to be retrieved with the query)
  */
 
-public interface SelectItem {
+public interface SelectListItem {
 	public void accept(SelectItemVisitor selectItemVisitor);
 }

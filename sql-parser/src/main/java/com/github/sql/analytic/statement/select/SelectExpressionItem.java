@@ -28,7 +28,7 @@ import com.github.sql.analytic.expression.Expression;
  * An expression as in "SELECT expr1 AS EXPR"
  */
 
-public class SelectExpressionItem implements SelectItem {
+public class SelectExpressionItem implements SelectListItem {
 	private Expression expression;
 	private String alias;
 	

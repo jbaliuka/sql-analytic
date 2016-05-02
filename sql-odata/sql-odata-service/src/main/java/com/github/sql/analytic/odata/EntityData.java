@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Base64;
 import java.util.List;
-
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -23,21 +23,44 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmKeyPropertyRef;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.server.api.uri.UriParameter;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.queryoption.SelectItem;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 
 public class EntityData {
+	
+	public static boolean inSelection(SelectOption selectOption, String name) {
+		if(selectOption == null || selectOption.getSelectItems().isEmpty()){
+			return true;
+		}
+		for(SelectItem item : selectOption.getSelectItems()){
+		  if(item.isStar()){
+			  return true;
+		  }
+		  List<UriResource> parts = item.getResourcePath().getUriResourceParts();
+		  if(parts.get(parts.size() - 1).getSegmentValue().equals(name)  ){
+			  return true;
+		  }
+		}
+		return false;
+	}
 
-	public static Entity createEntity(EdmEntitySet edmEntitySet, ResultSet rs) throws SQLException, IOException {
+	public static Entity createEntity(EdmEntitySet edmEntitySet, Set<String> projection, ResultSet rs) throws SQLException, IOException {
 
 		EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 		Entity entity = new Entity();
 		entity.setType(edmEntityType.getFullQualifiedName().toString());
 
-		for( String name : edmEntityType.getPropertyNames()){			
-			EdmElement prop = edmEntityType.getProperty(name);
-			entity.addProperty( new Property(null,prop.getName(),ValueType.PRIMITIVE,toPrimitive(rs, prop)));		
+		for( String name : edmEntityType.getPropertyNames()){	
+			if(projection == null || projection.contains(name)){
+				EdmElement prop = edmEntityType.getProperty(name);
+				entity.addProperty( new Property(null,prop.getName(),ValueType.PRIMITIVE,toPrimitive(rs, prop)));
+			}
 		}
 		for( EdmKeyPropertyRef ref : edmEntityType.getKeyPropertyRefs()){
-			entity.addProperty( new Property(null,ref.getName(),ValueType.PRIMITIVE,rs.getObject(ref.getName())));		  
+			if(projection == null || projection.contains(ref.getName())){
+				entity.addProperty( new Property(null,ref.getName(),ValueType.PRIMITIVE,rs.getObject(ref.getName())));
+			}
 		}		
 		entity.setId(createId(edmEntitySet.getName(),rs,edmEntityType));
 		return entity;

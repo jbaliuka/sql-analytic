@@ -63,7 +63,7 @@ public class SQLEntityProcessor implements EntityProcessor {
 			throws ODataApplicationException, ODataLibraryException {
 
 		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();	    
-		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
+		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(resourcePaths.size() - 1);
 		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 		EdmEntityType entityType = edmEntitySet.getEntityType();	    
 		List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
@@ -77,7 +77,7 @@ public class SQLEntityProcessor implements EntityProcessor {
 			setKeyParams(entityType, keyPredicates, ps,0);
 			try(ResultSet rs = ps.executeQuery()){
 				if(rs.next()){
-					entity = EntityData.createEntity(edmEntitySet,rs); 
+					entity = EntityData.createEntity(edmEntitySet,null,rs); 
 				}else {
 					throw new ODataApplicationException("Not Found", HttpStatusCode.NOT_FOUND.getStatusCode(), 
 							Locale.ENGLISH);
@@ -126,7 +126,7 @@ public class SQLEntityProcessor implements EntityProcessor {
 			ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
 
 		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
+		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(resourcePaths.size() - 1);
 		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 		EdmEntityType entityType = edmEntitySet.getEntityType();	
 		InputStream requestInputStream = request.getBody();
@@ -194,7 +194,7 @@ public class SQLEntityProcessor implements EntityProcessor {
 			ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
 
 		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();		 
-		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
+		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(resourcePaths.size() - 1);
 		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 		EdmEntityType edmEntityType = edmEntitySet.getEntityType();
 

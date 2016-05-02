@@ -12,7 +12,7 @@ import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.SelectExpressionItem;
-import com.github.sql.analytic.statement.select.SelectItem;
+import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.SubSelect;
 import com.github.sql.analytic.transform.ExpressionTransform;
 import com.github.sql.analytic.transform.InsertTransform;
@@ -75,7 +75,7 @@ public class InsertPolicy extends InsertTransform {
 		
 		SubSelect dual = buildDual();		
 		body.setFromItem(dual);		
-		body.setSelectItems(new ArrayList<SelectItem>());		
+		body.setSelectItems(new ArrayList<SelectListItem>());		
 		
 		for(Expression next: expressionList.getExpressions()){
 			SelectExpressionItem item = new SelectExpressionItem();
@@ -129,7 +129,7 @@ public class InsertPolicy extends InsertTransform {
 		
 		int index = 0;
 		for (Column column : getNewInsert().getColumns()) {		
-			SelectItem item = ((PlainSelect) subSelect.getSelectBody()).getSelectItems().get(index++);
+			SelectListItem item = ((PlainSelect) subSelect.getSelectBody()).getSelectItems().get(index++);
 			Expression expr;
 			if(item instanceof Column){
 				expr = (Expression) item;
@@ -171,7 +171,7 @@ public class InsertPolicy extends InsertTransform {
 		SubSelect dual = new SubSelect();
 		
 		PlainSelect dualBody = new PlainSelect();
-		List<SelectItem> dualList = new ArrayList<SelectItem>();
+		List<SelectListItem> dualList = new ArrayList<SelectListItem>();
 		SelectExpressionItem dualItem = new SelectExpressionItem();
 		dualItem.setExpression( new LongValue("1"));
 		dualList.add(dualItem );

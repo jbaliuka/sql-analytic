@@ -7,9 +7,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
@@ -40,6 +42,8 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.apache.olingo.server.api.uri.queryoption.SelectItem;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 
 import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.Expression;
@@ -54,7 +58,7 @@ import com.github.sql.analytic.statement.select.Join;
 import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.Select;
 import com.github.sql.analytic.statement.select.SelectExpressionItem;
-import com.github.sql.analytic.statement.select.SelectItem;
+import com.github.sql.analytic.statement.select.SelectListItem;
 
 
 
@@ -105,7 +109,7 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 		EntityCollection collection = new EntityCollection();
 
 		Map<String, Object> statementParams = new HashMap<>();
-		PlainSelect select = new PlainSelect().setSelectItems(new ArrayList<SelectItem>());
+		PlainSelect select = new PlainSelect().setSelectItems(new ArrayList<SelectListItem>());
 
 
 		for(UriResource segment : resourcePaths ){
@@ -127,19 +131,24 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 						Locale.ENGLISH);
 			}			
 		}
+		SelectOption selectOption = uriInfo.getSelectOption();
+		Set<String> projection = new HashSet<>(); 
 
 		for(String name : edmEntitySet.getEntityType().getPropertyNames()){
-			SelectExpressionItem item = new SelectExpressionItem().setAlias(name);
-			Column column = new Column().
-					setTable(new Table(edmEntitySet.getEntityType().getNamespace(),
-							edmEntitySet.getEntityType().getName()));			
-			select.getSelectItems().add(item.setExpression(column.setColumnName(name)));
+			if(EntityData.inSelection(selectOption,name)){
+				SelectExpressionItem item = new SelectExpressionItem().setAlias(name);
+				Column column = new Column().
+						setTable(new Table(edmEntitySet.getEntityType().getNamespace(),
+								edmEntitySet.getEntityType().getName()));			
+				select.getSelectItems().add(item.setExpression(column.setColumnName(name)));
+				projection.add(name);
+			}
 		}
 
 		try(PreparedStatement statement = connection.create(new Select().setSelectBody(select), statementParams ) ){
 			try(ResultSet rs = statement.executeQuery()){		  
 				while(rs.next()){
-					Entity entity = EntityData.createEntity(edmEntitySet,rs);					
+					Entity entity = EntityData.createEntity(edmEntitySet,projection,rs);					
 					collection.getEntities().add(entity);
 				}
 			}	   
@@ -151,11 +160,15 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 
 
 		ODataSerializer serializer = odata.createSerializer(contentType);
+		
+		String selectList = odata.createUriHelper().buildContextURLSelectList(edmEntitySet.getEntityType(),
+                null, selectOption);
 
-		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
+		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).selectList(selectList).build();
 
 		final String id = request.getRawBaseUri() + "/" + edmEntitySet.getName();
-		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with().id(id).contextURL(contextUrl).build();
+		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with().id(id).
+				select(selectOption).contextURL(contextUrl).build();
 		SerializerResult serializerResult = serializer.entityCollection(metadata, edmEntitySet.getEntityType(), collection, opts);
 		InputStream serializedContent = serializerResult.getContent();
 
@@ -165,6 +178,8 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 		response.setHeader(HttpHeader.CONTENT_TYPE, contentType.toContentTypeString());
 
 	}
+
+	
 
 	private void appendOn(Join join, String fKname, EdmEntityType leftType, EdmEntityType rightType) throws ODataApplicationException {
 
@@ -195,7 +210,7 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 	}
 
 	private void setOn(Join join, ResultSet rs) throws SQLException {
-		
+
 		Table pkTable = new Table(rs.getString(SQLEdmProvider.PKTABLE_SCHEM), rs.getString(SQLEdmProvider.PKTABLE_NAME));
 		Column pfCol = new Column(pkTable,rs.getString(SQLEdmProvider.PKCOLUMN_NAME));
 
@@ -203,7 +218,7 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 		Column fkCol = new Column(fkTable,rs.getString(SQLEdmProvider.FKCOLUMN_NAME));
 
 		BinaryExpression eq = new EqualsTo().setLeftExpression(pfCol).setRightExpression(fkCol);
-		
+
 		if(join.getOnExpression() == null ){
 			join.setOnExpression(eq);
 		}else {

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import com.github.sql.analytic.statement.policy.CreatePolicy;
 
 public abstract class SQLODataServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private ServletConfig config;
 	
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -25,7 +27,7 @@ public abstract class SQLODataServlet extends HttpServlet {
 			try(Connection connection = getDatasource().getConnection()){
 				try{
 					
-					SQLOdataHandler handler = new SQLOdataHandler(connection, getPolicy());
+					SQLOdataHandler handler = new SQLOdataHandler(config,connection, getPolicy());
 					handler.process(request, response);
 					connection.commit();
 
@@ -39,7 +41,11 @@ public abstract class SQLODataServlet extends HttpServlet {
 		}
 
 	}
-
+	@Override
+	public void init(ServletConfig config) throws ServletException {		
+		super.init(config);
+		this.config = config;
+	}
 
 	abstract protected List<CreatePolicy> getPolicy();
 

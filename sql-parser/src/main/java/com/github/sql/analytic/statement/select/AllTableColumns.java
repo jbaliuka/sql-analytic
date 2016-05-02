@@ -28,7 +28,7 @@ package com.github.sql.analytic.statement.select;
 import com.github.sql.analytic.schema.Table;
 
 
-public class AllTableColumns implements SelectItem {
+public class AllTableColumns implements SelectListItem {
 	private Table table;
 	
 	public AllTableColumns() {

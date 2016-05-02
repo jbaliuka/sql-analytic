@@ -28,7 +28,7 @@ import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.select.ColumnReference;
 import com.github.sql.analytic.statement.select.ColumnReferenceVisitor;
-import com.github.sql.analytic.statement.select.SelectItem;
+import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.SelectItemVisitor;
 
 
@@ -36,7 +36,7 @@ import com.github.sql.analytic.statement.select.SelectItemVisitor;
  * A column. It can have the table name it belongs to. 
  */
 
-public class Column implements Expression, ColumnReference,SelectItem {
+public class Column implements Expression, ColumnReference,SelectListItem {
 	private String columnName = "";
 	private Table table;
 	

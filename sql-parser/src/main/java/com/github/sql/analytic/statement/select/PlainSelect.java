@@ -38,7 +38,7 @@ import com.github.sql.analytic.schema.Table;
 public class PlainSelect implements SelectBody {
 	private Distinct distinct = null;
 
-	private List<SelectItem> selectItems;
+	private List<SelectListItem> selectItems;
 	private Table into;
 	private FromItem fromItem;
 
@@ -76,11 +76,11 @@ public class PlainSelect implements SelectBody {
 	}
 
 	/**
-	 * The {@link SelectItem}s in this query (for example the A,B,C in "SELECT A,B,C")
-	 * @return a list of {@link SelectItem}s
+	 * The {@link SelectListItem}s in this query (for example the A,B,C in "SELECT A,B,C")
+	 * @return a list of {@link SelectListItem}s
 	 */
 
-	public List<SelectItem> getSelectItems() {
+	public List<SelectListItem> getSelectItems() {
 		return selectItems;
 	}
 
@@ -100,7 +100,7 @@ public class PlainSelect implements SelectBody {
 
 
 
-	public PlainSelect setSelectItems(List<SelectItem> list) {
+	public PlainSelect setSelectItems(List<SelectListItem> list) {
 		selectItems = list;
 		return this;
 	}

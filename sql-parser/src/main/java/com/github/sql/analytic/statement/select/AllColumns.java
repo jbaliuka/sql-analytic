@@ -27,7 +27,7 @@ package com.github.sql.analytic.statement.select;
  * All the columns (as in "SELECT * FROM ...")
  */
 
-public class AllColumns implements SelectItem {
+public class AllColumns implements SelectListItem {
 	public void accept(SelectItemVisitor selectItemVisitor) {
 		selectItemVisitor.visit(this);
 	}

@@ -18,7 +18,7 @@ import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.replace.Replace;
 import com.github.sql.analytic.statement.select.Select;
 import com.github.sql.analytic.statement.select.SelectBody;
-import com.github.sql.analytic.statement.select.SelectItem;
+import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.WithItem;
 import com.github.sql.analytic.statement.truncate.Truncate;
 import com.github.sql.analytic.statement.update.Update;
@@ -88,8 +88,8 @@ public class StatementTransform  implements StatementVisitor {
 				WithItem newItem = new WithItem();
 				newItem.setName(withItem.getName());
 				if(withItem.getWithItemList() != null && !withItem.getWithItemList().isEmpty()){
-					List<SelectItem> selectItems = new ArrayList<SelectItem>();
-					for(SelectItem item: withItem.getWithItemList()){
+					List<SelectListItem> selectItems = new ArrayList<SelectListItem>();
+					for(SelectListItem item: withItem.getWithItemList()){
 						selectItems.add(item);
 					}
 				}
