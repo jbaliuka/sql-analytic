@@ -110,22 +110,23 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 		Map<String, Object> statementParams = new HashMap<>();
 		PlainSelect select = new PlainSelect().setSelectItems(new ArrayList<SelectListItem>());
 
-
+        int index = 0;
 		for(UriResource segment : resourcePaths ){
+			index++;
 			if(segment instanceof UriResourceNavigation){				
 				UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) segment;
 				EdmNavigationProperty edmNavigationProperty = uriResourceNavigation.getProperty();	
 				EdmEntityType leftType = edmEntitySet.getEntityType();
 				edmEntitySet = getNavigationTargetEntitySet(edmEntitySet, edmNavigationProperty);
 				EdmEntityType rightType = edmEntitySet.getEntityType();
-				Join join = appendFrom(select, edmEntitySet);
-				appendOn(join,edmNavigationProperty.getName(),leftType,rightType);
-				appendWhere(statementParams,edmEntitySet.getEntityType(),select, uriResourceNavigation.getKeyPredicates());
+				Join join = appendFrom(select, edmEntitySet,index);
+				appendOn(join,edmNavigationProperty.getName(),leftType,rightType,index);
+				appendWhere(statementParams,edmEntitySet.getEntityType(),select, uriResourceNavigation.getKeyPredicates(),index);
 			}else if (segment instanceof UriResourceEntitySet){				
 				UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) segment;
 				edmEntitySet = uriResourceEntitySet.getEntitySet();			
-				appendFrom(select, edmEntitySet);
-				appendWhere(statementParams,edmEntitySet.getEntityType(),select, uriResourceEntitySet.getKeyPredicates());				
+				appendFrom(select, edmEntitySet,index);
+				appendWhere(statementParams,edmEntitySet.getEntityType(),select, uriResourceEntitySet.getKeyPredicates(),index);				
 			}else {
 				throw new ODataApplicationException(segment.toString(), HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), 
 						Locale.ENGLISH);
@@ -138,8 +139,7 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 			if(EntityData.inSelection(selectOption,name)){
 				SelectExpressionItem item = new SelectExpressionItem().setAlias(name);
 				Column column = new Column().
-						setTable(new Table(edmEntitySet.getEntityType().getNamespace(),
-								edmEntitySet.getEntityType().getName()));			
+						setTable(new Table(null,edmEntitySet.getEntityType().getName() + "_" + index));			
 				select.getSelectItems().add(item.setExpression(column.setColumnName(name)));
 				projection.add(name);
 			}
@@ -181,22 +181,22 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 
 	
 
-	private void appendOn(Join join, String fKname, EdmEntityType leftType, EdmEntityType rightType) throws ODataApplicationException {
+	private void appendOn(Join join, String fKname, EdmEntityType leftType, EdmEntityType rightType, int index) throws ODataApplicationException {
 
 		boolean found = false;
-		try(ResultSet rs = connection.getMetaData().getImportedKeys(null, leftType.getNamespace(), leftType.getName())){			
+		try(ResultSet rs = connection.getMetaData().getImportedKeys(null, rightType.getNamespace(), rightType.getName())){			
 			while(rs.next()){
 				if(fKname.equalsIgnoreCase(rs.getString(SQLEdmProvider.FK_NAME))){
 					found = true;
-					setOn(join, rs);					
+					setOn(join, rs,index - 1,index);					
 				}
 			}
 			if(!found){
-				try(ResultSet right = connection.getMetaData().getImportedKeys(null, rightType.getNamespace(), rightType.getName())){					
+				try(ResultSet right = connection.getMetaData().getExportedKeys(null, rightType.getNamespace(), rightType.getName())){					
 					while(right.next()){
 						if(fKname.equalsIgnoreCase(right.getString(SQLEdmProvider.FK_NAME))){
 							found = true;
-							setOn(join, right);					
+							setOn(join, right,index,index - 1 );					
 						}
 					}
 
@@ -209,12 +209,12 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 		}		
 	}
 
-	private void setOn(Join join, ResultSet rs) throws SQLException {
+	private void setOn(Join join, ResultSet rs, int pkIndex,int fkIndex) throws SQLException {
 
-		Table pkTable = new Table(rs.getString(SQLEdmProvider.PKTABLE_SCHEM), rs.getString(SQLEdmProvider.PKTABLE_NAME));
+		Table pkTable = new Table(null, rs.getString(SQLEdmProvider.PKTABLE_NAME)+ "_" + pkIndex);
 		Column pfCol = new Column(pkTable,rs.getString(SQLEdmProvider.PKCOLUMN_NAME));
 
-		Table fkTable = new Table(rs.getString(SQLEdmProvider.FKTABLE_SCHEM), rs.getString(SQLEdmProvider.FKTABLE_NAME));
+		Table fkTable = new Table(null, rs.getString(SQLEdmProvider.FKTABLE_NAME) + "_" + fkIndex);
 		Column fkCol = new Column(fkTable,rs.getString(SQLEdmProvider.FKCOLUMN_NAME));
 
 		BinaryExpression eq = new EqualsTo().setLeftExpression(pfCol).setRightExpression(fkCol);
@@ -226,10 +226,12 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 		}
 	}
 
-	private Join appendFrom(PlainSelect select, EdmEntitySet edmEntitySet) {
+	private Join appendFrom(PlainSelect select, EdmEntitySet edmEntitySet, int index) {
 
 		FromItem from = select.getFromItem();
-		Table table = new Table(edmEntitySet.getEntityType().getNamespace(),edmEntitySet.getEntityType().getName());
+		String name = edmEntitySet.getEntityType().getName();
+		Table table = new Table(edmEntitySet.getEntityType().getNamespace(),name);
+		table.setAlias(name + "_" + index);
 		if(from == null){
 			select.setFromItem(table);
 			return null;
@@ -249,12 +251,12 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 	}
 
 	private void appendWhere(Map<String, Object> statementParams, EdmEntityType entityType,PlainSelect select,
-			List<UriParameter> list) throws EdmPrimitiveTypeException {
+			List<UriParameter> list, int index) throws EdmPrimitiveTypeException {
 
 		Expression expression = null;		
 
 		for( UriParameter key :  list){
-			expression = appendKey(statementParams, entityType, expression, key);
+			expression = appendKey(statementParams, entityType, expression, key, index);
 		}
 
 		if(expression != null){
@@ -269,10 +271,10 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 	}
 
 	private Expression appendKey(Map<String, Object> statementParams, EdmEntityType entityType,
-			Expression expression, UriParameter key) throws EdmPrimitiveTypeException {
+			Expression expression, UriParameter key, int index) throws EdmPrimitiveTypeException {
 
 		
-		String name = entityType.getName() + "_" + key.getName();
+		String name = entityType.getName() + "_" + index;
 
 		EdmProperty keyProperty = (EdmProperty)entityType.getProperty(key.getName());	
 		Object value = getValue(key, keyProperty);
@@ -280,9 +282,7 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 
 		Column column = new Column().
 				setColumnName(key.getName()).
-				setTable(new Table().
-						setSchemaName(entityType.getNamespace()).
-						setName(entityType.getName()));
+				setTable(new Table().setName(name));
 
 		BinaryExpression eq = new EqualsTo().
 				setLeftExpression(column).

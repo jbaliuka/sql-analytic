@@ -18,6 +18,7 @@ CREATE TABLE  order_details (id INT(11) NOT NULL AUTO_INCREMENT,order_id INT(11)
 CREATE TABLE  purchase_order_details (id INT(11) NOT NULL AUTO_INCREMENT,purchase_order_id INT(11) NOT NULL,product_id INT(11) NULL DEFAULT NULL,quantity DECIMAL(18,4) NOT NULL,unit_cost DECIMAL(19,4) NOT NULL,date_received DATETIME NULL DEFAULT NULL,posted_to_inventory TINYINT(1) NOT NULL DEFAULT '0',inventory_id INT(11) NULL DEFAULT NULL,PRIMARY KEY (id));
 CREATE TABLE  sales_reports (group_by VARCHAR(50) NOT NULL,display VARCHAR(50) NULL DEFAULT NULL,title VARCHAR(50) NULL DEFAULT NULL,filter_row_source LONGTEXT NULL DEFAULT NULL,default TINYINT(1) NOT NULL DEFAULT '0',PRIMARY KEY (group_by));
 CREATE TABLE  strings (string_id INT(11) NOT NULL AUTO_INCREMENT,string_data VARCHAR(255) NULL DEFAULT NULL,PRIMARY KEY (string_id));
+CREATE TABLE  folders (folder_id INT(11) NOT NULL AUTO_INCREMENT,parent_id INT(11),folder_name VARCHAR(255) NULL DEFAULT NULL,PRIMARY KEY (folder_id));
 ALTER TABLE employee_privileges ADD CONSTRAINT fk_employee_privileges_employees1 FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE employee_privileges ADD CONSTRAINT fk_employee_privileges_privileges1 FOREIGN KEY (privilege_id) REFERENCES privileges (id) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE orders ADD CONSTRAINT fk_orders_customers FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE NO ACTION ON UPDATE NO ACTION;
@@ -39,3 +40,4 @@ ALTER TABLE order_details ADD CONSTRAINT fk_order_details_order_details_status1 
 ALTER TABLE purchase_order_details ADD CONSTRAINT fk_purchase_order_details_inventory_transactions1 FOREIGN KEY (inventory_id) REFERENCES inventory_transactions (id) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE purchase_order_details ADD CONSTRAINT fk_purchase_order_details_products1 FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE purchase_order_details ADD CONSTRAINT fk_purchase_order_details_purchase_orders1 FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders (id) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE folders ADD CONSTRAINT fk_folder_parent FOREIGN KEY (parent_id) REFERENCES folders (folder_id) ON DELETE NO ACTION ON UPDATE NO ACTION;

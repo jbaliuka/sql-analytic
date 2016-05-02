@@ -510,3 +510,7 @@ INSERT INTO strings (string_id,string_data) VALUES (111,'There was an error atte
 INSERT INTO strings (string_id,string_data) VALUES (112,'You must supply a Unit Cost.');
 INSERT INTO strings (string_id,string_data) VALUES (113,'Fill back ordered product, Order #|');
 INSERT INTO strings (string_id,string_data) VALUES (114,'Purchase generated based on Order #|');
+INSERT INTO folders (folder_id,parent_id,folder_name) VALUES (1,null,'Root');
+INSERT INTO folders (folder_id,parent_id,folder_name) VALUES (2,1,'One');
+INSERT INTO folders (folder_id,parent_id,folder_name) VALUES (3,1,'Two');
+INSERT INTO folders (folder_id,parent_id,folder_name) VALUES (4,2,'Three');

@@ -18,3 +18,4 @@ DROP TABLE  order_details ;
 DROP TABLE  purchase_order_details;
 DROP TABLE  sales_reports;
 DROP TABLE  strings;
+DROP TABLE  folders;

@@ -18,3 +18,4 @@ CREATE POLICY   order_details ON PUBLIC.order_details;
 CREATE POLICY   purchase_order_details ON PUBLIC.purchase_order_details;
 CREATE POLICY   sales_reports ON PUBLIC.sales_reports;
 CREATE POLICY   strings ON PUBLIC.strings;
+CREATE POLICY   folders ON PUBLIC.folders;
