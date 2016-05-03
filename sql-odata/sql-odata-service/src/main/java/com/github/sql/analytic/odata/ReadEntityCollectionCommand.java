@@ -39,7 +39,6 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
-import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 
 import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.Expression;
@@ -110,8 +109,8 @@ public class ReadEntityCollectionCommand{
 		} catch (SQLException | IOException e) {
 			throw inernalError(e);
 		}
-		String selectList = getSelectList(connection,edmEntitySet, uriInfo.getSelectOption());
-		serialize(collection,selectList);
+		
+		serialize(collection);
 	}
 
 	public ODataApplicationException inernalError(Exception e) {
@@ -144,25 +143,29 @@ public class ReadEntityCollectionCommand{
 		}
 	}
 
-	protected void serialize(EntityCollection collection,String selectList) throws SerializerException {
+	protected void serialize(EntityCollection collection) throws SerializerException {
 		
-		ODataSerializer serializer = odata.createSerializer(contentType);
-
-		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).selectList(selectList).build();
+		ContextURL contextUrl = ContextURL.with().
+				entitySet(edmEntitySet).selectList(getSelectList()).
+				build();
 
 		final String id = request.getRawBaseUri() + "/" + edmEntitySet.getName();
-		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with().id(id).
-				select(uriInfo.getSelectOption()).contextURL(contextUrl).build();
-		SerializerResult serializerResult = serializer.entityCollection(metadata, edmEntitySet.getEntityType(), collection, opts);
+		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
+				.id(id).select(uriInfo.getSelectOption()).contextURL(contextUrl).
+				build();
+		
+		ODataSerializer serializer = odata.createSerializer(contentType);
+		SerializerResult serializerResult = serializer.entityCollection(metadata, 
+				edmEntitySet.getEntityType(), collection, opts);
 		
 		response.setContent(serializerResult.getContent());
 		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 		response.setHeader(HttpHeader.CONTENT_TYPE, contentType.toContentTypeString());
 	}
 
-	private String getSelectList(SQLSession connection,EdmEntitySet edmEntitySet, SelectOption selectOption) throws SerializerException {
+	protected String getSelectList() throws SerializerException {
 		return odata.createUriHelper().buildContextURLSelectList(edmEntitySet.getEntityType(),
-				null, selectOption);
+				null, uriInfo.getSelectOption());
 	}
 
 	private void appendOn(SQLSession connection,Join join, String fKname, EdmEntityType leftType, EdmEntityType rightType) throws ODataApplicationException {

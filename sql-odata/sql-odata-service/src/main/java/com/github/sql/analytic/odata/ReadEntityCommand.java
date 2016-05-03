@@ -1,12 +1,9 @@
 package com.github.sql.analytic.odata;
 
-import java.io.InputStream;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.data.ContextURL;
-import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -26,16 +23,17 @@ public class ReadEntityCommand extends ReadEntityCollectionCommand {
 	}
 
 	@Override
-	protected void serialize(EntityCollection collection, String selectList) throws SerializerException {
+	protected void serialize(EntityCollection collection) throws SerializerException {
 
 		
 		if(collection.getEntities().size() == 0){
 			new ODataApplicationException("Not Found",
 					HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
 		}
-		EdmEntityType entityType = getEdmEntitySet().getEntityType();
-
-		ContextURL contextUrl = ContextURL.with().entitySet(getEdmEntitySet()).selectList(selectList).build();
+		
+		ContextURL contextUrl = ContextURL.with().
+				entitySet(getEdmEntitySet()).selectList(getSelectList()).
+				build();
 		
 		EntitySerializerOptions options = EntitySerializerOptions.with().
 				contextURL(contextUrl).select(getUriInfo().getSelectOption()).
@@ -43,12 +41,11 @@ public class ReadEntityCommand extends ReadEntityCollectionCommand {
 
 		ODataSerializer serializer = getOdata().createSerializer(getContentType());
 		
-		SerializerResult serializerResult = serializer.entity(getMetadata(), entityType, 
+		SerializerResult serializerResult = serializer.entity(getMetadata(), getEdmEntitySet().getEntityType(), 
 				collection.getEntities().get(0) , options);
-		InputStream entityStream = serializerResult.getContent();
-
 		
-		getResponse().setContent(entityStream);
+		
+		getResponse().setContent(serializerResult.getContent());
 		getResponse().setStatusCode(HttpStatusCode.OK.getStatusCode());
 		getResponse().setHeader(HttpHeader.CONTENT_TYPE, getContentType().toContentTypeString());
 
