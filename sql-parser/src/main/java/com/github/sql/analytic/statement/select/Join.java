@@ -24,7 +24,7 @@ package com.github.sql.analytic.statement.select;
 
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.schema.Column;
 
 
@@ -41,7 +41,7 @@ public class Join {
 	private boolean inner = false;
 	private boolean simple = false;
 	private FromItem rightItem;
-	private Expression onExpression;
+	private SQLExpression onExpression;
 	private List<Column> usingColumns; 
 
 	/**
@@ -149,11 +149,11 @@ public class Join {
 	/**
 	 * Returns the "ON" expression (if any)
 	 */
-	public Expression getOnExpression() {
+	public SQLExpression getOnExpression() {
 		return onExpression;
 	}
 
-	public Join setOnExpression(Expression expression) {
+	public Join setOnExpression(SQLExpression expression) {
 		onExpression = expression;
 		return this;
 	}

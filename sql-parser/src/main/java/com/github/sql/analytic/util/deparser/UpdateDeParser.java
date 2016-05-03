@@ -1,6 +1,6 @@
 package com.github.sql.analytic.util.deparser;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.statement.update.Update;
@@ -42,7 +42,7 @@ public class UpdateDeParser {
 			Column column = (Column) update.getColumns().get(i);
 			buffer.append(column.getWholeColumnName()).append("=");
 
-			Expression expression = (Expression) update.getExpressions().get(i);
+			SQLExpression expression = (SQLExpression) update.getExpressions().get(i);
 			expression.accept(expressionVisitor);
 			if (i < update.getColumns().size() - 1) {
 				buffer.append(", ");

@@ -22,21 +22,21 @@
 
 package com.github.sql.analytic.statement.select;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 
 /**
  * An expression as in "SELECT expr1 AS EXPR"
  */
 
 public class SelectExpressionItem implements SelectListItem {
-	private Expression expression;
+	private SQLExpression expression;
 	private String alias;
 	
 	public String getAlias() {
 		return alias;
 	}
 
-	public Expression getExpression() {
+	public SQLExpression getExpression() {
 		return expression;
 	}
 
@@ -45,7 +45,7 @@ public class SelectExpressionItem implements SelectListItem {
 		return this;
 	}
 
-	public SelectExpressionItem setExpression(Expression expression) {
+	public SelectExpressionItem setExpression(SQLExpression expression) {
 		this.expression = expression;
 		return this;
 	}

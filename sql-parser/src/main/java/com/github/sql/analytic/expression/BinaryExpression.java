@@ -28,29 +28,29 @@ package com.github.sql.analytic.expression;
  * wich are in turn expressions. 
  */
 
-public abstract class BinaryExpression implements Expression {
-	private Expression leftExpression;
-	private Expression rightExpression;
+public abstract class BinaryExpression implements SQLExpression {
+	private SQLExpression leftExpression;
+	private SQLExpression rightExpression;
 	private boolean not = false;
 
 	public BinaryExpression() {
 	}
 	
 
-	public Expression getLeftExpression() {
+	public SQLExpression getLeftExpression() {
 		return leftExpression;
 	}
 
-	public Expression getRightExpression() {
+	public SQLExpression getRightExpression() {
 		return rightExpression;
 	}
 
-	public BinaryExpression setLeftExpression(Expression expression) {
+	public BinaryExpression setLeftExpression(SQLExpression expression) {
 		leftExpression = expression;
 		return this;
 	}
 
-	public BinaryExpression setRightExpression(Expression expression) {
+	public BinaryExpression setRightExpression(SQLExpression expression) {
 		rightExpression = expression;
 		return this;
 	}

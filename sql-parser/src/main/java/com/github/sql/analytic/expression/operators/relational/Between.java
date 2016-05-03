@@ -22,7 +22,7 @@
  
 package com.github.sql.analytic.expression.operators.relational;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.statement.StatementVisitor;
 
@@ -31,21 +31,21 @@ import com.github.sql.analytic.statement.StatementVisitor;
  * A "BETWEEN" expr1 expr2 statement
  */
 
-public class Between implements Expression {
-	private Expression leftExpression;
+public class Between implements SQLExpression {
+	private SQLExpression leftExpression;
 	private boolean not = false;
-	private Expression betweenExpressionStart;
-	private Expression betweenExpressionEnd;
+	private SQLExpression betweenExpressionStart;
+	private SQLExpression betweenExpressionEnd;
 
-	public Expression getBetweenExpressionEnd() {
+	public SQLExpression getBetweenExpressionEnd() {
 		return betweenExpressionEnd;
 	}
 
-	public Expression getBetweenExpressionStart() {
+	public SQLExpression getBetweenExpressionStart() {
 		return betweenExpressionStart;
 	}
 
-	public Expression getLeftExpression() {
+	public SQLExpression getLeftExpression() {
 		return leftExpression;
 	}
 
@@ -53,15 +53,15 @@ public class Between implements Expression {
 		return not;
 	}
 
-	public void setBetweenExpressionEnd(Expression expression) {
+	public void setBetweenExpressionEnd(SQLExpression expression) {
 		betweenExpressionEnd = expression;
 	}
 
-	public void setBetweenExpressionStart(Expression expression) {
+	public void setBetweenExpressionStart(SQLExpression expression) {
 		betweenExpressionStart = expression;
 	}
 
-	public void setLeftExpression(Expression expression) {
+	public void setLeftExpression(SQLExpression expression) {
 		leftExpression = expression;
 	}
 

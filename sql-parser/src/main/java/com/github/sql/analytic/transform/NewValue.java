@@ -1,13 +1,13 @@
 package com.github.sql.analytic.transform;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.schema.Column;
 
 public class NewValue{
 	private Column column;
-	private Expression expression;
+	private SQLExpression expression;
 
-	public NewValue(Column column, Expression expression) {
+	public NewValue(Column column, SQLExpression expression) {
 		super();
 		this.column = column;
 		this.expression = expression;
@@ -18,10 +18,10 @@ public class NewValue{
 	public void setColumn(Column column) {
 		this.column = column;
 	}
-	public Expression getExpression() {
+	public SQLExpression getExpression() {
 		return expression;
 	}
-	public void setExpression(Expression expression) {
+	public void setExpression(SQLExpression expression) {
 		this.expression = expression;
 	}
 

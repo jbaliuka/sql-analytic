@@ -22,22 +22,22 @@
  
 package com.github.sql.analytic.expression.operators.relational;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 
 
 
 
 
-public class InExpression implements Expression {
-	private Expression leftExpression;
+public class InExpression implements SQLExpression {
+	private SQLExpression leftExpression;
 	private ItemsList itemsList; 
 	private boolean not = false;
 	
 	public InExpression() {
 	}
 
-	public InExpression(Expression leftExpression, ItemsList itemsList) {
+	public InExpression(SQLExpression leftExpression, ItemsList itemsList) {
 		setLeftExpression(leftExpression);
 		setItemsList(itemsList);
 	}
@@ -46,7 +46,7 @@ public class InExpression implements Expression {
 		return itemsList;
 	}
 
-	public Expression getLeftExpression() {
+	public SQLExpression getLeftExpression() {
 		return leftExpression;
 	}
 
@@ -54,7 +54,7 @@ public class InExpression implements Expression {
 		itemsList = list;
 	}
 
-	public void setLeftExpression(Expression expression) {
+	public void setLeftExpression(SQLExpression expression) {
 		leftExpression = expression;
 	}
 

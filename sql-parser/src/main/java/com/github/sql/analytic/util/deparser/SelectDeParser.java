@@ -3,7 +3,7 @@ package com.github.sql.analytic.util.deparser;
 import java.util.Iterator;
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.Function;
 import com.github.sql.analytic.schema.Column;
@@ -85,7 +85,7 @@ public class SelectDeParser implements SelectVisitor, OrderByVisitor, SelectItem
 		if (plainSelect.getGroupByColumnReferences() != null) {
 			buffer.append(" GROUP BY ");
 			int i = 0;
-			for (Expression next  : plainSelect.getGroupByColumnReferences()) {				
+			for (SQLExpression next  : plainSelect.getGroupByColumnReferences()) {				
 				next.accept(expressionVisitor);
 				if (i++ < plainSelect.getGroupByColumnReferences().size() - 1) {
 					buffer.append(", ");

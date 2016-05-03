@@ -28,7 +28,7 @@ import java.sql.Date;
  * A Date in the form {d 'yyyy-mm-dd'}
  */
 
-public class DateValue implements Expression {
+public class DateValue implements SQLExpression {
 	private Date value;
 
 	public DateValue(String value) {

@@ -1,6 +1,6 @@
 package com.github.sql.analytic.transform;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.delete.Delete;
@@ -26,7 +26,7 @@ public class DeleteTransform {
 		return newDelete;
 	}
 
-	protected Expression transformWhere(Expression where) {		
+	protected SQLExpression transformWhere(SQLExpression where) {		
 		if(where != null){
 			return statementTransform.transform(where);
 		}else {

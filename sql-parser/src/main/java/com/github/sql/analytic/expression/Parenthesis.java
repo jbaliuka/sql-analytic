@@ -26,23 +26,23 @@ package com.github.sql.analytic.expression;
  * It represents an expression like "(" expression ")"
  */
 
-public class Parenthesis implements Expression {
-	private Expression expression;
+public class Parenthesis implements SQLExpression {
+	private SQLExpression expression;
 	private boolean not = false;
 
 	public Parenthesis() {
 	}
 	
 	
-	public Parenthesis(Expression expression) {
+	public Parenthesis(SQLExpression expression) {
 		setExpression(expression); 
 	}
 	
-	public Expression getExpression() {
+	public SQLExpression getExpression() {
 		return expression;
 	}
 
-	public void setExpression(Expression expression) {
+	public void setExpression(SQLExpression expression) {
 		this.expression = expression;
 	}
 

@@ -29,7 +29,7 @@ import java.sql.Time;
  * A Time in the form {t 'hh:mm:ss'}
  */
 
-public class TimeValue implements Expression {
+public class TimeValue implements SQLExpression {
 	private Time value;
 
 	public TimeValue(String value) {

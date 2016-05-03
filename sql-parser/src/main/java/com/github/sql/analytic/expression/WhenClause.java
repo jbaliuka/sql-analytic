@@ -30,10 +30,10 @@ package com.github.sql.analytic.expression;
  * @author Havard Rast Blok
  */
 
-public class WhenClause implements Expression {
+public class WhenClause implements SQLExpression {
 
-	private Expression whenExpression;
-	private Expression thenExpression;
+	private SQLExpression whenExpression;
+	private SQLExpression thenExpression;
 	
 	/* (non-Javadoc)
 	 * @see net.sf.jsqlparser.expression.Expression#accept(net.sf.jsqlparser.expression.ExpressionVisitor)
@@ -45,25 +45,25 @@ public class WhenClause implements Expression {
 	/**
 	 * @return Returns the thenExpression.
 	 */
-	public Expression getThenExpression() {
+	public SQLExpression getThenExpression() {
 		return thenExpression;
 	}
 	/**
 	 * @param thenExpression The thenExpression to set.
 	 */
-	public void setThenExpression(Expression thenExpression) {
+	public void setThenExpression(SQLExpression thenExpression) {
 		this.thenExpression = thenExpression;
 	}
 	/**
 	 * @return Returns the whenExpression.
 	 */
-	public Expression getWhenExpression() {
+	public SQLExpression getWhenExpression() {
 		return whenExpression;
 	}
 	/**
 	 * @param whenExpression The whenExpression to set.
 	 */
-	public void setWhenExpression(Expression whenExpression) {
+	public void setWhenExpression(SQLExpression whenExpression) {
 		this.whenExpression = whenExpression;
 	}
 	

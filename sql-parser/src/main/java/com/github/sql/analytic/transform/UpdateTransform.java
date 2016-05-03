@@ -3,7 +3,7 @@ package com.github.sql.analytic.transform;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.SQLStatement;
@@ -27,12 +27,12 @@ public class UpdateTransform {
 		newUpdate.setTable(transformTable(update.getTable()));
 		setTable(newUpdate.getTable());
 		newUpdate.setColumns(new ArrayList<Column>());
-		newUpdate.setExpressions(new ArrayList<Expression>());
+		newUpdate.setExpressions(new ArrayList<SQLExpression>());
 		List<NewValue> newValues = new ArrayList<NewValue>();
 
 		for (int i = 0; i < update.getColumns().size(); i++) {
 			Column column = (Column) update.getColumns().get(i);
-			Expression expression = (Expression) update.getExpressions().get(i);			
+			SQLExpression expression = (SQLExpression) update.getExpressions().get(i);			
 			NewValue newItem = transfromItem(new NewValue(column,statementTransform.transform(expression)));
 			if(newItem != null){
 				newValues.add(newItem);				
@@ -73,7 +73,7 @@ public class UpdateTransform {
 
 		return newTable;
 	}
-	protected Expression transformWhere(Expression where) {		
+	protected SQLExpression transformWhere(SQLExpression where) {		
 		if(where == null){
 			return null;
 		}

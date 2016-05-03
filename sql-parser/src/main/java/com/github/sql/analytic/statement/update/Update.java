@@ -24,7 +24,7 @@ package com.github.sql.analytic.statement.update;
 
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.SQLStatement;
@@ -37,9 +37,9 @@ import com.github.sql.analytic.statement.StatementVisitor;
 
 public class Update implements SQLStatement {
 	private Table table;
-	private Expression where;
+	private SQLExpression where;
 	private List<Column> columns;
-	private List<Expression> expressions;
+	private List<SQLExpression> expressions;
 
 	public void accept(StatementVisitor statementVisitor) {
 		statementVisitor.visit(this);
@@ -49,7 +49,7 @@ public class Update implements SQLStatement {
 		return table;
 	}
 
-	public Expression getWhere() {
+	public SQLExpression getWhere() {
 		return where;
 	}
 
@@ -57,7 +57,7 @@ public class Update implements SQLStatement {
 		table = name;
 	}
 
-	public void setWhere(Expression expression) {
+	public void setWhere(SQLExpression expression) {
 		where = expression;
 	}
 
@@ -70,11 +70,11 @@ public class Update implements SQLStatement {
 	}
 
 	/**
-	 * The {@link Expression}s in this update (as 'a' and 'b' in UPDATE col1='a', col2='b')
-	 * @return a list of {@link Expression}s
+	 * The {@link SQLExpression}s in this update (as 'a' and 'b' in UPDATE col1='a', col2='b')
+	 * @return a list of {@link SQLExpression}s
 	 */
 	
-	public List<Expression> getExpressions() {
+	public List<SQLExpression> getExpressions() {
 		return expressions;
 	}
 
@@ -82,7 +82,7 @@ public class Update implements SQLStatement {
 		columns = list;
 	}
 
-	public void setExpressions(List<Expression> list) {
+	public void setExpressions(List<SQLExpression> list) {
 		expressions = list;
 	}
 	

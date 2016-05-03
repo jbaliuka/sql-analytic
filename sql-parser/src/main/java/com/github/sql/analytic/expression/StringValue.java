@@ -26,7 +26,7 @@ package com.github.sql.analytic.expression;
  * A string as in 'example_string'
  */
 
-public class StringValue implements Expression {
+public class StringValue implements SQLExpression {
 	private String value = "";
 	
 	public StringValue(String escapedValue) {

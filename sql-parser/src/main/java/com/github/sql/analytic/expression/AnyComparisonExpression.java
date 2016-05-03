@@ -3,7 +3,7 @@ package com.github.sql.analytic.expression;
 import com.github.sql.analytic.statement.select.SubSelect;
 
 
-public class AnyComparisonExpression implements Expression {
+public class AnyComparisonExpression implements SQLExpression {
 	private SubSelect subSelect;
 	
 	public AnyComparisonExpression(SubSelect subSelect) {

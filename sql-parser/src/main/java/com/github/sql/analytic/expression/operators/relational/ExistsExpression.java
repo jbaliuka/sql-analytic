@@ -22,20 +22,20 @@
  
 package com.github.sql.analytic.expression.operators.relational;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 
 
 
-public class ExistsExpression implements Expression {
-	private Expression rightExpression;
+public class ExistsExpression implements SQLExpression {
+	private SQLExpression rightExpression;
 	private boolean not = false;
 
-	public Expression getRightExpression() {
+	public SQLExpression getRightExpression() {
 		return rightExpression;
 	}
 
-	public void setRightExpression(Expression expression) {
+	public void setRightExpression(SQLExpression expression) {
 		rightExpression = expression;
 	}
 

@@ -22,7 +22,7 @@
 
 package com.github.sql.analytic.statement.select;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
 import com.github.sql.analytic.expression.operators.relational.ItemsListVisitor;
@@ -34,7 +34,7 @@ import com.github.sql.analytic.statement.StatementVisitor;
  * A subselect followed by an optional alias.
  */
 
-public class SubSelect implements FromItem, Expression, ItemsList {
+public class SubSelect implements FromItem, SQLExpression, ItemsList {
 	private SelectBody selectBody;
 	private String alias;
 	private boolean expression;

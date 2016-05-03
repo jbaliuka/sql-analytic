@@ -2,7 +2,7 @@ package com.github.sql.analytic.transform.policy;
 
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.NewValue;
@@ -25,7 +25,7 @@ public class UpdatePolicy extends UpdateTransform {
 	}
 
 	@Override
-	protected Expression transformWhere(Expression where) {
+	protected SQLExpression transformWhere(SQLExpression where) {
 
 		SelectPolicy policy = new SelectPolicy("UPDATE", values, policyTransform);
 		policy.addFrom(getTable());		

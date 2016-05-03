@@ -24,7 +24,7 @@
 
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.GroupingExpression;
 import com.github.sql.analytic.statement.select.PlainSelect;
@@ -36,23 +36,23 @@ import com.github.sql.analytic.statement.select.PlainSelect;
 
 public class ExpressionList implements ItemsList,GroupingExpression {
 	
-	private List<Expression> expressions;
+	private List<SQLExpression> expressions;
 
 	public ExpressionList() {
 	}
 
 	
-	public ExpressionList(List<Expression> expressions) {
+	public ExpressionList(List<SQLExpression> expressions) {
 		this.expressions = expressions;
 	}
 
 	
-	public List<Expression> getExpressions() {
+	public List<SQLExpression> getExpressions() {
 		return expressions;
 	}
 
 	
-	public void setExpressions(List<Expression> list) {
+	public void setExpressions(List<SQLExpression> list) {
 		expressions = list;
 	}
 

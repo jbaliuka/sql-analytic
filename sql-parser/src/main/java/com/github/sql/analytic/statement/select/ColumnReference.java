@@ -22,13 +22,13 @@
 
 package com.github.sql.analytic.statement.select;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 
 /**
  * A column reference in expressions as "GROUP BY 1" or as "ORDER BY COL2"
  */
 
-public interface ColumnReference extends Expression{
+public interface ColumnReference extends SQLExpression{
 	public void accept(ColumnReferenceVisitor columnReferenceVisitor);
 
 }

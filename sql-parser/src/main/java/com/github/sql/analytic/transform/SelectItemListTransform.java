@@ -9,7 +9,7 @@ import com.github.sql.analytic.expression.CaseExpression;
 import com.github.sql.analytic.expression.CastExpression;
 import com.github.sql.analytic.expression.DateValue;
 import com.github.sql.analytic.expression.DoubleValue;
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.Function;
 import com.github.sql.analytic.expression.GroupingExpression;

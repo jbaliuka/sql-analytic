@@ -26,7 +26,7 @@ package com.github.sql.analytic.expression;
  *  A "NULL" in a sql statement
  */
 
-public class NullValue implements Expression {
+public class NullValue implements SQLExpression {
 	public void accept(ExpressionVisitor expressionVisitor) {
 		expressionVisitor.visit(this);
 	}

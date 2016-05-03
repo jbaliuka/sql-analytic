@@ -1,7 +1,7 @@
 package com.github.sql.analytic.expression;
 
 
-public class AnalyticClause implements Expression{
+public class AnalyticClause implements SQLExpression{
 	
 	private QueryPartitionClause queryPartitionClause;
 	private OrderByClause orderByClause;

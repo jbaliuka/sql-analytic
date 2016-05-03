@@ -3,7 +3,7 @@ package com.github.sql.analytic.transform.policy;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.Parenthesis;
 import com.github.sql.analytic.expression.operators.conditional.AndExpression;
 import com.github.sql.analytic.expression.operators.conditional.OrExpression;
@@ -75,7 +75,7 @@ public class SelectPolicy extends SelectTransform {
 	};
 
 
-	private Expression or(Expression expression1,Expression expression2){
+	private SQLExpression or(SQLExpression expression1,SQLExpression expression2){
 
 		OrExpression newExpression = new OrExpression();
 
@@ -91,7 +91,7 @@ public class SelectPolicy extends SelectTransform {
 
 	}
 
-	private Expression and(Expression expression1,Expression expression2){
+	private SQLExpression and(SQLExpression expression1,SQLExpression expression2){
 
 		AndExpression newExpression = new AndExpression();
 
@@ -121,9 +121,9 @@ public class SelectPolicy extends SelectTransform {
 	}
 
 	@Override
-	protected Expression transformWhere(Expression expression) {
+	protected SQLExpression transformWhere(SQLExpression expression) {
 
-		Expression filter = getPolicyFilter();		
+		SQLExpression filter = getPolicyFilter();		
 		if(expression != null && filter != null){
 			return and(statementTransform.transform(expression),filter);
 		}else if (expression != null && filter == null){
@@ -134,12 +134,12 @@ public class SelectPolicy extends SelectTransform {
 		}
 	}
 
-	private Expression getPolicyFilter() {
+	private SQLExpression getPolicyFilter() {
 
-		Expression filter = null;
+		SQLExpression filter = null;
 		
 		for(Table table: fromTables){
-			Expression tableFilter = getUsingFilter(table);
+			SQLExpression tableFilter = getUsingFilter(table);
 			if(tableFilter != null){
 				if(filter != null){
 					filter = and(filter,tableFilter);
@@ -158,10 +158,10 @@ public class SelectPolicy extends SelectTransform {
 
 
 
-	protected Expression getCheckFilter(Expression filter) {
+	protected SQLExpression getCheckFilter(SQLExpression filter) {
 		
 		List<CreatePolicy> list = statementTransform.findTablePolicies(action, toTable);
-		Expression checkFilter = null;		
+		SQLExpression checkFilter = null;		
 		for(CreatePolicy policy: list){				
 			if(policy.getCheck() != null){
 				if(checkFilter == null){
@@ -191,9 +191,9 @@ public class SelectPolicy extends SelectTransform {
 		return tables;
 	}
 
-	private Expression getUsingFilter(Table table) {
+	private SQLExpression getUsingFilter(Table table) {
 
-		Expression filter = null;
+		SQLExpression filter = null;
 		List<CreatePolicy> list = statementTransform.findTablePolicies(action, table);		
 		
 			for(CreatePolicy policy: list){
@@ -211,7 +211,7 @@ public class SelectPolicy extends SelectTransform {
 		return filter;
 	}
 
-	protected Expression getCheckNewValues(final Table table,Expression check) {
+	protected SQLExpression getCheckNewValues(final Table table,SQLExpression check) {
 
 		return  new StatementTransform(){
 			@Override
@@ -233,7 +233,7 @@ public class SelectPolicy extends SelectTransform {
 
 	}
 
-	private Expression getUsing(final Table table,Expression using) {
+	private SQLExpression getUsing(final Table table,SQLExpression using) {
 
 
 		return  new StatementTransform(){

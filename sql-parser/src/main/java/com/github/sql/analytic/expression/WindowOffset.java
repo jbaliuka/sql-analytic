@@ -10,13 +10,13 @@ public class WindowOffset {
 		EXPR
 		
 	}	
-	private Expression expression;
+	private SQLExpression expression;
 	private Type type;
 	
-	public Expression getExpression() {
+	public SQLExpression getExpression() {
 		return expression;
 	}
-	public void setExpression(Expression expression) {
+	public void setExpression(SQLExpression expression) {
 		this.expression = expression;
 	}
 	public Type getType() {

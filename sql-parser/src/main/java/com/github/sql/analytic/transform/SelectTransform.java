@@ -3,7 +3,7 @@ package com.github.sql.analytic.transform;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.statement.select.Distinct;
@@ -86,8 +86,8 @@ public class SelectTransform implements SelectVisitor   {
 
 
 		if (plainSelect.getGroupByColumnReferences() != null) {
-			((PlainSelect) selectBody).setGroupByColumnReferences(new ArrayList<Expression>());
-			for (Expression next : plainSelect.getGroupByColumnReferences()) {
+			((PlainSelect) selectBody).setGroupByColumnReferences(new ArrayList<SQLExpression>());
+			for (SQLExpression next : plainSelect.getGroupByColumnReferences()) {
 				((PlainSelect) selectBody).getGroupByColumnReferences().add(statementTransform.transform(next));
 			}
 		}
@@ -119,7 +119,7 @@ public class SelectTransform implements SelectVisitor   {
 
 
 
-	protected Expression transformWhere(Expression expression) {
+	protected SQLExpression transformWhere(SQLExpression expression) {
 		if(expression != null){
 			return statementTransform.transform(expression);
 		}else {

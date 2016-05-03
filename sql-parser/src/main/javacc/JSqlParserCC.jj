@@ -60,7 +60,7 @@ import java.util.List;
 
 import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.DoubleValue;
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.Function;
 import com.github.sql.analytic.expression.AnalyticClause;
 import com.github.sql.analytic.expression.QueryPartitionClause;
@@ -129,7 +129,7 @@ import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.Select;
 import com.github.sql.analytic.statement.select.SelectBody;
 import com.github.sql.analytic.statement.select.SelectExpressionItem;
-import com.github.sql.analytic.statement.select.SelectItem;
+import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.SubSelect;
 import com.github.sql.analytic.statement.select.Top;
 import com.github.sql.analytic.statement.select.Union;
@@ -330,7 +330,7 @@ CreatePolicy CreatePolicy():
   Column column;
   List<String> roles = new ArrayList<String>();
   Token token;
-  Expression expression;
+  SQLExpression expression;
   Table table;}{
   token = <S_IDENTIFIER>  {
     policy.setName(token.image);  }
@@ -345,8 +345,8 @@ CreatePolicy CreatePolicy():
   	<K_TO> token = <S_IDENTIFIER >	{ roles.add(token.image); }
   	( token =<S_IDENTIFIER>	{ roles.add(token.image); })*  	
   ]
-  [<K_USING> "(" expression = Expression() ")" { policy.setUsing(expression); } ]
-  [<K_WITH> <K_CHECK> "(" expression = Expression() ")"{ policy.setCheck(expression); }]
+  [<K_USING> "(" expression = SQLExpression() ")" { policy.setUsing(expression); } ]
+  [<K_WITH> <K_CHECK> "(" expression = SQLExpression() ")"{ policy.setCheck(expression); }]
   {
     policy.setTable(table);
     if(columns.size() > 0){
@@ -359,11 +359,11 @@ Update Update():
 { 
 	Update update = new Update(); 
 	Table table = null;
-	Expression where = null;
+	SQLExpression where = null;
 	Column tableColumn = null;
 	List expList = new ArrayList(); 
 	List columns = new ArrayList(); 
-	Expression value = null;
+	SQLExpression value = null;
 	
 }
 {
@@ -385,12 +385,12 @@ Replace Replace():
 	Replace replace = new Replace(); 
 	Table table = null;
 	Column tableColumn = null;
-	Expression value = null;
+	SQLExpression value = null;
 	
 	List columns = new ArrayList(); 
 	List expList = new ArrayList(); 
 	ItemsList itemsList = null;
-	Expression exp = null;
+	SQLExpression exp = null;
 	
 	
 }
@@ -441,7 +441,7 @@ Insert Insert():
 	List columns = new ArrayList(); 
 	List primaryExpList = new ArrayList(); 
 	ItemsList itemsList = null;
-	Expression exp = null;
+	SQLExpression exp = null;
 }
 {
     <K_INSERT> [<K_INTO>] table=Table()
@@ -478,7 +478,7 @@ Delete Delete():
 { 
 	Delete delete = new Delete();
 	Table table = null;
-	Expression where = null;
+	SQLExpression where = null;
 }
 {
     <K_DELETE> [<K_FROM>] table=Table() 
@@ -546,7 +546,7 @@ Table Table():
 	Table table = null;
 	String name1 = null;
 	String name2 = null;
-	Expression partition = null;
+	SQLExpression partition = null;
 	
 }
 {
@@ -610,10 +610,10 @@ PlainSelect PlainSelect():
 	FromItem fromItem = null;
 	List joins = null;
 	List distinctOn = null;
-	Expression where = null;
+	SQLExpression where = null;
 	List orderByElements;
 	List groupByColumnReferences = null;
-	Expression having = null;
+	SQLExpression having = null;
 	Limit limit = null;
 	Top top = null;
 	String hints = null;
@@ -726,23 +726,23 @@ WithItem WithItem():
 List SelectItemsList():
 { 
 	ArrayList selectItemsList = new ArrayList();
-	SelectItem selectItem = null; 
+	SelectListItem selectItem = null; 
 }
 { 
-    selectItem=SelectItem() { selectItemsList.add(selectItem); } ("," selectItem=SelectItem() { selectItemsList.add(selectItem); } )*
+    selectItem=SelectListItem() { selectItemsList.add(selectItem); } ("," selectItem=SelectListItem() { selectItemsList.add(selectItem); } )*
     
     { return selectItemsList; }
 }
 
-SelectItem SelectItem():
+SelectListItem SelectListItem():
 {
 	Function function = null;
 	AllColumns allTableColumns = null;
 	Column tableColumn = null;
 	String alias = null;
-	SelectItem selectItem = null;
+	SelectListItem selectItem = null;
 	SelectExpressionItem selectExpressionItem = null;
-	Expression expression = null;
+	SQLExpression expression = null;
 	SubSelect subSelect = null;
 }
 {
@@ -846,7 +846,7 @@ Join JoinerExpression():
 { 
 	Join join = new Join(); 
 	FromItem right = null;
-	Expression onExpression = null;
+	SQLExpression onExpression = null;
 	Column tableColumn;
 	List columns = null;
 }
@@ -869,7 +869,7 @@ Join JoinerExpression():
   	  
   	    ( <K_JOIN> | "," { join.setSimple(true); } ) right=FromItem()  
 	[
-		( <K_ON> onExpression=Expression()  { join.setOnExpression(onExpression); } )
+		( <K_ON> onExpression=SQLExpression()  { join.setOnExpression(onExpression); } )
 		|
 		( <K_USING> "(" tableColumn=Column() { columns = new ArrayList(); columns.add(tableColumn); } 
 				("," tableColumn=Column() { columns.add(tableColumn); } )* ")"  
@@ -884,19 +884,19 @@ Join JoinerExpression():
 }
 
 
-Expression WhereClause():
+SQLExpression WhereClause():
 {
-	Expression retval = null;
+	SQLExpression retval = null;
 }
 {
-    <K_WHERE> retval=Expression()
+    <K_WHERE> retval=SQLExpression()
     { return retval; }
 }
 
 
 List GroupByColumnReferences():
 {
-	Expression columnReference = null;
+	SQLExpression columnReference = null;
 	List columnReferences = new ArrayList();
 }
 {
@@ -907,12 +907,12 @@ List GroupByColumnReferences():
 	}
 }
 
-Expression Having():
+SQLExpression Having():
 {
-	Expression having = null;
+	SQLExpression having = null;
 }
 {
-    <K_HAVING> having=Expression()
+    <K_HAVING> having=SQLExpression()
 	{
 		return having;
 	}
@@ -935,7 +935,7 @@ OrderByElement OrderByElement():
 {
 	OrderByElement orderByElement = new OrderByElement(); 
 	List retval = new ArrayList();
-	Expression columnReference = null;
+	SQLExpression columnReference = null;
 }
 {
 	columnReference = SimpleExpression()
@@ -1039,25 +1039,25 @@ ColumnIndex ColumnIndex():
 }
 	
 
-Expression Expression():
+SQLExpression SQLExpression():
 { 
-	Expression retval = null;
+	SQLExpression retval = null;
 }
 {
 	(
 	LOOKAHEAD(OrExpression())
 		retval=OrExpression() 
 		|
-		"(" retval=Expression() ")" {retval = new Parenthesis(retval); }
+		"(" retval=SQLExpression() ")" {retval = new Parenthesis(retval); }
 		
 	)
 	
     { return retval; }
 }
 
-Expression OrExpression()  :
+SQLExpression OrExpression()  :
 {
-	Expression left, right, result;
+	SQLExpression left, right, result;
 }
 {
 	left=AndExpression() { result = left; }
@@ -1078,9 +1078,9 @@ Expression OrExpression()  :
 
 
 
-Expression AndExpression() :
+SQLExpression AndExpression() :
 {
-	Expression left, right, result;
+	SQLExpression left, right, result;
 	boolean not = false;
 }
 {
@@ -1114,9 +1114,9 @@ Expression AndExpression() :
 	}
 }
 
-Expression Condition():
+SQLExpression Condition():
 {
-	Expression result;
+	SQLExpression result;
 }
 {
 	(LOOKAHEAD(SQLCondition()) result=SQLCondition()
@@ -1125,11 +1125,11 @@ Expression Condition():
 	{ return result; }
 }
 
-Expression RegularCondition():
+SQLExpression RegularCondition():
 {
-	Expression result = null;
-	Expression leftExpression;
-	Expression rightExpression;
+	SQLExpression result = null;
+	SQLExpression leftExpression;
+	SQLExpression rightExpression;
 	boolean not = false;
 }
 {
@@ -1159,9 +1159,9 @@ Expression RegularCondition():
 }
 
 
-Expression SQLCondition():
+SQLExpression SQLCondition():
 {
-	Expression result;
+	SQLExpression result;
 }
 {
 	(
@@ -1174,11 +1174,11 @@ Expression SQLCondition():
 	{ return result; }
 }
 
-Expression InExpression() :
+SQLExpression InExpression() :
 {
 	InExpression result = new InExpression();
 	ItemsList itemsList = null;
-	Expression leftExpression = null;
+	SQLExpression leftExpression = null;
 }
 {
 	leftExpression=SimpleExpression()
@@ -1190,12 +1190,12 @@ Expression InExpression() :
 	}
 }
 
-Expression Between() :
+SQLExpression Between() :
 {
 	Between result = new Between();
-	Expression leftExpression = null;
-	Expression betweenExpressionStart = null;
-	Expression betweenExpressionEnd = null;
+	SQLExpression leftExpression = null;
+	SQLExpression betweenExpressionStart = null;
+	SQLExpression betweenExpressionEnd = null;
 }
 {
 	leftExpression=SimpleExpression()
@@ -1210,11 +1210,11 @@ Expression Between() :
 	}
 }
 
-Expression LikeExpression() :
+SQLExpression LikeExpression() :
 {
 	LikeExpression result = new LikeExpression();
-	Expression leftExpression = null;
-	Expression rightExpression = null;
+	SQLExpression leftExpression = null;
+	SQLExpression rightExpression = null;
 }
 {
 	leftExpression=SimpleExpression()
@@ -1227,10 +1227,10 @@ Expression LikeExpression() :
 	}
 }
 
-Expression IsNullExpression():
+SQLExpression IsNullExpression():
 {
 	IsNullExpression result = new IsNullExpression();
-	Expression leftExpression = null;
+	SQLExpression leftExpression = null;
 }
 {
 	leftExpression=SimpleExpression()
@@ -1243,10 +1243,10 @@ Expression IsNullExpression():
 }
 
 
-Expression ExistsExpression():
+SQLExpression ExistsExpression():
 {
 	ExistsExpression result = new ExistsExpression();
-	Expression rightExpression = null;
+	SQLExpression rightExpression = null;
 }
 {
     [<K_NOT> { result.setNot(true); } ] <K_EXISTS> rightExpression=SimpleExpression()
@@ -1261,10 +1261,10 @@ ExpressionList SQLExpressionList():
 {
 	ExpressionList retval = new ExpressionList();
 	List expressions = new ArrayList();
-	Expression expr = null;
+	SQLExpression expr = null;
 }
 {
-    expr=Expression() { expressions.add(expr); } ("," expr=Expression() { expressions.add(expr); })*
+    expr=SQLExpression() { expressions.add(expr); } ("," expr=SQLExpression() { expressions.add(expr); })*
 	{
 		retval.setExpressions(expressions);
 		return retval;
@@ -1275,7 +1275,7 @@ ExpressionList SimpleExpressionList():
 {
 	ExpressionList retval = new ExpressionList();
 	List expressions = new ArrayList();
-	Expression expr = null;
+	SQLExpression expr = null;
 }
 {
     expr=SimpleExpression() { expressions.add(expr); } ("," expr=SimpleExpression() { expressions.add(expr); })*
@@ -1285,9 +1285,9 @@ ExpressionList SimpleExpressionList():
 	}
 }
 
-Expression ComparisonItem() :
+SQLExpression ComparisonItem() :
 { 
-	Expression retval = null; 
+	SQLExpression retval = null; 
 }
 {
   (
@@ -1301,7 +1301,7 @@ Expression ComparisonItem() :
    }
 }
 
-Expression AllComparisonExpression() :
+SQLExpression AllComparisonExpression() :
 { 
 	AllComparisonExpression retval = null; 
 	SubSelect subselect = null; 
@@ -1313,7 +1313,7 @@ Expression AllComparisonExpression() :
    }
 }
 
-Expression AnyComparisonExpression() :
+SQLExpression AnyComparisonExpression() :
 { 
 	AnyComparisonExpression retval = null; 
 	SubSelect subselect = null; 
@@ -1325,9 +1325,9 @@ Expression AnyComparisonExpression() :
    }
 }
 
-Expression SimpleExpression():
+SQLExpression SimpleExpression():
 { 
-	Expression retval = null; 
+	SQLExpression retval = null; 
 }
 {
   (
@@ -1345,7 +1345,7 @@ Expression SimpleExpression():
    }
 }
 
-Expression Olap():
+SQLExpression Olap():
 { 
 	Function retval = new Function(); 
 	ExpressionList expressionList = null;
@@ -1372,7 +1372,7 @@ ExpressionList GroupingList():
 {
 	ExpressionList retval = new ExpressionList();
 	List expressions = new ArrayList();
-	Expression expr = null;
+	SQLExpression expr = null;
 }
 {
    
@@ -1383,9 +1383,9 @@ ExpressionList GroupingList():
 	}
 }
 
-Expression GroupingExpression():
+SQLExpression GroupingExpression():
 {
-  Expression expr = null;
+  SQLExpression expr = null;
 }
 {
    
@@ -1399,11 +1399,11 @@ Expression GroupingExpression():
 
 
 
-Expression AdditiveExpression():
+SQLExpression AdditiveExpression():
 {
-	Expression result = null;
-	Expression leftExpression = null;
-	Expression rightExpression = null;
+	SQLExpression result = null;
+	SQLExpression leftExpression = null;
+	SQLExpression rightExpression = null;
 }
 {
     leftExpression=MultiplicativeExpression()  { result = leftExpression; }
@@ -1427,11 +1427,11 @@ Expression AdditiveExpression():
 }
 
 
-Expression MultiplicativeExpression():
+SQLExpression MultiplicativeExpression():
 {
-	Expression result = null;
-	Expression leftExpression = null;
-	Expression rightExpression = null;
+	SQLExpression result = null;
+	SQLExpression leftExpression = null;
+	SQLExpression rightExpression = null;
 }
 {
 	(
@@ -1463,9 +1463,9 @@ Expression MultiplicativeExpression():
 }
 
 
-Expression PrimaryExpression():
+SQLExpression PrimaryExpression():
 { 
-	Expression retval = null;
+	SQLExpression retval = null;
 	Token token = null;
 	boolean isInverse = false;
 	String tmp = "";
@@ -1515,10 +1515,10 @@ Expression PrimaryExpression():
 }
 
 
-Expression CastExpression():
+SQLExpression CastExpression():
 {
 	CastExpression castExp = new CastExpression();
-	Expression expr;
+	SQLExpression expr;
 	Token type;
 	
 }
@@ -1531,13 +1531,13 @@ Expression CastExpression():
 }
 
 
-Expression CaseWhenExpression():
+SQLExpression CaseWhenExpression():
 {
 	CaseExpression caseExp = new CaseExpression();
-	Expression switchExp = null;
+	SQLExpression switchExp = null;
 	WhenClause clause;
 	List whenClauses = new ArrayList();
-	Expression elseExp = null;
+	SQLExpression elseExp = null;
 }
 {
 	<K_CASE> 
@@ -1561,11 +1561,11 @@ Expression CaseWhenExpression():
 WhenClause WhenThenSearchCondition():
 {
 	WhenClause whenThen = new WhenClause();
-	Expression whenExp = null;
-	Expression thenExp = null;
+	SQLExpression whenExp = null;
+	SQLExpression thenExp = null;
 }
 {
-	<K_WHEN> whenExp=Expression() <K_THEN> thenExp=SimpleExpression()
+	<K_WHEN> whenExp=SQLExpression() <K_THEN> thenExp=SimpleExpression()
 	{
 	   whenThen.setWhenExpression(whenExp);
 	   whenThen.setThenExpression(thenExp);
@@ -1576,8 +1576,8 @@ WhenClause WhenThenSearchCondition():
 WhenClause WhenThenValue():
 {
 	WhenClause whenThen = new WhenClause();
-	Expression whenExp = null;
-	Expression thenExp = null;
+	SQLExpression whenExp = null;
+	SQLExpression thenExp = null;
 }
 {
 	<K_WHEN> whenExp=PrimaryExpression() <K_THEN> thenExp=PrimaryExpression()
@@ -1695,7 +1695,7 @@ WindowClause windowCausue():
 WindowOffset windowOffset():
 {
   WindowOffset offset = new WindowOffset();
-  Expression expr = null;
+  SQLExpression expr = null;
 }
 {
   (

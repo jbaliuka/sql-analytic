@@ -26,21 +26,21 @@ package com.github.sql.analytic.expression;
  * It represents a "-" before an expression 
  */
 
-public class InverseExpression implements Expression {
-	private Expression expression;
+public class InverseExpression implements SQLExpression {
+	private SQLExpression expression;
 	
 	public InverseExpression() {
 	}
 
-	public InverseExpression(Expression expression) {
+	public InverseExpression(SQLExpression expression) {
 		setExpression(expression);
 	}
 
-	public Expression getExpression() {
+	public SQLExpression getExpression() {
 		return expression;
 	}
 
-	public void setExpression(Expression expression) {
+	public void setExpression(SQLExpression expression) {
 		this.expression = expression;
 	}
 

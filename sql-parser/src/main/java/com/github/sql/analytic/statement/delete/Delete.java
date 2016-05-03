@@ -22,7 +22,7 @@
  
 package com.github.sql.analytic.statement.delete;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
@@ -31,7 +31,7 @@ import com.github.sql.analytic.statement.StatementVisitor;
 
 public class Delete implements SQLStatement {
 	private Table table;
-	private Expression where;
+	private SQLExpression where;
 	
 	public void accept(StatementVisitor statementVisitor) {
 		statementVisitor.visit(this);
@@ -41,7 +41,7 @@ public class Delete implements SQLStatement {
 		return table;
 	}
 
-	public Expression getWhere() {
+	public SQLExpression getWhere() {
 		return where;
 	}
 
@@ -49,7 +49,7 @@ public class Delete implements SQLStatement {
 		table = name;
 	}
 
-	public void setWhere(Expression expression) {
+	public void setWhere(SQLExpression expression) {
 		where = expression;
 	}
 

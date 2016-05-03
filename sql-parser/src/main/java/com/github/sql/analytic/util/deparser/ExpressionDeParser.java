@@ -11,7 +11,7 @@ import com.github.sql.analytic.expression.CaseExpression;
 import com.github.sql.analytic.expression.CastExpression;
 import com.github.sql.analytic.expression.DateValue;
 import com.github.sql.analytic.expression.DoubleValue;
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.Function;
 import com.github.sql.analytic.expression.GroupingExpression;
@@ -56,7 +56,7 @@ import com.github.sql.analytic.statement.select.SubSelect;
 
 /**
  * A class to de-parse (that is, tranform from JSqlParser hierarchy into a string)
- * an {@link com.github.sql.analytic.expression.Expression}
+ * an {@link com.github.sql.analytic.expression.SQLExpression}
  */
 
 public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
@@ -298,7 +298,7 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 	public void visit(ExpressionList expressionList) {
 		buffer.append("(");
 		for (Iterator iter = expressionList.getExpressions().iterator(); iter.hasNext();) {
-			Expression expression = (Expression) iter.next();
+			SQLExpression expression = (SQLExpression) iter.next();
 			expression.accept(this);
 			if (iter.hasNext()){
 				buffer.append(", ");
@@ -329,18 +329,18 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 	@SuppressWarnings("unchecked")
 	public void visit(CaseExpression caseExpression) {
 		buffer.append("CASE ");
-		Expression switchExp = caseExpression.getSwitchExpression();
+		SQLExpression switchExp = caseExpression.getSwitchExpression();
 		if( switchExp != null ) {
 			switchExp.accept(this);
 		}
 
 		List clauses = caseExpression.getWhenClauses();
 		for (Object clause : clauses) {
-			Expression exp = (Expression) clause;
+			SQLExpression exp = (SQLExpression) clause;
 			exp.accept(this);
 		}
 
-		Expression elseExp = caseExpression.getElseExpression();
+		SQLExpression elseExp = caseExpression.getElseExpression();
 		if( elseExp != null ) {
 			buffer.append(" ELSE ");
 			elseExp.accept(this);

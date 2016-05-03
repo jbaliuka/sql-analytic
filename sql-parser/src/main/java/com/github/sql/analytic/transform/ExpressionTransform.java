@@ -11,7 +11,7 @@ import com.github.sql.analytic.expression.CaseExpression;
 import com.github.sql.analytic.expression.CastExpression;
 import com.github.sql.analytic.expression.DateValue;
 import com.github.sql.analytic.expression.DoubleValue;
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.Function;
 import com.github.sql.analytic.expression.GroupingExpression;
@@ -56,13 +56,13 @@ import com.github.sql.analytic.statement.select.SubSelect;
 
 /**
  * A class to transform from JSqlParser hierarchy into a new AST)
- * an {@link com.github.sql.analytic.expression.Expression}
+ * an {@link com.github.sql.analytic.expression.SQLExpression}
  */
 
 public class ExpressionTransform implements ExpressionVisitor {
 
 
-	private Expression expression;
+	private SQLExpression expression;
 	protected StatementTransform statementTransform;
 
 
@@ -83,7 +83,7 @@ public class ExpressionTransform implements ExpressionVisitor {
 
 
 
-	protected void setExpression(Expression expr) {
+	protected void setExpression(SQLExpression expr) {
 		expression = expr;		
 	}
 
@@ -283,10 +283,10 @@ public class ExpressionTransform implements ExpressionVisitor {
 		newFunction.setPipeline(function.isPipeline());
 
 		ExpressionList newList = new ExpressionList();	
-		newList.setExpressions(new ArrayList<Expression>());
+		newList.setExpressions(new ArrayList<SQLExpression>());
 
 		if(function.getParameters() != null){
-			for ( Expression next :  function.getParameters().getExpressions()) {
+			for ( SQLExpression next :  function.getParameters().getExpressions()) {
 				newList.getExpressions().add(statementTransform.transform(next));
 			}	
 		}
@@ -304,9 +304,9 @@ public class ExpressionTransform implements ExpressionVisitor {
 	public void visit(ExpressionList expressionList) {
 
 		ExpressionList newList = new ExpressionList();	
-		newList.setExpressions(new ArrayList<Expression>());
+		newList.setExpressions(new ArrayList<SQLExpression>());
 		
-		for ( Expression next :  expressionList.getExpressions()) {
+		for ( SQLExpression next :  expressionList.getExpressions()) {
 			newList.getExpressions().add(statementTransform.transform(next));
 		}
 
@@ -330,7 +330,7 @@ public class ExpressionTransform implements ExpressionVisitor {
 		CaseExpression newExpression = new CaseExpression();
 		setExpression(newExpression);	
 
-		Expression switchExp = caseExpression.getSwitchExpression();
+		SQLExpression switchExp = caseExpression.getSwitchExpression();
 		if( switchExp != null ) {			
 			newExpression.setSwitchExpression(statementTransform.transform(switchExp));
 		}
@@ -343,7 +343,7 @@ public class ExpressionTransform implements ExpressionVisitor {
 		}
 		newExpression.setWhenClauses(newCauses);
 
-		Expression elseExp = caseExpression.getElseExpression();
+		SQLExpression elseExp = caseExpression.getElseExpression();
 		if( elseExp != null ) {
 			newExpression.setElseExpression(statementTransform.transform(elseExp));
 		}
@@ -360,13 +360,13 @@ public class ExpressionTransform implements ExpressionVisitor {
 	public void visit(AllComparisonExpression allComparisonExpression) {
 		AllComparisonExpression newExpression = new AllComparisonExpression();
 		setExpression(newExpression);		
-		newExpression.setSubSelect((SubSelect) statementTransform.transform((Expression)allComparisonExpression.getSubSelect()));
+		newExpression.setSubSelect((SubSelect) statementTransform.transform((SQLExpression)allComparisonExpression.getSubSelect()));
 	}
 
 	public void visit(AnyComparisonExpression anyComparisonExpression) {
 		AnyComparisonExpression newExpression = new AnyComparisonExpression();
 		setExpression(newExpression);
-		newExpression.setSubSelect((SubSelect) statementTransform.transform((Expression)anyComparisonExpression.getSubSelect()));
+		newExpression.setSubSelect((SubSelect) statementTransform.transform((SQLExpression)anyComparisonExpression.getSubSelect()));
 	}
 
 	public void visit(ColumnIndex columnIndex) {
@@ -388,8 +388,8 @@ public class ExpressionTransform implements ExpressionVisitor {
 	public void visit(GroupingExpression groupingExpression) {
 		ExpressionList newExpression = new ExpressionList();
 		setExpression(newExpression);
-		newExpression.setExpressions(new ArrayList<Expression>());
-		for(Expression next : groupingExpression.getExpressions()){
+		newExpression.setExpressions(new ArrayList<SQLExpression>());
+		for(SQLExpression next : groupingExpression.getExpressions()){
 			newExpression.getExpressions().add(next);
 		}
 			
@@ -430,7 +430,7 @@ public class ExpressionTransform implements ExpressionVisitor {
 
 	}
 
-	public Expression getExpression() {		
+	public SQLExpression getExpression() {		
 		return expression;
 	}
 
@@ -438,7 +438,7 @@ public class ExpressionTransform implements ExpressionVisitor {
 	public void visit(QueryPartitionClause queryPartitionClause) {
 		QueryPartitionClause newClause = new QueryPartitionClause();
 		setExpression(newClause);
-		newClause.setExpressionList((ExpressionList) statementTransform.transform((Expression)queryPartitionClause.getExpressionList()));
+		newClause.setExpressionList((ExpressionList) statementTransform.transform((SQLExpression)queryPartitionClause.getExpressionList()));
 
 	}
 

@@ -26,7 +26,7 @@ package com.github.sql.analytic.expression;
  * Every number without a point or an exponential format is a LongValue
  */
 
-public class LongValue implements Expression {
+public class LongValue implements SQLExpression {
 	private long value;
 	private String stringValue;
 

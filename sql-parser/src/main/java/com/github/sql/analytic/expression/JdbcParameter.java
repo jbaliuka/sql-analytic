@@ -28,7 +28,7 @@ import com.github.sql.analytic.parser.Token;
  * A '?' in a statement
  */
 
-public class JdbcParameter implements Expression {
+public class JdbcParameter implements SQLExpression {
 	
 	private Token token;
 

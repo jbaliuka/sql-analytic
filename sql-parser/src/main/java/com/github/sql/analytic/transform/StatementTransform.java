@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.SQLStatement;
@@ -112,7 +112,7 @@ public class StatementTransform  implements StatementVisitor {
 
 	}
 
-	public final Expression transform(Expression epr){
+	public final SQLExpression transform(SQLExpression epr){
 		ExpressionTransform transform = createExpressionTransform();
 		epr.accept(transform);
 		return transform.getExpression(); 

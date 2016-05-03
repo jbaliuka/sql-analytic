@@ -23,13 +23,13 @@
 package com.github.sql.analytic.expression.operators.conditional;
 
 import com.github.sql.analytic.expression.BinaryExpression;
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 
 
 
 public class AndExpression extends BinaryExpression {
-	public AndExpression(Expression leftExpression, Expression rightExpression) {
+	public AndExpression(SQLExpression leftExpression, SQLExpression rightExpression) {
 		setLeftExpression(leftExpression);
 		setRightExpression(rightExpression);
 	}

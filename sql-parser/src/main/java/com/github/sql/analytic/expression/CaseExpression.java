@@ -59,13 +59,13 @@ import com.github.sql.analytic.statement.select.PlainSelect;
  * @author Havard Rast Blok
  */
 
-public class CaseExpression implements Expression {
+public class CaseExpression implements SQLExpression {
 
-	private Expression switchExpression;
+	private SQLExpression switchExpression;
 	
 	private List<WhenClause> whenClauses;
 	
-	private Expression elseExpression;
+	private SQLExpression elseExpression;
 	
 	/* (non-Javadoc)
 	 * @see net.sf.jsqlparser.expression.Expression#accept(net.sf.jsqlparser.expression.ExpressionVisitor)
@@ -77,26 +77,26 @@ public class CaseExpression implements Expression {
 	/**
 	 * @return Returns the switchExpression.
 	 */
-	public Expression getSwitchExpression() {
+	public SQLExpression getSwitchExpression() {
 		return switchExpression;
 	}
 	/**
 	 * @param switchExpression The switchExpression to set.
 	 */
-	public void setSwitchExpression(Expression switchExpression) {
+	public void setSwitchExpression(SQLExpression switchExpression) {
 		this.switchExpression = switchExpression;
 	}
 	
 	/**
 	 * @return Returns the elseExpression.
 	 */
-	public Expression getElseExpression() {
+	public SQLExpression getElseExpression() {
 		return elseExpression;
 	}
 	/**
 	 * @param elseExpression The elseExpression to set.
 	 */
-	public void setElseExpression(Expression elseExpression) {
+	public void setElseExpression(SQLExpression elseExpression) {
 		this.elseExpression = elseExpression;
 	}
 	/**

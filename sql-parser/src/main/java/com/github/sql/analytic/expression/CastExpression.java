@@ -1,19 +1,19 @@
 package com.github.sql.analytic.expression;
 
-public class CastExpression implements Expression {
+public class CastExpression implements SQLExpression {
 
-	private Expression expression;
+	private SQLExpression expression;
 	private String type;
 	
 	public void accept(ExpressionVisitor expressionVisitor) {
 		expressionVisitor.visit(this);		
 	}
 
-	public Expression getExpression() {
+	public SQLExpression getExpression() {
 		return expression;
 	}
 
-	public void setExpression(Expression expression) {
+	public void setExpression(SQLExpression expression) {
 		this.expression = expression;
 	}
 

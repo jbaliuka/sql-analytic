@@ -2,7 +2,7 @@ package com.github.sql.analytic.util.deparser;
 
 import java.util.Iterator;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.operators.relational.ExpressionList;
 import com.github.sql.analytic.expression.operators.relational.ItemsListVisitor;
@@ -27,7 +27,7 @@ public class InsertDeParser implements ItemsListVisitor {
 	}
 
 	/**
-	 * @param expressionVisitor a {@link ExpressionVisitor} to de-parse {@link com.github.sql.analytic.expression.Expression}s. It has to share the same<br>
+	 * @param expressionVisitor a {@link ExpressionVisitor} to de-parse {@link com.github.sql.analytic.expression.SQLExpression}s. It has to share the same<br>
 	 * StringBuffer (buffer parameter) as this object in order to work
 	 * @param selectVisitor a {@link SelectVisitor} to de-parse {@link com.github.sql.analytic.statement.select.Select}s.
 	 * It has to share the same<br>
@@ -72,7 +72,7 @@ public class InsertDeParser implements ItemsListVisitor {
 	public void visit(ExpressionList expressionList) {
 		buffer.append(" VALUES (");
 		for (Iterator iter = expressionList.getExpressions().iterator(); iter.hasNext();) {
-			Expression expression = (Expression) iter.next();
+			SQLExpression expression = (SQLExpression) iter.next();
 			expression.accept(expressionVisitor);
 			if (iter.hasNext()){
 				buffer.append(", ");

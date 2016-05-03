@@ -22,7 +22,7 @@
  
 package com.github.sql.analytic.statement.select;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.statement.StatementVisitor;
 
@@ -31,7 +31,7 @@ import com.github.sql.analytic.statement.StatementVisitor;
  * An element (column reference) in an "ORDER BY" clause.
  */
 
-public class OrderByElement implements Expression{
+public class OrderByElement implements SQLExpression{
 	
 	public enum NullOrdering{
 		
@@ -40,7 +40,7 @@ public class OrderByElement implements Expression{
 		
 	}
 	
-	private Expression columnReference;
+	private SQLExpression columnReference;
 	private boolean asc = true; 
 	private NullOrdering nullOrdering;
 	
@@ -58,11 +58,11 @@ public class OrderByElement implements Expression{
 		orderByVisitor.visit(this);
 	}
 
-	public Expression getColumnReference() {
+	public SQLExpression getColumnReference() {
 		return columnReference;
 	}
 
-	public void setColumnReference(Expression columnReference) {
+	public void setColumnReference(SQLExpression columnReference) {
 		this.columnReference = columnReference;
 	}
 

@@ -85,7 +85,7 @@ public class Replace implements SQLStatement {
 	}
 
 	/**
-	 * A list of {@link com.github.sql.analytic.expression.Expression}s (from a "REPLACE mytab SET col1=exp1, col2=exp2"). <br>
+	 * A list of {@link com.github.sql.analytic.expression.SQLExpression}s (from a "REPLACE mytab SET col1=exp1, col2=exp2"). <br>
 	 * it is null in case of a "REPLACE mytab (col1, col2) [...]"  
 	 */
 	@SuppressWarnings("unchecked")

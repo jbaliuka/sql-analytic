@@ -30,7 +30,7 @@ import com.github.sql.analytic.parser.Token;
  * A '?' in a statement
  */
 
-public class NamedParameter implements Expression {
+public class NamedParameter implements SQLExpression {
 	
 	private Token token;
 	

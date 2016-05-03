@@ -41,7 +41,7 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 
 import com.github.sql.analytic.expression.BinaryExpression;
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.NamedParameter;
 import com.github.sql.analytic.expression.operators.conditional.AndExpression;
 import com.github.sql.analytic.expression.operators.relational.EqualsTo;
@@ -233,12 +233,12 @@ public class ReadEntityCollectionCommand{
 
 	private void appendWhere( List<UriParameter> list) throws EdmPrimitiveTypeException {
 
-		Expression expression = null;
+		SQLExpression expression = null;
 		for( UriParameter key :  list){
 			expression = appendKey( expression, key );
 		}
 		if(expression != null){
-			Expression where = select.getWhere();
+			SQLExpression where = select.getWhere();
 			if(where == null){
 				where = expression;
 			}else {
@@ -248,7 +248,7 @@ public class ReadEntityCollectionCommand{
 		}
 	}
 
-	private Expression appendKey(Expression expression, UriParameter key) throws EdmPrimitiveTypeException {
+	private SQLExpression appendKey(SQLExpression expression, UriParameter key) throws EdmPrimitiveTypeException {
 
 		EdmEntityType entityType =  edmEntitySet.getEntityType();
 		String name = entityType.getName() + "_" + index;

@@ -22,16 +22,16 @@
  
 package com.github.sql.analytic.expression.operators.relational;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 
 
 
-public class IsNullExpression implements Expression {
-	private Expression leftExpression;
+public class IsNullExpression implements SQLExpression {
+	private SQLExpression leftExpression;
 	private boolean not = false;
 
-	public Expression getLeftExpression() {
+	public SQLExpression getLeftExpression() {
 		return leftExpression;
 	}
 
@@ -39,7 +39,7 @@ public class IsNullExpression implements Expression {
 		return not;
 	}
 
-	public void setLeftExpression(Expression expression) {
+	public void setLeftExpression(SQLExpression expression) {
 		leftExpression = expression;
 	}
 

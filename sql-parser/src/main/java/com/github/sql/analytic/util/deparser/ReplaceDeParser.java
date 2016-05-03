@@ -2,7 +2,7 @@ package com.github.sql.analytic.util.deparser;
 
 import java.util.Iterator;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.operators.relational.ExpressionList;
 import com.github.sql.analytic.expression.operators.relational.ItemsListVisitor;
@@ -70,7 +70,7 @@ public class ReplaceDeParser implements ItemsListVisitor {
 				Column column = (Column) replace.getColumns().get(i);
 				buffer.append(column.getWholeColumnName()).append("=");
 
-				Expression expression = (Expression) replace.getExpressions().get(i);
+				SQLExpression expression = (SQLExpression) replace.getExpressions().get(i);
 				expression.accept(expressionVisitor);
 				if (i < replace.getColumns().size() - 1) {
 					buffer.append(", ");
@@ -85,7 +85,7 @@ public class ReplaceDeParser implements ItemsListVisitor {
 	public void visit(ExpressionList expressionList) {
 		buffer.append(" VALUES (");
 		for (Iterator iter = expressionList.getExpressions().iterator(); iter.hasNext();) {
-			Expression expression = (Expression) iter.next();
+			SQLExpression expression = (SQLExpression) iter.next();
 			expression.accept(expressionVisitor);
 			if (iter.hasNext()){
 				buffer.append(", ");

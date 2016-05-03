@@ -22,7 +22,7 @@
  
 package com.github.sql.analytic.schema;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.statement.select.FromItem;
 import com.github.sql.analytic.statement.select.FromItemVisitor;
 import com.github.sql.analytic.statement.select.IntoTableVisitor;
@@ -35,7 +35,7 @@ public class Table implements FromItem {
 	private String schemaName;
 	private String name;
 	private String alias;
-	private Expression partition;
+	private SQLExpression partition;
 	private boolean partitionFor;
 	
 	public Table() {
@@ -110,11 +110,11 @@ public class Table implements FromItem {
 		return tableName;
 	}
 
-	public Expression getPartition() {
+	public SQLExpression getPartition() {
 		return partition;
 	}
 
-	public void setPartition(Expression partition) {
+	public void setPartition(SQLExpression partition) {
 		this.partition = partition;
 	}
 

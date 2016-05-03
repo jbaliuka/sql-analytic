@@ -25,7 +25,7 @@ package com.github.sql.analytic.statement.select;
 import java.util.Collection;
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.schema.Table;
 
 
@@ -43,12 +43,12 @@ public class PlainSelect implements SelectBody {
 	private FromItem fromItem;
 
 	private List<Join> joins;
-	private Expression where;
+	private SQLExpression where;
 
-	private List<Expression> groupByColumnReferences;
+	private List<SQLExpression> groupByColumnReferences;
 
 	private List<OrderByElement> orderByElements;
-	private Expression having;
+	private SQLExpression having;
 	private Limit limit;
 	private Top top;
 	private String hints;
@@ -84,7 +84,7 @@ public class PlainSelect implements SelectBody {
 		return selectItems;
 	}
 
-	public Expression getWhere() {
+	public SQLExpression getWhere() {
 		return where;
 	}
 
@@ -105,7 +105,7 @@ public class PlainSelect implements SelectBody {
 		return this;
 	}
 
-	public PlainSelect setWhere(Expression where) {
+	public PlainSelect setWhere(SQLExpression where) {
 		this.where = where;
 		return this;
 	}
@@ -168,11 +168,11 @@ public class PlainSelect implements SelectBody {
 		return this;
 	}
 
-	public Expression getHaving() {
+	public SQLExpression getHaving() {
 		return having;
 	}
 
-	public PlainSelect setHaving(Expression expression) {
+	public PlainSelect setHaving(SQLExpression expression) {
 		having = expression;
 		return this;
 	}
@@ -183,12 +183,12 @@ public class PlainSelect implements SelectBody {
 	 * @return a list of {@link ColumnReference}s 
 	 */
 
-	public List<Expression> getGroupByColumnReferences() {
+	public List<SQLExpression> getGroupByColumnReferences() {
 		return groupByColumnReferences;
 	}
 
 
-	public PlainSelect setGroupByColumnReferences(List<Expression> list) {
+	public PlainSelect setGroupByColumnReferences(List<SQLExpression> list) {
 		groupByColumnReferences = list;
 		return this;
 	}

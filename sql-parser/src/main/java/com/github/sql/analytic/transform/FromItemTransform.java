@@ -1,6 +1,6 @@
 package com.github.sql.analytic.transform;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.Function;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.select.FromItem;
@@ -27,7 +27,7 @@ public class FromItemTransform implements FromItemVisitor{
 	}
 
 	public void visit(SubSelect subSelect) {
-		fromItem = (FromItem) selectTransform.getStatementTransform().transform((Expression)subSelect);
+		fromItem = (FromItem) selectTransform.getStatementTransform().transform((SQLExpression)subSelect);
 		fromItem.setAlias(subSelect.getAlias());		
 		
 	}

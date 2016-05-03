@@ -26,7 +26,7 @@ package com.github.sql.analytic.expression;
  * Every number with a point or a exponential format is a DoubleValue
  */
 
-public class DoubleValue implements Expression {
+public class DoubleValue implements SQLExpression {
 	private double value;
 	private String stringValue;
 

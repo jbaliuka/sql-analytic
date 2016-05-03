@@ -3,7 +3,7 @@ package com.github.sql.analytic.transform.policy;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.LongValue;
 import com.github.sql.analytic.expression.NullValue;
 import com.github.sql.analytic.expression.operators.relational.ExpressionList;
@@ -27,7 +27,7 @@ public class InsertPolicy extends InsertTransform {
 			super(action,  newValues, statementTransform);
 		}
 		
-		protected Expression getCheckNewValues(final Table table,Expression check) {
+		protected SQLExpression getCheckNewValues(final Table table,SQLExpression check) {
 
 			return  new StatementTransform(){
 				@Override
@@ -77,7 +77,7 @@ public class InsertPolicy extends InsertTransform {
 		body.setFromItem(dual);		
 		body.setSelectItems(new ArrayList<SelectListItem>());		
 		
-		for(Expression next: expressionList.getExpressions()){
+		for(SQLExpression next: expressionList.getExpressions()){
 			SelectExpressionItem item = new SelectExpressionItem();
 			item.setExpression(next);
 			body.getSelectItems().add(item);
@@ -130,9 +130,9 @@ public class InsertPolicy extends InsertTransform {
 		int index = 0;
 		for (Column column : getNewInsert().getColumns()) {		
 			SelectListItem item = ((PlainSelect) subSelect.getSelectBody()).getSelectItems().get(index++);
-			Expression expr;
+			SQLExpression expr;
 			if(item instanceof Column){
-				expr = (Expression) item;
+				expr = (SQLExpression) item;
 			}else if (item instanceof SelectExpressionItem){
 				expr = ((SelectExpressionItem) item).getExpression();
 			}else {

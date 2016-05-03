@@ -22,7 +22,7 @@
 
 package com.github.sql.analytic.expression;
 
-public interface Expression {
+public interface SQLExpression {
 	
 	public void accept(ExpressionVisitor expressionVisitor);
 

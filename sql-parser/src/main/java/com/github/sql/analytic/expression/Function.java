@@ -30,7 +30,7 @@ import com.github.sql.analytic.statement.select.FromItemVisitor;
  * A function as MAX,COUNT...
  */
 
-public class Function implements Expression,FromItem {
+public class Function implements SQLExpression,FromItem {
 
 	private String name;
 	private ExpressionList parameters;

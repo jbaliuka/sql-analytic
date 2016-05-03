@@ -1,6 +1,6 @@
 package com.github.sql.analytic.transform.policy;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.transform.DeleteTransform;
 
 public class DeletePolicy extends DeleteTransform {
@@ -13,7 +13,7 @@ public class DeletePolicy extends DeleteTransform {
 	}
 	
 	@Override
-	protected Expression transformWhere(Expression where) {
+	protected SQLExpression transformWhere(SQLExpression where) {
 		SelectPolicy policy = new SelectPolicy("DELETE", null, policyTransform);
 		policy.addFrom(getTable());
 		

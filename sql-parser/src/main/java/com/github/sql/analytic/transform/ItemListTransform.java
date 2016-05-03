@@ -2,7 +2,7 @@ package com.github.sql.analytic.transform;
 
 import java.util.ArrayList;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.operators.relational.ExpressionList;
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
 import com.github.sql.analytic.expression.operators.relational.ItemsListVisitor;
@@ -32,8 +32,8 @@ public class ItemListTransform implements ItemsListVisitor{
 	public void visit(ExpressionList expressionList) {
 		ExpressionList newList = new ExpressionList();
 		itemList = newList;
-		newList.setExpressions(new ArrayList<Expression>());
-		for( Expression expr : expressionList.getExpressions()){
+		newList.setExpressions(new ArrayList<SQLExpression>());
+		for( SQLExpression expr : expressionList.getExpressions()){
 			newList.getExpressions().add(statementTransform.transform(expr));
 		}
 		

@@ -3,7 +3,7 @@ package com.github.sql.analytic.transform;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.sql.analytic.expression.Expression;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.operators.relational.ExpressionList;
 import com.github.sql.analytic.expression.operators.relational.ItemsListVisitor;
 import com.github.sql.analytic.schema.Column;
@@ -52,7 +52,7 @@ public class InsertTransform implements ItemsListVisitor {
 
 		ExpressionList newList = new ExpressionList(); 
 		newInsert.setItemsList(newList);
-		newList.setExpressions(new ArrayList<Expression>());
+		newList.setExpressions(new ArrayList<SQLExpression>());
 
 		if(newInsert.getColumns() != null){
 			List<NewValue> newValues = new ArrayList<NewValue>();
@@ -66,7 +66,7 @@ public class InsertTransform implements ItemsListVisitor {
 				newList.getExpressions().add(next.getExpression());
 			}
 		}else {
-			for( Expression e : expressionList.getExpressions()){
+			for( SQLExpression e : expressionList.getExpressions()){
 				newList.getExpressions().add(statementTransform.transform(e));
 			}
 
