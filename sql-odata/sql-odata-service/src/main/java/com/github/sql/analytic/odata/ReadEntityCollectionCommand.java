@@ -1,7 +1,6 @@
 package com.github.sql.analytic.odata;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -115,7 +114,7 @@ public class ReadEntityCollectionCommand{
 		serialize(collection,selectList);
 	}
 
-	private ODataApplicationException inernalError(Exception e) {
+	public ODataApplicationException inernalError(Exception e) {
 		return new ODataApplicationException(e.getMessage(), HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
 				Locale.ROOT,e);
 	}
@@ -311,5 +310,33 @@ public class ReadEntityCollectionCommand{
 	private ODataApplicationException notImplemented() {
 		return new ODataApplicationException("Not supported.",
 				HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+	}
+
+	public EdmEntitySet getEdmEntitySet() {
+		return edmEntitySet;
+	}
+
+	public OData getOdata() {
+		return odata;
+	}
+
+	public ODataRequest getRequest() {
+		return request;
+	}
+
+	public ODataResponse getResponse() {
+		return response;
+	}
+
+	public UriInfo getUriInfo() {
+		return uriInfo;
+	}
+
+	public ContentType getContentType() {
+		return contentType;
+	}
+
+	public ServiceMetadata getMetadata() {
+		return metadata;
 	}
 }
