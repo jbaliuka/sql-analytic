@@ -9,10 +9,10 @@ import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
-import org.apache.olingo.server.api.edmx.EdmxReference;
 
 import com.github.sql.analytic.odata.SQLEdmProvider;
 import com.github.sql.analytic.odata.SQLEntityCollectionProcessor;
@@ -37,8 +37,7 @@ public class SQLOdataHandler {
 	public void process(final HttpServletRequest request, HttpServletResponse response) throws SQLException{
 		             
 		            SessionContext context = createContext(request);										
-					SQLSession session = createSession(context);
-					
+					SQLSession session = createSession(context);					
 					OData odata = OData.newInstance();
 					ServiceMetadata edm = odata.createServiceMetadata(new SQLEdmProvider(session.getMetaData()), new ArrayList<EdmxReference>());
 					ODataHttpHandler handler = odata.createHandler(edm);

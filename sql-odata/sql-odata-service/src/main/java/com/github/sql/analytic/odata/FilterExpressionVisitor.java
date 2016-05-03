@@ -17,6 +17,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor;
 import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
+import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
 
@@ -126,25 +127,6 @@ public class FilterExpressionVisitor  implements ExpressionVisitor<SQLExpression
 		}
 	}
 
-	@Override
-	public SQLExpression visitMember(UriInfoResource member)
-			throws ExpressionVisitException, ODataApplicationException {
-
-		final List<UriResource> uriResourceParts = member.getUriResourceParts();
-
-		if(uriResourceParts.size() == 1 && uriResourceParts.get(0) instanceof UriResourcePrimitiveProperty) {
-
-			UriResourcePrimitiveProperty uriResourceProperty = (UriResourcePrimitiveProperty) uriResourceParts.get(0);
-			String name = uriResourceProperty.getProperty().getName();	       
-			Table table = new Table().setName(alias);
-
-			return new Column(table , name);
-		} else {
-
-			throw new ODataApplicationException("Only primitive properties are implemented in filter  expressions", 
-					HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-		}
-	}
 
 	@Override
 	public SQLExpression visitAlias(String aliasName) throws ExpressionVisitException, ODataApplicationException {
@@ -172,6 +154,25 @@ public class FilterExpressionVisitor  implements ExpressionVisitor<SQLExpression
 		throw new ODataApplicationException("Enums are not implemented",
 				HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);	
 
+	}
+
+	@Override
+	public SQLExpression visitMember(Member member) throws ExpressionVisitException, ODataApplicationException {
+
+		final List<UriResource> uriResourceParts = member.getResourcePath().getUriResourceParts();
+
+		if(uriResourceParts.size() == 1 && uriResourceParts.get(0) instanceof UriResourcePrimitiveProperty) {
+
+			UriResourcePrimitiveProperty uriResourceProperty = (UriResourcePrimitiveProperty) uriResourceParts.get(0);
+			String name = uriResourceProperty.getProperty().getName();	       
+			Table table = new Table().setName(alias);
+
+			return new Column(table , name);
+		} else {
+
+			throw new ODataApplicationException("Only primitive properties are implemented in filter  expressions", 
+					HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+		}
 	}
 
 

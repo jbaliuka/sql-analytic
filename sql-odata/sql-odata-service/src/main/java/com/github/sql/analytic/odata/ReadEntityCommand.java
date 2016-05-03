@@ -23,31 +23,34 @@ public class ReadEntityCommand extends ReadEntityCollectionCommand {
 	}
 
 	@Override
-	protected void serialize(EntityCollection collection) throws SerializerException {
+	protected void serialize(ResultSetIterator iterator) throws SerializerException {
 
-		
-		if(collection.getEntities().size() == 0){
-			new ODataApplicationException("Not Found",
-					HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+		try{
+			if(!iterator.hasNext()){
+				new ODataApplicationException("Not Found",
+						HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+			}
+
+			ContextURL contextUrl = ContextURL.with().
+					entitySet(getEdmEntitySet()).selectList(getSelectList()).
+					build();
+
+			EntitySerializerOptions options = EntitySerializerOptions.with().
+					contextURL(contextUrl).select(getUriInfo().getSelectOption()).
+					build();
+
+			ODataSerializer serializer = getOdata().createSerializer(getContentType());
+
+			SerializerResult serializerResult = serializer.entity(getMetadata(), getEdmEntitySet().getEntityType(), 
+					iterator.next() , options);
+
+
+			getResponse().setContent(serializerResult.getContent());
+			getResponse().setStatusCode(HttpStatusCode.OK.getStatusCode());
+			getResponse().setHeader(HttpHeader.CONTENT_TYPE, getContentType().toContentTypeString());
+		}finally{
+			iterator.close();
 		}
-		
-		ContextURL contextUrl = ContextURL.with().
-				entitySet(getEdmEntitySet()).selectList(getSelectList()).
-				build();
-		
-		EntitySerializerOptions options = EntitySerializerOptions.with().
-				contextURL(contextUrl).select(getUriInfo().getSelectOption()).
-				build();
-
-		ODataSerializer serializer = getOdata().createSerializer(getContentType());
-		
-		SerializerResult serializerResult = serializer.entity(getMetadata(), getEdmEntitySet().getEntityType(), 
-				collection.getEntities().get(0) , options);
-		
-		
-		getResponse().setContent(serializerResult.getContent());
-		getResponse().setStatusCode(HttpStatusCode.OK.getStatusCode());
-		getResponse().setHeader(HttpHeader.CONTENT_TYPE, getContentType().toContentTypeString());
 
 	}
 

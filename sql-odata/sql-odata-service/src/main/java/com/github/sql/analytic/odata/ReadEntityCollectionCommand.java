@@ -1,6 +1,7 @@
 package com.github.sql.analytic.odata;
 
 import java.io.IOException;
+import java.nio.channels.WritableByteChannel;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,7 +15,7 @@ import java.util.Set;
 
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.data.EntityIterator;
 import org.apache.olingo.commons.api.edm.EdmBindingTarget;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -27,13 +28,15 @@ import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.ODataContentWriteErrorCallback;
+import org.apache.olingo.server.api.ODataContentWriteErrorContext;
 import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.EntityCollectionSerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
-import org.apache.olingo.server.api.serializer.SerializerResult;
+import org.apache.olingo.server.api.serializer.SerializerStreamResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -44,9 +47,9 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 
 import com.github.sql.analytic.expression.BinaryExpression;
-import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.NamedParameter;
 import com.github.sql.analytic.expression.Parenthesis;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.operators.conditional.AndExpression;
 import com.github.sql.analytic.expression.operators.relational.EqualsTo;
 import com.github.sql.analytic.schema.Column;
@@ -60,6 +63,56 @@ import com.github.sql.analytic.statement.select.SelectExpressionItem;
 import com.github.sql.analytic.statement.select.SelectListItem;
 
 public class ReadEntityCollectionCommand{
+
+	final class ResultSetIterator extends EntityIterator implements ODataContentWriteErrorCallback{
+
+		private final ResultSet rs;
+		private final Set<String> projection;
+
+		ResultSetIterator(ResultSet rs, Set<String> projection) {
+			this.rs = rs;
+			this.projection = projection;
+		}
+
+		@Override
+		public Entity next() {
+
+			try {
+				return EntityData.createEntity(edmEntitySet,projection,rs);
+			} catch (SQLException | IOException e) {
+				throw new IllegalStateException(e);
+			}		
+		}
+
+		@Override
+		public boolean hasNext() {				
+			try {
+				if( rs.next() ){
+					return true;
+				}else {
+					close();
+					return false;
+				}
+			} catch (SQLException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+
+		public void close()  {
+			try{			
+				if(!rs.isClosed()){
+					rs.close();
+				}				
+			} catch (SQLException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+
+		@Override
+		public void handleError(ODataContentWriteErrorContext context, WritableByteChannel channel) {
+			close();
+		}
+	}
 
 	private ODataRequest request;
 	private ODataResponse response;
@@ -79,7 +132,7 @@ public class ReadEntityCollectionCommand{
 		this.uriInfo = uriInfo;
 		this.contentType = contentType;
 	}
-	
+
 	public void init(OData odata, ServiceMetadata metadata) {
 		this.odata = odata;
 		this.metadata = metadata;
@@ -88,9 +141,9 @@ public class ReadEntityCollectionCommand{
 
 	public void execute(SQLSession connection)throws SerializerException, 
 	ODataApplicationException, EdmPrimitiveTypeException  {
-		
+
 		processUriResource(connection);
-		
+
 		FilterOption filterOption = uriInfo.getFilterOption();
 		if(filterOption != null) {
 			try {
@@ -99,8 +152,8 @@ public class ReadEntityCollectionCommand{
 				throw internalError(e);
 			}
 		}
-		
-		Set<String> projection = new HashSet<>(); 
+
+		final Set<String> projection = new HashSet<>(); 
 
 		for(String name : edmEntitySet.getEntityType().getPropertyNames()){
 			if(EntityData.inSelection(uriInfo.getSelectOption(),name)){
@@ -111,32 +164,34 @@ public class ReadEntityCollectionCommand{
 				projection.add(name);
 			}
 		}
-		EntityCollection collection = new EntityCollection();
-		try(PreparedStatement statement = connection.create(new Select().setSelectBody(select), statementParams ) ){
-			try(ResultSet rs = statement.executeQuery()){		  
-				while(rs.next()){
-					Entity entity = EntityData.createEntity(edmEntitySet,projection,rs);					
-					collection.getEntities().add(entity);
-				}
-			}	   
-		} catch (SQLException | IOException e) {
+
+
+		try{
+
+			PreparedStatement statement = connection.create(new Select().setSelectBody(select), statementParams );			
+			ResultSet rs = statement.executeQuery();			
+			statement.closeOnCompletion();
+			serialize(new ResultSetIterator(rs, projection));
+
+		} catch (SQLException e) {
 			throw internalError(e);
 		}
-		
-		serialize(collection);
+
 	}
 
 	private void appendFilter(Expression filterExpression) throws ExpressionVisitException, ODataApplicationException {
-		 FilterExpressionVisitor expressionVisitor = new FilterExpressionVisitor(getCurrentAlias());
-		     SQLExpression filter = filterExpression.accept(expressionVisitor);
-		     if(select.getWhere() == null ){
-		    	 select.setWhere(filter);
-		     }else {
-		    	BinaryExpression where = new AndExpression().setLeftExpression(new Parenthesis().setExpression(select.getWhere())).
-		    	setRightExpression( new Parenthesis().setExpression(filter));
-		    	select.setWhere(where);
-		     }
-		
+
+		FilterExpressionVisitor expressionVisitor = new FilterExpressionVisitor(getCurrentAlias());
+		SQLExpression filter = filterExpression.accept(expressionVisitor);
+
+		if(select.getWhere() == null ){
+			select.setWhere(filter);
+		}else {
+			BinaryExpression where = new AndExpression().setLeftExpression(new Parenthesis().setExpression(select.getWhere())).
+					setRightExpression( new Parenthesis().setExpression(filter));
+			select.setWhere(where);
+		}
+
 	}
 
 	private String getCurrentAlias() {
@@ -149,7 +204,7 @@ public class ReadEntityCollectionCommand{
 	}
 
 	private void processUriResource(SQLSession connection) throws ODataApplicationException, EdmPrimitiveTypeException {
-		
+
 		for(UriResource segment : uriInfo.getUriResourceParts() ){
 			index++;
 			if(segment instanceof UriResourceNavigation){				
@@ -173,22 +228,23 @@ public class ReadEntityCollectionCommand{
 		}
 	}
 
-	protected void serialize(EntityCollection collection) throws SerializerException {
-		
+	protected void serialize(ResultSetIterator iterator) throws SerializerException {
+
 		ContextURL contextUrl = ContextURL.with().
 				entitySet(edmEntitySet).selectList(getSelectList()).
 				build();
 
 		final String id = request.getRawBaseUri() + "/" + edmEntitySet.getName();
 		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
-				.id(id).select(uriInfo.getSelectOption()).contextURL(contextUrl).
-				build();
-		
+				.id(id).select(uriInfo.getSelectOption()).contextURL(contextUrl)
+				.writeContentErrorCallback(iterator)
+				.build();
+
 		ODataSerializer serializer = odata.createSerializer(contentType);
-		SerializerResult serializerResult = serializer.entityCollection(metadata, 
-				edmEntitySet.getEntityType(), collection, opts);
-		
-		response.setContent(serializerResult.getContent());
+		SerializerStreamResult serializerResult = serializer.entityCollectionStreamed(metadata, 
+				edmEntitySet.getEntityType(), iterator, opts);
+
+		response.setODataContent(serializerResult.getODataContent());
 		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 		response.setHeader(HttpHeader.CONTENT_TYPE, contentType.toContentTypeString());
 	}
@@ -316,7 +372,7 @@ public class ReadEntityCollectionCommand{
 	}
 
 	private EdmEntitySet getNavigationTargetEntitySet(EdmNavigationProperty edmNavigationProperty)
-					throws ODataApplicationException {
+			throws ODataApplicationException {
 
 		if ( edmEntitySet == null) {
 			throw notImplemented();
