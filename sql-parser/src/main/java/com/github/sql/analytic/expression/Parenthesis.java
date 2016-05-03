@@ -42,16 +42,18 @@ public class Parenthesis implements SQLExpression {
 		return expression;
 	}
 
-	public void setExpression(SQLExpression expression) {
+	public Parenthesis setExpression(SQLExpression expression) {
 		this.expression = expression;
+		return this;
 	}
 
 	public void accept(ExpressionVisitor expressionVisitor) {
 		expressionVisitor.visit(this);
 	}
 
-	public void setNot() {
+	public Parenthesis setNot() {
 		not = true;
+		return this;
 	}
 
 	public boolean isNot() {

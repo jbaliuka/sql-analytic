@@ -40,8 +40,9 @@ public class InverseExpression implements SQLExpression {
 		return expression;
 	}
 
-	public void setExpression(SQLExpression expression) {
+	public InverseExpression setExpression(SQLExpression expression) {
 		this.expression = expression;
+		return this;
 	}
 
 	public void accept(ExpressionVisitor expressionVisitor) {

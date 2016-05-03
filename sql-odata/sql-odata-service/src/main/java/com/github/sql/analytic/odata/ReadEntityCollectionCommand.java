@@ -39,10 +39,14 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
+import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 
 import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.NamedParameter;
+import com.github.sql.analytic.expression.Parenthesis;
 import com.github.sql.analytic.expression.operators.conditional.AndExpression;
 import com.github.sql.analytic.expression.operators.relational.EqualsTo;
 import com.github.sql.analytic.schema.Column;
@@ -87,13 +91,22 @@ public class ReadEntityCollectionCommand{
 		
 		processUriResource(connection);
 		
+		FilterOption filterOption = uriInfo.getFilterOption();
+		if(filterOption != null) {
+			try {
+				appendFilter(filterOption.getExpression());
+			} catch (ExpressionVisitException e) {
+				throw internalError(e);
+			}
+		}
+		
 		Set<String> projection = new HashSet<>(); 
 
 		for(String name : edmEntitySet.getEntityType().getPropertyNames()){
 			if(EntityData.inSelection(uriInfo.getSelectOption(),name)){
 				SelectExpressionItem item = new SelectExpressionItem().setAlias(name);
 				Column column = new Column().
-						setTable(new Table(null,edmEntitySet.getEntityType().getName() + "_" + index));			
+						setTable(new Table(null,getCurrentAlias()));			
 				select.getSelectItems().add(item.setExpression(column.setColumnName(name)));
 				projection.add(name);
 			}
@@ -107,13 +120,30 @@ public class ReadEntityCollectionCommand{
 				}
 			}	   
 		} catch (SQLException | IOException e) {
-			throw inernalError(e);
+			throw internalError(e);
 		}
 		
 		serialize(collection);
 	}
 
-	public ODataApplicationException inernalError(Exception e) {
+	private void appendFilter(Expression filterExpression) throws ExpressionVisitException, ODataApplicationException {
+		 FilterExpressionVisitor expressionVisitor = new FilterExpressionVisitor(getCurrentAlias());
+		     SQLExpression filter = filterExpression.accept(expressionVisitor);
+		     if(select.getWhere() == null ){
+		    	 select.setWhere(filter);
+		     }else {
+		    	BinaryExpression where = new AndExpression().setLeftExpression(new Parenthesis().setExpression(select.getWhere())).
+		    	setRightExpression( new Parenthesis().setExpression(filter));
+		    	select.setWhere(where);
+		     }
+		
+	}
+
+	private String getCurrentAlias() {
+		return edmEntitySet.getEntityType().getName() + "_" + index;
+	}
+
+	public ODataApplicationException internalError(Exception e) {
 		return new ODataApplicationException(e.getMessage(), HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
 				Locale.ROOT,e);
 	}
@@ -190,7 +220,7 @@ public class ReadEntityCollectionCommand{
 			}
 
 		} catch (SQLException e) {
-			throw inernalError(e);
+			throw internalError(e);
 		}		
 	}
 

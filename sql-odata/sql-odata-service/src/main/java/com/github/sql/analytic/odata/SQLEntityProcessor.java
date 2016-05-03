@@ -66,7 +66,7 @@ public class SQLEntityProcessor implements EntityProcessor {
 		try {
 			command.execute(session);
 		} catch (EdmPrimitiveTypeException e) {
-			throw command.inernalError(e);
+			throw command.internalError(e);
 		}
 		
 	}

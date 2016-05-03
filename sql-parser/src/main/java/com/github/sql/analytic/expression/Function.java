@@ -45,8 +45,9 @@ public class Function implements SQLExpression,FromItem {
 		return distinct;
 	}
 
-	public void setDistinct(boolean distinct) {
+	public Function setDistinct(boolean distinct) {
 		this.distinct = distinct;
+		return this;
 	}
 
 	public void accept(ExpressionVisitor expressionVisitor) {
@@ -61,8 +62,9 @@ public class Function implements SQLExpression,FromItem {
 		return name;
 	}
 
-	public void setName(String string) {
+	public Function setName(String string) {
 		name = string;
+		return this;
 	}
 
 	/**
@@ -73,8 +75,9 @@ public class Function implements SQLExpression,FromItem {
 		return allColumns;
 	}
 
-	public void setAllColumns(boolean b) {
+	public Function setAllColumns(boolean b) {
 		allColumns = b;
+		return this;
 	}
 
 	/**
@@ -86,8 +89,9 @@ public class Function implements SQLExpression,FromItem {
 		return parameters;
 	}
 
-	public void setParameters(ExpressionList list) {
+	public Function setParameters(ExpressionList list) {
 		parameters = list;
+		return this;
 	}
 
     /**
@@ -98,8 +102,9 @@ public class Function implements SQLExpression,FromItem {
         return isEscaped;
     }
     
-    public void setEscaped(boolean isEscaped) {
+    public Function setEscaped(boolean isEscaped) {
         this.isEscaped = isEscaped;
+        return this;
     }
 
     public String toString() {
@@ -139,12 +144,12 @@ public class Function implements SQLExpression,FromItem {
 	}
 
 	public void setAlias(String alias) {
-	  this.alias = alias;
-		
+	  this.alias = alias;	  
 	}
 
-	public void setPipeline(boolean pipeline) {
+	public Function setPipeline(boolean pipeline) {
 		this.pipeline = pipeline;
+		return this;
 	}
 
 	public boolean isPipeline() {
@@ -155,7 +160,8 @@ public class Function implements SQLExpression,FromItem {
 		return analyticCause;
 	}
 
-	public void setAnalyticClause(AnalyticClause analyticCause) {
+	public Function setAnalyticClause(AnalyticClause analyticCause) {
 		this.analyticCause = analyticCause;
+		return this;
 	}
 }
