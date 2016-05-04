@@ -43,6 +43,10 @@ import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
+import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
+import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
+import org.apache.olingo.server.api.uri.queryoption.SkipOption;
+import org.apache.olingo.server.api.uri.queryoption.TopOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 
@@ -57,6 +61,8 @@ import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.select.FromItem;
 import com.github.sql.analytic.statement.select.Join;
+import com.github.sql.analytic.statement.select.Limit;
+import com.github.sql.analytic.statement.select.OrderByElement;
 import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.Select;
 import com.github.sql.analytic.statement.select.SelectExpressionItem;
@@ -165,6 +171,8 @@ public class ReadEntityCollectionCommand{
 			}
 		}
 
+		 appendLimit();
+		 appendOrdering();
 
 		try{
 
@@ -177,6 +185,41 @@ public class ReadEntityCollectionCommand{
 			throw internalError(e);
 		}
 
+	}
+
+	private void appendOrdering() throws ODataApplicationException {
+		
+		OrderByOption ordering = uriInfo.getOrderByOption();
+		if(ordering != null){
+			select.setOrderByElements(new ArrayList<OrderByElement>());
+			for( OrderByItem item: ordering.getOrders()){
+				OrderByElement element = new OrderByElement();
+				element.setAsc(!item.isDescending());
+				FilterExpressionVisitor expressionVisitor = new FilterExpressionVisitor(getCurrentAlias());
+				try {
+					
+					SQLExpression orderByItem = item.getExpression().accept(expressionVisitor);
+					element.setColumnReference(orderByItem);
+					select.getOrderByElements().add(element);
+				} catch (ExpressionVisitException  e) {
+					throw internalError(e);
+				}
+
+			}
+		}
+	}
+
+	private void appendLimit() {
+		TopOption top = uriInfo.getTopOption();
+		Limit limit = new Limit();
+		if(top != null){
+			select.setLimit( limit.setRowCount(top.getValue()) );
+		}
+		SkipOption skip = uriInfo.getSkipOption(); 
+		if(skip != null){
+			select.setLimit( limit.setOffset(skip.getValue()) );
+		}
+		
 	}
 
 	private void appendFilter(Expression filterExpression) throws ExpressionVisitException, ODataApplicationException {
