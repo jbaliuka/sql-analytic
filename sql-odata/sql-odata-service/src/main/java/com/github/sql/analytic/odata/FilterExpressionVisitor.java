@@ -37,6 +37,7 @@ import com.github.sql.analytic.expression.operators.relational.EqualsTo;
 import com.github.sql.analytic.expression.operators.relational.ExpressionList;
 import com.github.sql.analytic.expression.operators.relational.GreaterThan;
 import com.github.sql.analytic.expression.operators.relational.GreaterThanEquals;
+import com.github.sql.analytic.expression.operators.relational.LikeExpression;
 import com.github.sql.analytic.expression.operators.relational.MinorThan;
 import com.github.sql.analytic.expression.operators.relational.MinorThanEquals;
 import com.github.sql.analytic.expression.operators.relational.NotEqualsTo;
@@ -96,8 +97,28 @@ public class FilterExpressionVisitor  implements ExpressionVisitor<SQLExpression
 	@Override
 	public SQLExpression visitMethodCall(MethodKind methodCall, List<SQLExpression> parameters)
 			throws ExpressionVisitException, ODataApplicationException {
-
-		return new Function().setName(methodCall.name()).setParameters(new ExpressionList(parameters));
+		
+		Function function = new Function().setName(methodCall.name()).
+				setParameters(new ExpressionList(parameters));
+		
+		switch (methodCall) {
+		case CONTAINS: return new LikeExpression().
+				setLeftExpression(parameters.get(0)).
+				setRightExpression(new StringValue("%" +parameters.get(1) + "%"));
+		case STARTSWITH: return new LikeExpression().
+				setLeftExpression(parameters.get(0)).
+				setRightExpression(new StringValue(parameters.get(1) + "%"));
+		case ENDSWITH: return new LikeExpression().
+				setLeftExpression(parameters.get(0)).
+				setRightExpression(new StringValue("%" +parameters.get(1) ));
+		case TOLOWER: function.setName("LOWER");
+		case TOUPPER: function.setName("UPPER");
+		case INDEXOF: function.setName("INSTR");
+		case NOW: function.setName("CURRENT_TIMESTAMP");
+		default:
+			break;
+		}
+		return function;
 	}
 
 	@Override
