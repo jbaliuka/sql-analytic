@@ -39,6 +39,7 @@ import org.apache.olingo.client.api.domain.ClientProperty;
 import org.apache.olingo.client.api.domain.ClientServiceDocument;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.api.http.HttpClientFactory;
+import org.apache.olingo.client.api.uri.FilterFactory;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.client.core.domain.ClientEntityImpl;
 import org.apache.olingo.client.core.domain.ClientPrimitiveValueImpl;
@@ -163,6 +164,18 @@ public class SQLODataServletTest {
 		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
 		ClientEntitySet entity = res.getBody();		
 		assertFalse( entity.getEntities().isEmpty() );
+
+	}
+	
+	@Test
+	public void testFilterReq() throws URISyntaxException {
+		
+		URI uri = new URI(serviceRoot + "CUSTOMERS?$filter=contains(LAST_NAME,%27Andersen%27)");
+		ODataEntitySetRequest<ClientEntitySet> req =
+				client.getRetrieveRequestFactory().getEntitySetRequest(uri);		
+		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
+		ClientEntitySet entity = res.getBody();		
+		assertTrue( entity.getEntities().size() == 1 );
 
 	}
 

@@ -9,7 +9,6 @@ import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
@@ -21,6 +20,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
 
+import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.Function;
 import com.github.sql.analytic.expression.InverseExpression;
 import com.github.sql.analytic.expression.LongValue;
@@ -41,11 +41,13 @@ import com.github.sql.analytic.expression.operators.relational.LikeExpression;
 import com.github.sql.analytic.expression.operators.relational.MinorThan;
 import com.github.sql.analytic.expression.operators.relational.MinorThanEquals;
 import com.github.sql.analytic.expression.operators.relational.NotEqualsTo;
+import com.github.sql.analytic.expression.operators.string.Concat;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 
 public class FilterExpressionVisitor  implements ExpressionVisitor<SQLExpression> {
 
+	private static final StringValue MATCH_ANY = new StringValue("'%'");
 	private String alias;
 
 	public FilterExpressionVisitor(String string) {
@@ -85,7 +87,7 @@ public class FilterExpressionVisitor  implements ExpressionVisitor<SQLExpression
 		switch (operator) {
 		case MINUS:	return new InverseExpression().setExpression(operand);
 		case NOT: return new Parenthesis().setExpression(operand).setNot();
-			
+
 		default:
 			break;
 		}
@@ -97,28 +99,51 @@ public class FilterExpressionVisitor  implements ExpressionVisitor<SQLExpression
 	@Override
 	public SQLExpression visitMethodCall(MethodKind methodCall, List<SQLExpression> parameters)
 			throws ExpressionVisitException, ODataApplicationException {
-		
+
 		Function function = new Function().setName(methodCall.name()).
 				setParameters(new ExpressionList(parameters));
-		
+
 		switch (methodCall) {
-		case CONTAINS: return new LikeExpression().
-				setLeftExpression(parameters.get(0)).
-				setRightExpression(new StringValue("%" +parameters.get(1) + "%"));
-		case STARTSWITH: return new LikeExpression().
-				setLeftExpression(parameters.get(0)).
-				setRightExpression(new StringValue(parameters.get(1) + "%"));
-		case ENDSWITH: return new LikeExpression().
-				setLeftExpression(parameters.get(0)).
-				setRightExpression(new StringValue("%" +parameters.get(1) ));
-		case TOLOWER: function.setName("LOWER");
-		case TOUPPER: function.setName("UPPER");
-		case INDEXOF: function.setName("INSTR");
+
+		case CONTAINS: {
+			BinaryExpression concat = new Concat().setLeftExpression(MATCH_ANY).setRightExpression(parameters.get(1));
+			return new LikeExpression().
+					setLeftExpression(parameters.get(0)).
+					setRightExpression( new Concat().setLeftExpression(concat).setRightExpression(MATCH_ANY));
+		}
+		case STARTSWITH: {				
+			return new LikeExpression().
+					setLeftExpression(parameters.get(0)).
+					setRightExpression( new Concat().setLeftExpression(parameters.get(1)).setRightExpression(MATCH_ANY));
+		}
+		case ENDSWITH:{
+			return new LikeExpression().
+					setLeftExpression(parameters.get(0)).
+					setRightExpression( new Concat().setLeftExpression(MATCH_ANY).setRightExpression(parameters.get(1)));
+		}
+		case TOLOWER: return function.setName("LOWER");
+		case TOUPPER: return function.setName("UPPER");
+		case INDEXOF: return function.setName("INSTR");
+		case TRIM: return function;
 		case NOW: function.setName("CURRENT_TIMESTAMP");
+		case LENGTH: return function;
+		case SUBSTRING: return function;
+		case CONCAT: return function;
+		case YEAR: return function;
+		case MONTH: return function;
+		case DAY: return function;
+		case HOUR: return function;
+		case MINUTE: return function;
+		case SECOND: return function;
+		case ROUND: return function;
+		case FLOOR: return function;
+		case CEILING: return function;
+
 		default:
 			break;
 		}
-		return function;
+		throw new ODataApplicationException(methodCall + " function is not implemented",
+				HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);		
 	}
 
 	@Override
@@ -131,13 +156,8 @@ public class FilterExpressionVisitor  implements ExpressionVisitor<SQLExpression
 	@Override
 	public SQLExpression visitLiteral(Literal literal) throws ExpressionVisitException, ODataApplicationException {
 		String literalAsString = literal.getText();
-		if(literal.getType() instanceof EdmString) {
-			String stringLiteral = "";
-			if(literal.getText().length() > 2) {
-				stringLiteral = literalAsString.substring(1, literalAsString.length() - 1);
-			}
-
-			return new StringValue(stringLiteral);
+		if(literal.getType() instanceof EdmString) {			
+			return new StringValue(literal.getText());
 		} else {	        
 			try {
 				return new LongValue(literalAsString);

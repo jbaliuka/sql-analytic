@@ -5,7 +5,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.io.ObjectInputStream.GetField;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -379,11 +382,16 @@ public final class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public StringBuffer getRequestURL() {
 		
+		URI uri = clientRequest.getURI();	
 		try {
-			return new StringBuffer(clientRequest.getURI().toURL().toString());
-		} catch (MalformedURLException e) {
-		  return new StringBuffer(clientRequest.getURI().toString());
-		}
+			URI newUri = new URI(uri.getScheme(), uri.getUserInfo(), 
+					uri.getHost(), uri.getPort(), uri.getPath(), 
+					null, null);
+			return new StringBuffer(newUri.toString());
+		} catch (URISyntaxException e) {
+			throw new AssertionError(e);
+		} 
+		
 	}
 
 	@Override
