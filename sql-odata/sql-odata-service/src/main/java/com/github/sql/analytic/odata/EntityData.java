@@ -10,9 +10,10 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Base64;
 import java.util.List;
 import java.util.Set;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -77,7 +78,7 @@ public class EntityData {
 						out.write(b);
 					}
 				}
-				value = Base64.getEncoder().encodeToString(out.toByteArray());
+				value = DatatypeConverter.printBase64Binary(out.toByteArray());
 			}
 		}else if (value instanceof Clob) {
 			Clob clob = (Clob) value;
