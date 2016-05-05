@@ -43,17 +43,13 @@ public class SQLEntityCollectionProcessor implements EntityCollectionProcessor {
 
 		final UriResource firstResourceSegment = uriInfo.getUriResourceParts().get(0);	    
 		if(firstResourceSegment instanceof UriResourceEntitySet) {
-			try {
-				
-				ReadEntityCollectionCommand cmd = new ReadEntityCollectionCommand(request, response, uriInfo, contentType);
-				cmd.init(odata,metadata);
-				cmd.execute(connection);
-				
-			} catch (EdmPrimitiveTypeException e) {
-				throw new ODataApplicationException(e.getMessage(), 
-						HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
-						Locale.ROOT,e);
-			}	     
+			ReadEntityCollectionCommand command = new ReadEntityCollectionCommand( uriInfo);			
+			ResultSetIterator iterator = command.execute(connection);
+			SerializeEntityCollectionCommand ser = new SerializeEntityCollectionCommand(request, response, uriInfo, contentType);
+			ser.init(odata,metadata);
+			ser.setEdmEntitySet(command.getEdmEntitySet());
+			ser.serialize(iterator);	
+			
 		} else {
 			throw new ODataApplicationException("Not implemented", 
 					HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), 

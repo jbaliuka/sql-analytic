@@ -61,13 +61,12 @@ public class SQLEntityProcessor implements EntityProcessor {
 	public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat)
 			throws ODataApplicationException, ODataLibraryException {
 		
-		ReadEntityCommand command = new ReadEntityCommand(request, response, uriInfo, responseFormat);
-		command.init(odata, serviceMetadata);		
-		try {
-			command.execute(session);
-		} catch (EdmPrimitiveTypeException e) {
-			throw command.internalError(e);
-		}
+		ReadEntityCollectionCommand command = new ReadEntityCollectionCommand(uriInfo);			
+		ResultSetIterator iterator = command.execute(session);
+		SerializeEntityCommand ser = new SerializeEntityCommand(request, response, uriInfo, responseFormat);
+		ser.init(odata,serviceMetadata);
+		ser.setEdmEntitySet(command.getEdmEntitySet());
+		ser.serialize(iterator);
 		
 	}
 

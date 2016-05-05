@@ -3,7 +3,6 @@ package com.github.sql.analytic.odata;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.data.ContextURL;
-import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -16,18 +15,18 @@ import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 
-public class ReadEntityCommand extends ReadEntityCollectionCommand {
+public class SerializeEntityCommand extends SerializeEntityCollectionCommand {
 
-	public ReadEntityCommand(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType contentType) {
+	public SerializeEntityCommand(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType contentType) {
 		super(request, response, uriInfo, contentType);		
 	}
 
 	@Override
-	protected void serialize(ResultSetIterator iterator) throws SerializerException {
+	protected void serialize(ResultSetIterator iterator) throws SerializerException, ODataApplicationException {
 
 		try{
 			if(!iterator.hasNext()){
-				new ODataApplicationException("Not Found",
+				throw new ODataApplicationException("Not Found",
 						HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
 			}
 
@@ -37,6 +36,7 @@ public class ReadEntityCommand extends ReadEntityCollectionCommand {
 
 			EntitySerializerOptions options = EntitySerializerOptions.with().
 					contextURL(contextUrl).select(getUriInfo().getSelectOption()).
+					expand(getUriInfo().getExpandOption()).
 					build();
 
 			ODataSerializer serializer = getOdata().createSerializer(getContentType());
@@ -48,6 +48,7 @@ public class ReadEntityCommand extends ReadEntityCollectionCommand {
 			getResponse().setContent(serializerResult.getContent());
 			getResponse().setStatusCode(HttpStatusCode.OK.getStatusCode());
 			getResponse().setHeader(HttpHeader.CONTENT_TYPE, getContentType().toContentTypeString());
+			
 		}finally{
 			iterator.close();
 		}

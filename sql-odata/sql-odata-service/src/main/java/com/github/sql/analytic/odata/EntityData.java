@@ -18,7 +18,6 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmElement;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmKeyPropertyRef;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
@@ -45,9 +44,9 @@ public class EntityData {
 		return false;
 	}
 
-	public static Entity createEntity(EdmEntitySet edmEntitySet, Set<String> projection, ResultSet rs) throws SQLException, IOException {
+	public static Entity createEntity(EdmEntityType edmEntityType, Set<String> projection, ResultSet rs) throws SQLException, IOException {
 
-		EdmEntityType edmEntityType = edmEntitySet.getEntityType();
+		
 		Entity entity = new Entity();
 		entity.setType(edmEntityType.getFullQualifiedName().toString());
 
@@ -62,7 +61,7 @@ public class EntityData {
 				entity.addProperty( new Property(null,ref.getName(),ValueType.PRIMITIVE,rs.getObject(ref.getName())));
 			}
 		}		
-		entity.setId(createId(edmEntitySet.getName(),rs,edmEntityType));
+		entity.setId(createId(edmEntityType.getName(),rs,edmEntityType));
 		return entity;
 	}
 
