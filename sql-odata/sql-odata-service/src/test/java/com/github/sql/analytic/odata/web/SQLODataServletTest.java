@@ -101,6 +101,18 @@ public class SQLODataServletTest {
 	}
 	
 	@Test
+	public void testExpandEntityReq() throws URISyntaxException {
+		URI uri = new URI(serviceRoot + "CUSTOMERS(3)?$expand=FK_ORDERS_CUSTOMERS");
+		ODataEntityRequest<ClientEntity> req =
+				client.getRetrieveRequestFactory().getEntityRequest(uri);
+		ODataRetrieveResponse<ClientEntity> res = req.execute();
+		ClientEntity entity = res.getBody();		
+		ClientProperty expanded = entity.getProperty("FK_ORDERS_CUSTOMERS");
+		assertTrue(expanded.getCollectionValue().size() > 1);
+
+	}
+	
+	@Test
 	public void testNavEntityReq() throws URISyntaxException {
 		
 		URI uri = new URI(serviceRoot + "CUSTOMERS(3)/FK_ORDERS_CUSTOMERS");		
@@ -111,6 +123,8 @@ public class SQLODataServletTest {
 		assertFalse( entity.getEntities().isEmpty() );
 
 	}
+	
+	
 	
 	@Test
 	public void testCreateEntityReq() throws URISyntaxException {
@@ -164,6 +178,18 @@ public class SQLODataServletTest {
 		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
 		ClientEntitySet entity = res.getBody();		
 		assertFalse( entity.getEntities().isEmpty() );
+
+	}
+	
+	@Test
+	public void testTopReq() throws URISyntaxException {
+		
+		URI uri = new URI(serviceRoot + "CUSTOMERS?$top=1");
+		ODataEntitySetRequest<ClientEntitySet> req =
+				client.getRetrieveRequestFactory().getEntitySetRequest(uri);
+		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
+		ClientEntitySet entity = res.getBody();		
+		assertFalse( entity.getEntities().size() == 1 );
 
 	}
 	

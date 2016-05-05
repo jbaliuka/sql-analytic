@@ -26,9 +26,7 @@ final class ResultSetIterator extends EntityIterator implements ODataContentWrit
 	private EdmEntityType type;
 	private ExpandOption expandOption;
 	private SQLSession session;
-	private boolean close = false;
-
-
+	
 	ResultSetIterator(SQLSession session,ResultSet rs, EdmEntityType type, ExpandOption expandOption) throws SQLException {
 		this.session = session;
 		this.expandOption = expandOption;
@@ -43,8 +41,7 @@ final class ResultSetIterator extends EntityIterator implements ODataContentWrit
 
 	@Override
 	public Entity next() {
-
-		try {
+		try{
 			Entity entity = EntityData.createEntity(type,projection,rs);
 			if(expandOption != null){
 				new ExpandCommad(expandOption, type, entity).expand(session);
@@ -52,11 +49,7 @@ final class ResultSetIterator extends EntityIterator implements ODataContentWrit
 			return entity;
 		} catch (SQLException | IOException | ODataApplicationException e) {
 			throw new ODataRuntimeException(e);
-		}finally{
-			if(close){
-				close();
-			}
-		}		
+		}	
 	}
 
 	@Override
@@ -65,7 +58,7 @@ final class ResultSetIterator extends EntityIterator implements ODataContentWrit
 			if( rs.next() ){
 				return true;
 			}else {
-				close = true;
+				close();
 				return false;
 			}
 		} catch (SQLException e) {
@@ -95,5 +88,5 @@ final class ResultSetIterator extends EntityIterator implements ODataContentWrit
 		return projection;
 	}
 
-	
+
 }
