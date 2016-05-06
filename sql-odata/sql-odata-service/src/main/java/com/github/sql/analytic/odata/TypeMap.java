@@ -10,6 +10,7 @@ public enum TypeMap {
 	TINYINT(Types.TINYINT,EdmPrimitiveTypeKind.Byte),
 	SMALLINT(Types.SMALLINT,EdmPrimitiveTypeKind.Int16),
 	INTEGER(Types.INTEGER,EdmPrimitiveTypeKind.Int32),
+	INT(Types.INTEGER,EdmPrimitiveTypeKind.Int32),
 	BIGINT(Types.BIGINT,EdmPrimitiveTypeKind.Int64),
 	FLOAT(Types.FLOAT,EdmPrimitiveTypeKind.Double),
 	REAL(Types.REAL,EdmPrimitiveTypeKind.Double),

@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 
 public abstract class SQLODataServlet extends HttpServlet {
@@ -27,7 +28,7 @@ public abstract class SQLODataServlet extends HttpServlet {
 			try(Connection connection = getDatasource().getConnection()){
 				try{
 					
-					SQLOdataHandler handler = new SQLOdataHandler(config,connection, getPolicy());
+					SQLOdataHandler handler = new SQLOdataHandler(config,connection, getPolicy(),getCursors());
 					handler.process(request, response);
 					connection.commit();
 
@@ -50,6 +51,7 @@ public abstract class SQLODataServlet extends HttpServlet {
 	abstract protected List<CreatePolicy> getPolicy();
 
 	abstract protected DataSource getDatasource();
+	abstract protected Map<String, Cursor> getCursors();
 
 
 

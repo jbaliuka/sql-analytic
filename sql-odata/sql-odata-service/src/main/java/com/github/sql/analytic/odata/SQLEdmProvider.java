@@ -69,6 +69,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		
 		CsdlEntityType entityType = new CsdlEntityType().setName(entityTypeName.getName()); 
 		List<CsdlProperty> properties = new ArrayList<>();
+		entityType.setProperties(properties);
 		List<CsdlPropertyRef> key = new ArrayList<>();
 		List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
 		String schema = entityTypeName.getNamespace();
@@ -111,7 +112,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		} catch (SQLException e) {
 			throw new ODataException(e);
 		}
-		return entityType.setProperties(properties).setKey(key).setNavigationProperties(navPropList);
+		return entityType.setKey(key).setNavigationProperties(navPropList);
 	}
 
 	private CsdlNavigationProperty createExportedNavProperty(ResultSet rs) throws SQLException {

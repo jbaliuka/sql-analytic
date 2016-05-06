@@ -208,7 +208,7 @@ public class FilterExpressionVisitor  implements ExpressionVisitor<SQLExpression
 			String name = uriResourceProperty.getProperty().getName();	       
 			Table table = new Table().setName(alias);
 
-			return new Column(table , name);
+			return new Column(alias != null ? table : null , name);
 		} else {
 
 			throw new ODataApplicationException("Only primitive properties are implemented in filter  expressions", 

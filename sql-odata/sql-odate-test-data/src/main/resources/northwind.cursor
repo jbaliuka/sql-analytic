@@ -1,0 +1,1 @@
+CURSOR myCustomers (id INT(11) ,company VARCHAR(50),last_name VARCHAR(50),first_name VARCHAR(50)) AS select id,company,last_name,first_name from public.customers

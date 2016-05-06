@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -57,6 +58,7 @@ import org.junit.Test;
 
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
+import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 
 public class SQLODataServletTest {
@@ -272,6 +274,11 @@ public class SQLODataServletTest {
 			protected DataSource getDatasource() {
 
 				return datasource;
+			}
+
+			@Override
+			protected Map<String, Cursor> getCursors() {				
+				return Collections.emptyMap();
 			}
 
 		};		

@@ -113,8 +113,10 @@ public abstract class ReadCommand {
 		for(String name : type.getPropertyNames()){
 			if(EntityData.inSelection(selectOption, name)){
 				SelectExpressionItem item = new SelectExpressionItem().setAlias(name);
-				Column column = new Column().
-						setTable(new Table(null,alias));			
+				Column column = new Column();
+				if(alias != null ){
+					column.setTable(new Table(null,alias));
+				}
 				getSelect().getSelectItems().add(item.setExpression(column.setColumnName(name)));
 
 			}

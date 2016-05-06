@@ -263,9 +263,11 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 	}
 
 	public void visit(Column tableColumn) {
-		String tableName = tableColumn.getTable().getWholeTableName();
-		if (tableName != null) {
-			buffer.append(tableName).append(".");
+		if( tableColumn.getTable() != null){
+			String tableName = tableColumn.getTable().getWholeTableName();
+			if (tableName != null) {
+				buffer.append(tableName).append(".");
+			}
 		}
 
 		buffer.append(tableColumn.getColumnName());

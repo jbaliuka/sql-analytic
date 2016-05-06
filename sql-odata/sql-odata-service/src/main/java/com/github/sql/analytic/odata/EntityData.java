@@ -51,7 +51,7 @@ public class EntityData {
 		entity.setType(edmEntityType.getFullQualifiedName().toString());
 
 		for( String name : edmEntityType.getPropertyNames()){	
-			if(projection == null || projection.contains(name)){
+			if(projection == null || projection.contains(name.toUpperCase())){
 				EdmElement prop = edmEntityType.getProperty(name);
 				entity.addProperty( new Property(null,prop.getName(),ValueType.PRIMITIVE,toPrimitive(rs, prop)));
 			}

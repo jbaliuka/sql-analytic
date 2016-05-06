@@ -1803,7 +1803,7 @@ Cursor DeclareCursor():
 
    ")" <K_AS> select = Select()   {
       cursor.setSelect(select);   }
-{  
+{  cursor.setColumnDefinitions(columnDefinitions);
   return cursor;
 }}
 

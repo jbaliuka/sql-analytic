@@ -35,7 +35,7 @@ final class ResultSetIterator extends EntityIterator implements ODataContentWrit
 		this.type = type;
 		ResultSetMetaData md = rs.getMetaData();
 		for(int i = 0; i < md.getColumnCount(); i++ ){
-			projection.add(md.getColumnName(i + 1));
+			projection.add(md.getColumnName(i + 1).toUpperCase());
 		}
 	}
 

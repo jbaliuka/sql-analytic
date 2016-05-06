@@ -29,12 +29,13 @@ public class SQLOdataHandler {
 	private Connection connection;
 	private List<CreatePolicy> policy;
 	private ServletConfig config;
-	private Map<String,Cursor> cursors = new HashMap<>();
+	private Map<String,Cursor> cursors;
 
-	public SQLOdataHandler(ServletConfig config,Connection connection,List<CreatePolicy> policy){
+	public SQLOdataHandler(ServletConfig config,Connection connection,List<CreatePolicy> policy, Map<String, Cursor> cursors){
 		this.connection = connection;
 		this.policy = policy;
 		this.config = config;
+		this.cursors = cursors;
 	}
 
 
