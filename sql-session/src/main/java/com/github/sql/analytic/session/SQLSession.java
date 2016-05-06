@@ -91,7 +91,7 @@ public class SQLSession implements Connection{
 		return  new Policy(policy, context);
 	}
 
-	protected ParamsDeparser createDeparser(StringBuffer buffer) {
+	public ParamsDeparser createDeparser(StringBuffer buffer) {
 
 		return new ParamsDeparser(buffer);
 	} 

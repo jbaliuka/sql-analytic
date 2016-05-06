@@ -28,10 +28,13 @@ import org.apache.olingo.client.api.communication.request.cud.ODataEntityUpdateR
 import org.apache.olingo.client.api.communication.request.cud.UpdateType;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntityRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetRequest;
+import org.apache.olingo.client.api.communication.request.retrieve.ODataPropertyRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataServiceDocumentRequest;
+import org.apache.olingo.client.api.communication.request.retrieve.ODataValueRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataEntityCreateResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
+import org.apache.olingo.client.api.domain.ClientComplexValue;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientPrimitiveValue;
@@ -50,8 +53,11 @@ import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.internal.runners.statements.Fail;
 
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
@@ -181,6 +187,20 @@ public class SQLODataServletTest {
 
 	}
 	
+	@Ignore
+	public void testFunctionReq() throws URISyntaxException {
+		
+		Assert.fail("not implemented");
+		
+		URI uri = new URI(serviceRoot + "KeyValue(KEY='test')");
+		ODataPropertyRequest<ClientProperty> req =
+				client.getRetrieveRequestFactory().getPropertyRequest(uri);
+		ODataRetrieveResponse<ClientProperty> res = req.execute();
+		ClientProperty property = res.getBody();		
+		assertFalse( property.getCollectionValue().isEmpty() );
+
+	}
+	
 	@Test
 	public void testTopReq() throws URISyntaxException {
 		
@@ -189,7 +209,7 @@ public class SQLODataServletTest {
 				client.getRetrieveRequestFactory().getEntitySetRequest(uri);
 		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
 		ClientEntitySet entity = res.getBody();		
-		assertFalse( entity.getEntities().size() == 1 );
+		assertTrue( entity.getEntities().size() == 1 );
 
 	}
 	

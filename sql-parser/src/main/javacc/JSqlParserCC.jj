@@ -106,6 +106,7 @@ import com.github.sql.analytic.expression.operators.relational.NotEqualsTo;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.SQLStatement;
+import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.create.table.ColDataType;
 import com.github.sql.analytic.statement.create.table.ColumnDefinition;
 import com.github.sql.analytic.statement.create.table.CreateTable;
@@ -244,6 +245,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_CHECK: "CHECK">
 |   <K_TO: "TO" >
 |   <K_POLICY: "POLICY" >
+|  < K_CURSOR: "CURSOR" >
 }
 
 
@@ -298,6 +300,8 @@ SQLStatement Statement() :
     stm = Drop()
     |
     stm = Truncate()
+    |
+     <K_CURSOR>  stm = DeclareCursor() 
   	
     )
     [";"]
@@ -1761,6 +1765,47 @@ CreateView CreateView():
 		}
 
 }
+
+Cursor DeclareCursor():
+{
+  Cursor cursor = new Cursor();
+  Token name = null;
+  ColDataType colDataType = null;
+  ColumnDefinition coldef = null;
+  ArrayList columnDefinitions = new ArrayList();
+  Select select = null;}
+{
+
+  name = <S_IDENTIFIER>  {
+    cursor.setName(name.image);  }
+
+  "("
+
+        name = <S_IDENTIFIER>
+		colDataType = ColDataType()
+		{
+		  coldef = new ColumnDefinition();
+		  coldef.setColumnName(name.image);
+		  coldef.setColDataType(colDataType);
+		  columnDefinitions.add(coldef);		}
+
+		( ","
+
+        name = <S_IDENTIFIER>
+		colDataType = ColDataType()
+		{
+		  coldef = new ColumnDefinition();
+			coldef.setColumnName(name.image);
+			coldef.setColDataType(colDataType);
+			columnDefinitions.add(coldef);
+		}
+		 		)*
+
+   ")" <K_AS> select = Select()   {
+      cursor.setSelect(select);   }
+{  
+  return cursor;
+}}
 
 CreateTable CreateTable():
 {

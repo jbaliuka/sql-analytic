@@ -3,6 +3,7 @@ package com.github.sql.analytic.util.deparser;
 import java.util.Iterator;
 
 import com.github.sql.analytic.schema.Column;
+import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.create.table.CreateTable;
 import com.github.sql.analytic.statement.create.view.CreateView;
@@ -167,6 +168,12 @@ public class StatementDeParser implements StatementVisitor {
 		
 		
 
+	}
+
+	@Override
+	public void visit(Cursor cursor) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

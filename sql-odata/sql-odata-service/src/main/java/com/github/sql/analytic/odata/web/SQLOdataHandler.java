@@ -3,7 +3,9 @@ package com.github.sql.analytic.odata.web;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
@@ -14,10 +16,12 @@ import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
 
+import com.github.sql.analytic.odata.SQLComplexCollectionProcessor;
 import com.github.sql.analytic.odata.SQLEdmProvider;
 import com.github.sql.analytic.odata.SQLEntityCollectionProcessor;
 import com.github.sql.analytic.odata.SQLEntityProcessor;
 import com.github.sql.analytic.session.SQLSession;
+import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.policy.SessionContext;
 
@@ -26,6 +30,7 @@ public class SQLOdataHandler {
 	private Connection connection;
 	private List<CreatePolicy> policy;
 	private ServletConfig config;
+	private Map<String,Cursor> cursors = new HashMap<>();
 
 	public SQLOdataHandler(ServletConfig config,Connection connection,List<CreatePolicy> policy){
 		this.connection = connection;
@@ -39,10 +44,15 @@ public class SQLOdataHandler {
 		            SessionContext context = createContext(request);										
 					SQLSession session = createSession(context);					
 					OData odata = OData.newInstance();
-					ServiceMetadata edm = odata.createServiceMetadata(new SQLEdmProvider(session.getMetaData()), new ArrayList<EdmxReference>());
+					SQLEdmProvider edmProvider = new SQLEdmProvider(session.getMetaData());
+					edmProvider.setCursors(cursors);
+					ServiceMetadata edm = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 					ODataHttpHandler handler = odata.createHandler(edm);
 					handler.register(new SQLEntityCollectionProcessor(session));	      
 					handler.register(new SQLEntityProcessor(session));
+					SQLComplexCollectionProcessor processor = new SQLComplexCollectionProcessor(session);
+					processor.setCursors(cursors);
+					handler.register(processor);
 					handler.process(request, response);	
 		
 	}

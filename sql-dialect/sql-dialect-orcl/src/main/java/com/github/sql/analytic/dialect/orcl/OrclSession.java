@@ -17,7 +17,7 @@ public class OrclSession extends SQLSession {
 	}
 	
 	@Override
-	protected ParamsDeparser createDeparser(StringBuffer buffer) {
+	public ParamsDeparser createDeparser(StringBuffer buffer) {
 		
 		return new ParamsDeparser(buffer){
 			

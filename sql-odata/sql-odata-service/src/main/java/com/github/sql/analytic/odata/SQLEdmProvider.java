@@ -4,22 +4,37 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
+import org.apache.olingo.commons.api.edm.provider.CsdlFunction;
+import org.apache.olingo.commons.api.edm.provider.CsdlFunctionImport;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlOnDelete;
 import org.apache.olingo.commons.api.edm.provider.CsdlOnDeleteAction;
+import org.apache.olingo.commons.api.edm.provider.CsdlParameter;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.apache.olingo.commons.api.edm.provider.CsdlReturnType;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.ex.ODataException;
+
+import com.github.sql.analytic.expression.NamedParameter;
+import com.github.sql.analytic.statement.Cursor;
+import com.github.sql.analytic.statement.create.table.ColumnDefinition;
+import com.github.sql.analytic.transform.ExpressionTransform;
+import com.github.sql.analytic.transform.StatementTransform;
 
 public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
@@ -44,8 +59,11 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 	private static FullQualifiedName container = new FullQualifiedName("SQLODataService",CONTAINER_NAME);
 	private DatabaseMetaData metadata;
+	private Map<String,Cursor> cursors;
+
 
 	public SQLEdmProvider(DatabaseMetaData metadata) {
+
 		this.metadata = metadata;		
 	}
 
@@ -144,6 +162,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		List<CsdlEntitySet> entitySets = new ArrayList<>();
 		root.setEntitySets(entitySets);
 
+
 		for(CsdlSchema schema : getSchemas()){
 			for(CsdlEntitySet set : schema.getEntityContainer().getEntitySets()){
 				entitySets.add(set);
@@ -155,9 +174,10 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	@Override
 	public CsdlEntitySet getEntitySet(FullQualifiedName entityContainer, String entitySetName) throws ODataException {
 
-		CsdlEntitySet entitySet = new CsdlEntitySet();
+		CsdlEntitySet entitySet = null;
 		try (ResultSet rs = metadata.getTables(null, null,entitySetName,null)){
 			if(rs.next()){	
+				entitySet = new CsdlEntitySet();
 				FullQualifiedName entityTypeName = new FullQualifiedName(rs.getString(TABLE_SCHEM),
 						rs.getString(TABLE_NAME));										
 				entitySet.setType(entityTypeName).setName(entityTypeName.getName());
@@ -173,12 +193,23 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	public List<CsdlSchema> getSchemas() throws ODataException {
 		List<CsdlSchema> schemas = new ArrayList<CsdlSchema>();		
 		try(ResultSet schemasRs = metadata.getSchemas()){			
-			while(schemasRs.next()){				
-				CsdlEntityContainer schemaContainer = new CsdlEntityContainer();
+			while(schemasRs.next()){
+				CsdlEntityContainer schemaContainer = new CsdlEntityContainer();				
 				List<CsdlEntitySet> entitySets = new ArrayList<>();
 				schemaContainer.setEntitySets(entitySets);
 				CsdlSchema schema = new CsdlSchema();
-				schema.setNamespace(schemasRs.getString(TABLE_SCHEM));		  
+				schema.setNamespace(schemasRs.getString(TABLE_SCHEM));	
+				schema.setComplexTypes(new ArrayList<CsdlComplexType>());
+				schema.setFunctions(new ArrayList<CsdlFunction>());				
+				schemaContainer.setFunctionImports(new ArrayList<CsdlFunctionImport>());
+				for( String cursor : cursors.keySet()){
+					List<CsdlFunction> f =  getFunctions(new FullQualifiedName(schema.getNamespace(), cursor));
+					schema.getFunctions().addAll(f);	
+					FullQualifiedName containerName = new FullQualifiedName("SQLODataService",schema.getNamespace());
+					schemaContainer.getFunctionImports().add(getFunctionImport(containerName,cursor));
+					FullQualifiedName complexTypeName = new FullQualifiedName(schema.getNamespace(),cursor);
+					schema.getComplexTypes().add(getComplexType(complexTypeName ));
+				}
 				List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();		 
 				schema.setEntityTypes(entityTypes);
 				try (ResultSet rs = metadata.getTables(null, schema.getNamespace(),"%",null)){
@@ -195,12 +226,13 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 						entityTypes.add(entityType);							
 					}				
 				} 
-				schema.setEntityContainer(schemaContainer.setName(schema.getNamespace()));
+				schema.setEntityContainer(schemaContainer.setName(schema.getNamespace()));				
 				schemas.add(schema);
 			}
 		} catch (SQLException sqle) {
 			throw new ODataException(sqle);
 		}
+
 
 		return schemas;
 	}
@@ -237,4 +269,98 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		entityContainerInfo.setContainerName( container );      
 		return entityContainerInfo;
 	}
+
+	@Override
+	public CsdlComplexType getComplexType(FullQualifiedName complexTypeName) throws ODataException {
+
+		Cursor cursor = cursors.get(complexTypeName.getName());
+		if(cursor == null){
+			return null;
+		}
+
+		CsdlComplexType type = new CsdlComplexType().setName(complexTypeName.getName());		
+		List<CsdlProperty> properties = new ArrayList<>();
+		for(ColumnDefinition def : cursor.getColumnDefinitions()){
+			TypeMap propType = TypeMap.valueOf(def.getColDataType().getDataType().toUpperCase());
+			properties.add(new CsdlProperty().
+					setName(def.getColumnName()).
+					setType(propType.getODataKind().getFullQualifiedName()));			
+		}
+
+		type.setProperties(properties );
+
+
+		return type;
+	}
+
+	@Override
+	public List<CsdlFunction> getFunctions(FullQualifiedName functionName) throws ODataException {
+
+		if(cursors == null || cursors.isEmpty()){
+			return null;
+		}
+		Cursor cursor = cursors.get(functionName.getName());
+		if(cursor == null){
+			return null;
+		}
+
+		List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
+		List<CsdlParameter> parameters = new ArrayList<>();
+		final List<NamedParameter> namedParams = new ArrayList<>();
+		StatementTransform transform = new StatementTransform(){
+
+			@Override
+			protected ExpressionTransform createExpressionTransform() {				 
+				return  new ExpressionTransform(this){
+
+					@Override
+					public void visit(NamedParameter namedParameter) {
+						namedParams.add(namedParameter);
+					}
+
+				};
+			}
+
+		};
+
+		transform.visit(cursor.getSelect());
+
+		for( NamedParameter param : namedParams){
+			CsdlParameter parameter = new CsdlParameter();		
+			parameter.setName(param.getName());			
+			parameter.setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+			parameters.add(parameter);
+		}
+
+		final CsdlReturnType returnType = new CsdlReturnType();
+		returnType.setCollection(true);
+		returnType.setType(new FullQualifiedName(functionName.getNamespace(),functionName.getName()));
+
+		final CsdlFunction function = new CsdlFunction();
+		function.setName(functionName.getName())
+		.setParameters(parameters)
+		.setReturnType(returnType);		
+		functions.add(function);
+
+		return functions;
+	}
+
+	@Override
+	public CsdlFunctionImport getFunctionImport(FullQualifiedName entityContainer, String functionImportName)
+			throws ODataException {
+
+		return new CsdlFunctionImport()
+				.setName(functionImportName)
+				.setFunction(new FullQualifiedName(entityContainer.getName(),functionImportName))                
+				.setIncludeInServiceDocument(true);
+	}
+
+	public Map<String,Cursor> getCursors() {
+		return cursors;
+	}
+
+	public void setCursors(Map<String,Cursor> cursors) {
+		this.cursors = cursors;
+	}
+
 }

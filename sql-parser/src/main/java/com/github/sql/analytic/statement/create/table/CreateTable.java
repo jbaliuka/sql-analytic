@@ -18,7 +18,7 @@ public class CreateTable implements SQLStatement {
     
 	private List<?> tableOptionsStrings;
     
-	private List<?> columnDefinitions;
+	private List<ColumnDefinition> columnDefinitions;
     
 	private List<?> indexes;
 
@@ -46,7 +46,7 @@ public class CreateTable implements SQLStatement {
     }
 
     
-	public void setColumnDefinitions(List<?> list) {
+	public void setColumnDefinitions(List<ColumnDefinition> list) {
         columnDefinitions = list;
     }
 

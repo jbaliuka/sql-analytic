@@ -7,6 +7,7 @@ import java.util.List;
 import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
 import com.github.sql.analytic.schema.Table;
+import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.create.table.CreateTable;
@@ -177,6 +178,18 @@ public class StatementTransform  implements StatementVisitor {
 
 	public void visit(CreatePolicy policy) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(Cursor cursor) {
+		
+		Cursor newCursor = new Cursor();		
+		newCursor.setName(cursor.getName());
+		newCursor.setColumnDefinitions(cursor.getColumnDefinitions());		
+		visit(cursor.getSelect());
+		newCursor.setSelect((Select) statement);		
+		statement = newCursor;
 		
 	}
 
