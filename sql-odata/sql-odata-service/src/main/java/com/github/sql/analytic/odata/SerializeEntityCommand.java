@@ -31,7 +31,7 @@ public class SerializeEntityCommand extends SerializeEntityCollectionCommand {
 			}
 
 			ContextURL contextUrl = ContextURL.with().
-					entitySet(getEdmEntitySet()).selectList(getSelectList()).
+					entitySetOrSingletonOrType(getEntityType().getName()).selectList(getSelectList()).
 					build();
 
 			EntitySerializerOptions options = EntitySerializerOptions.with().
@@ -41,7 +41,7 @@ public class SerializeEntityCommand extends SerializeEntityCollectionCommand {
 
 			ODataSerializer serializer = getOdata().createSerializer(getContentType());
 
-			SerializerResult serializerResult = serializer.entity(getMetadata(), getEdmEntitySet().getEntityType(), 
+			SerializerResult serializerResult = serializer.entity(getMetadata(), getEntityType(), 
 					iterator.next() , options);
 
 

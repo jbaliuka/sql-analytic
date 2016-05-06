@@ -4,15 +4,12 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
@@ -69,11 +66,23 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 	@Override
 	public CsdlEntityType getEntityType(FullQualifiedName entityTypeName) throws ODataException {
+		
 		CsdlEntityType entityType = new CsdlEntityType().setName(entityTypeName.getName()); 
 		List<CsdlProperty> properties = new ArrayList<>();
 		List<CsdlPropertyRef> key = new ArrayList<>();
 		List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
 		String schema = entityTypeName.getNamespace();
+		Cursor cursor = cursors.get(entityTypeName.getName());
+		if(cursor != null){
+			for(ColumnDefinition def : cursor.getColumnDefinitions()){
+				CsdlProperty property = new CsdlProperty()
+						.setName(def.getColumnName())
+						.setType(TypeMap.valueOf(def.getColDataType().getDataType().toUpperCase())
+								.getODataKind().getFullQualifiedName());
+				properties.add(property );
+			}			
+			return entityType;
+		}
 		try {
 			try(ResultSet rs = metadata.getColumns(null, schema, entityTypeName.getName(), "%")){			
 				while(rs.next()){					
@@ -198,20 +207,21 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 				List<CsdlEntitySet> entitySets = new ArrayList<>();
 				schemaContainer.setEntitySets(entitySets);
 				CsdlSchema schema = new CsdlSchema();
-				schema.setNamespace(schemasRs.getString(TABLE_SCHEM));	
-				schema.setComplexTypes(new ArrayList<CsdlComplexType>());
+				schema.setNamespace(schemasRs.getString(TABLE_SCHEM));
 				schema.setFunctions(new ArrayList<CsdlFunction>());				
 				schemaContainer.setFunctionImports(new ArrayList<CsdlFunctionImport>());
+				List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();		 
+				schema.setEntityTypes(entityTypes);
+				
 				for( String cursor : cursors.keySet()){
 					List<CsdlFunction> f =  getFunctions(new FullQualifiedName(schema.getNamespace(), cursor));
 					schema.getFunctions().addAll(f);	
 					FullQualifiedName containerName = new FullQualifiedName("SQLODataService",schema.getNamespace());
 					schemaContainer.getFunctionImports().add(getFunctionImport(containerName,cursor));
-					FullQualifiedName complexTypeName = new FullQualifiedName(schema.getNamespace(),cursor);
-					schema.getComplexTypes().add(getComplexType(complexTypeName ));
+					FullQualifiedName cursorType = new FullQualifiedName(schema.getNamespace(),cursor);
+					schema.getEntityTypes().add(getEntityType(cursorType));
 				}
-				List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();		 
-				schema.setEntityTypes(entityTypes);
+				
 				try (ResultSet rs = metadata.getTables(null, schema.getNamespace(),"%",null)){
 					while(rs.next()){	
 						FullQualifiedName entityTypeName = new FullQualifiedName(schema.getNamespace(),
@@ -239,6 +249,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 	private void addBindings(FullQualifiedName entityTypeName, CsdlEntitySet entitySet)
 			throws SQLException {
+		
 		List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
 		entitySet.setNavigationPropertyBindings(navPropBindingList);		
 		try( ResultSet rs = metadata.getImportedKeys(null, null, entityTypeName.getName()) ){						
@@ -270,28 +281,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		return entityContainerInfo;
 	}
 
-	@Override
-	public CsdlComplexType getComplexType(FullQualifiedName complexTypeName) throws ODataException {
-
-		Cursor cursor = cursors.get(complexTypeName.getName());
-		if(cursor == null){
-			return null;
-		}
-
-		CsdlComplexType type = new CsdlComplexType().setName(complexTypeName.getName());		
-		List<CsdlProperty> properties = new ArrayList<>();
-		for(ColumnDefinition def : cursor.getColumnDefinitions()){
-			TypeMap propType = TypeMap.valueOf(def.getColDataType().getDataType().toUpperCase());
-			properties.add(new CsdlProperty().
-					setName(def.getColumnName()).
-					setType(propType.getODataKind().getFullQualifiedName()));			
-		}
-
-		type.setProperties(properties );
-
-
-		return type;
-	}
+	
 
 	@Override
 	public List<CsdlFunction> getFunctions(FullQualifiedName functionName) throws ODataException {

@@ -30,11 +30,9 @@ import org.apache.olingo.client.api.communication.request.retrieve.ODataEntityRe
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataPropertyRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataServiceDocumentRequest;
-import org.apache.olingo.client.api.communication.request.retrieve.ODataValueRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataEntityCreateResponse;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
-import org.apache.olingo.client.api.domain.ClientComplexValue;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientPrimitiveValue;
@@ -42,7 +40,6 @@ import org.apache.olingo.client.api.domain.ClientProperty;
 import org.apache.olingo.client.api.domain.ClientServiceDocument;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.api.http.HttpClientFactory;
-import org.apache.olingo.client.api.uri.FilterFactory;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.client.core.domain.ClientEntityImpl;
 import org.apache.olingo.client.core.domain.ClientPrimitiveValueImpl;
@@ -57,7 +54,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.internal.runners.statements.Fail;
 
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
@@ -121,7 +117,7 @@ public class SQLODataServletTest {
 	@Test
 	public void testNavEntityReq() throws URISyntaxException {
 		
-		URI uri = new URI(serviceRoot + "CUSTOMERS(3)/FK_ORDERS_CUSTOMERS");		
+		URI uri = new URI(serviceRoot + "CUSTOMERS(3)/FK_ORDERS_CUSTOMERS?$format=xml");		
 		ODataEntitySetRequest<ClientEntitySet> req =
 				client.getRetrieveRequestFactory().getEntitySetRequest(uri);
 		ODataRetrieveResponse<ClientEntitySet> res = req.execute();

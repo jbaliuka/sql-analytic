@@ -16,7 +16,6 @@ import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
 
-import com.github.sql.analytic.odata.SQLComplexCollectionProcessor;
 import com.github.sql.analytic.odata.SQLEdmProvider;
 import com.github.sql.analytic.odata.SQLEntityCollectionProcessor;
 import com.github.sql.analytic.odata.SQLEntityProcessor;
@@ -26,7 +25,7 @@ import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.policy.SessionContext;
 
 public class SQLOdataHandler {
-	
+
 	private Connection connection;
 	private List<CreatePolicy> policy;
 	private ServletConfig config;
@@ -37,24 +36,23 @@ public class SQLOdataHandler {
 		this.policy = policy;
 		this.config = config;
 	}
-	
-	
+
+
 	public void process(final HttpServletRequest request, HttpServletResponse response) throws SQLException{
-		             
-		            SessionContext context = createContext(request);										
-					SQLSession session = createSession(context);					
-					OData odata = OData.newInstance();
-					SQLEdmProvider edmProvider = new SQLEdmProvider(session.getMetaData());
-					edmProvider.setCursors(cursors);
-					ServiceMetadata edm = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
-					ODataHttpHandler handler = odata.createHandler(edm);
-					handler.register(new SQLEntityCollectionProcessor(session));	      
-					handler.register(new SQLEntityProcessor(session));
-					SQLComplexCollectionProcessor processor = new SQLComplexCollectionProcessor(session);
-					processor.setCursors(cursors);
-					handler.register(processor);
-					handler.process(request, response);	
-		
+
+		SessionContext context = createContext(request);										
+		SQLSession session = createSession(context);					
+		OData odata = OData.newInstance();
+		SQLEdmProvider edmProvider = new SQLEdmProvider(session.getMetaData());
+		edmProvider.setCursors(cursors);
+		ServiceMetadata edm = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
+		ODataHttpHandler handler = odata.createHandler(edm);
+		SQLEntityCollectionProcessor processor = new SQLEntityCollectionProcessor(session);
+		processor.setCursors(cursors);
+		handler.register(processor);	      
+		handler.register(new SQLEntityProcessor(session));					
+		handler.process(request, response);	
+
 	}
 
 	protected SQLSession createSession(SessionContext context) {
@@ -63,15 +61,15 @@ public class SQLOdataHandler {
 
 	protected SessionContext createContext(final HttpServletRequest request) {
 		return new SessionContext() {
-			
+
 			@Override
 			public boolean isUserInRole(String role) {							
 				return request.isUserInRole(role);
 			}
-			
+
 			@Override
 			public  Object getParameter(String name) {
-				
+
 				Object value = request.getAttribute(name);
 				if(value == null && request.getSession(false) != null){
 					value =  request.getSession(false).getAttribute(name);								
@@ -79,10 +77,10 @@ public class SQLOdataHandler {
 				if(value == null && config != null ){
 					value = config.getServletContext().getAttribute(name);
 				}
-				
+
 				return value;
 			}
-			
+
 			@Override
 			public String getCurrentUser() {							
 				return request.getUserPrincipal() == null ? null : request.getUserPrincipal().getName();

@@ -65,7 +65,7 @@ public class SQLEntityProcessor implements EntityProcessor {
 		ResultSetIterator iterator = command.execute(session);
 		SerializeEntityCommand ser = new SerializeEntityCommand(request, response, uriInfo, responseFormat);
 		ser.init(odata,serviceMetadata);
-		ser.setEdmEntitySet(command.getEdmEntitySet());
+		ser.setEntityType(command.getEntityType());
 		ser.serialize(iterator);
 		
 	}

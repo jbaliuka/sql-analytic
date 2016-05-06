@@ -1,7 +1,7 @@
 package com.github.sql.analytic.odata;
 
 import org.apache.olingo.commons.api.data.ContextURL;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -21,10 +21,10 @@ public class SerializeEntityCollectionCommand {
 	private ODataRequest request;	
 	private ODataResponse response;
 	private UriInfo uriInfo;
-	private ContentType contentType;
-	private EdmEntitySet edmEntitySet;
+	private ContentType contentType;	
 	private OData odata;
 	private ServiceMetadata metadata;
+	private EdmEntityType entityType;
 
 	public SerializeEntityCollectionCommand(ODataRequest request, ODataResponse response, UriInfo uriInfo,
 			ContentType contentType) {
@@ -34,20 +34,18 @@ public class SerializeEntityCollectionCommand {
 		this.contentType = contentType;
 	}
 	
-	
 	public void init(OData odata, ServiceMetadata metadata) {
 		this.odata = odata;
 		this.metadata = metadata;
-
 	}
 	
 	protected void serialize(ResultSetIterator iterator) throws SerializerException, ODataApplicationException {
 
 		ContextURL contextUrl = ContextURL.with().
-				entitySet(getEdmEntitySet()).selectList(getSelectList()).			
+				entitySetOrSingletonOrType(entityType.getName()).selectList(getSelectList()).			
 				build();
 
-		final String id = request.getRawBaseUri() + "/" + getEdmEntitySet().getName();
+		final String id = request.getRawBaseUri() + "/" + entityType.getName();
 		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
 				.id(id)
 				.select(uriInfo.getSelectOption())
@@ -58,23 +56,18 @@ public class SerializeEntityCollectionCommand {
 
 		ODataSerializer serializer = odata.createSerializer(contentType);
 		SerializerStreamResult serializerResult = serializer.entityCollectionStreamed(metadata, 
-				getEdmEntitySet().getEntityType(), iterator, opts);
-
+				getEntityType(), iterator, opts);
 		response.setODataContent(serializerResult.getODataContent());
 		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 		response.setHeader(HttpHeader.CONTENT_TYPE, contentType.toContentTypeString());
 	}
-
-	public EdmEntitySet getEdmEntitySet() {
-		return edmEntitySet;
-	}
-
-	public void setEdmEntitySet(EdmEntitySet edmEntitySet) {
-		this.edmEntitySet = edmEntitySet;
+	
+	public EdmEntityType getEntityType() {		
+		return entityType;
 	}
 
 	protected String getSelectList() throws SerializerException {
-		return odata.createUriHelper().buildContextURLSelectList(edmEntitySet.getEntityType(),
+		return odata.createUriHelper().buildContextURLSelectList(getEntityType(),
 				uriInfo.getExpandOption(), uriInfo.getSelectOption());
 	}
 	
@@ -82,21 +75,17 @@ public class SerializeEntityCollectionCommand {
 		return request;
 	}
 
-
 	public ODataResponse getResponse() {
 		return response;
 	}
-
 
 	public UriInfo getUriInfo() {
 		return uriInfo;
 	}
 
-
 	public ContentType getContentType() {
 		return contentType;
 	}
-
 
 	public OData getOdata() {
 		return odata;
@@ -106,5 +95,9 @@ public class SerializeEntityCollectionCommand {
 		return metadata;
 	}
 
+	public void setEntityType(EdmEntityType entityType) {
+		this.entityType = entityType;
+		
+	}
 	
 }

@@ -4,13 +4,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
-import org.apache.olingo.commons.api.edm.EdmBindingTarget;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
@@ -38,48 +34,34 @@ import com.github.sql.analytic.statement.select.Select;
 
 public class ReadEntityCollectionCommand extends ReadCommand{
 
-	private UriInfoResource uriInfo;
-
-	private EdmEntitySet edmEntitySet;
-	private Map<String, Object> statementParams = new HashMap<>();
-
+	private UriInfoResource uriInfo;	
 	private int index = 0;
-
-
+	private EdmEntityType entityType;
+	
 
 	public ReadEntityCollectionCommand(UriInfoResource uriInfo) {		
 		this.uriInfo = uriInfo;		
 	}
 
-
-
 	@Override
 	public ResultSetIterator execute(SQLSession connection) throws 	ODataApplicationException{
 
 		try{
-
 			processUriResource(connection);
-
-			processUriInfo(uriInfo, edmEntitySet.getEntityType(),  getCurrentAlias());
-
-			PreparedStatement statement = connection.create(new Select().setSelectBody(getSelect()), statementParams );			
+			processUriInfo(uriInfo, getEntityType(),  getCurrentAlias());
+			PreparedStatement statement = connection.create(new Select().setSelectBody(getSelect()), getStatementParams() );			
 			ResultSet rs = statement.executeQuery();			
 			statement.closeOnCompletion();
-			
-			return new ResultSetIterator(connection, rs, edmEntitySet.getEntityType(),uriInfo.getExpandOption());
+			return new ResultSetIterator(connection, rs, getEntityType(),uriInfo.getExpandOption());
 
 		} catch (SQLException | EdmPrimitiveTypeException e) {
 			throw internalError(e);
 		}
-
 	}
-
 
 	private String getCurrentAlias() {
-		return edmEntitySet.getEntityType().getName() + "_" + index;
+		return getEntityType().getName() + "_" + index;
 	}
-
-	
 
 	private void processUriResource(SQLSession connection) throws ODataApplicationException, EdmPrimitiveTypeException {
 
@@ -87,27 +69,22 @@ public class ReadEntityCollectionCommand extends ReadCommand{
 			index++;
 			if(segment instanceof UriResourceNavigation){				
 				UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) segment;
-				EdmNavigationProperty edmNavigationProperty = uriResourceNavigation.getProperty();	
-				EdmEntityType leftType = edmEntitySet.getEntityType();
-				edmEntitySet = getNavigationTargetEntitySet(edmNavigationProperty);
-				EdmEntityType rightType = edmEntitySet.getEntityType();
-				Join join = appendFrom();
-				appendOn(connection,join,edmNavigationProperty.getName(),leftType,rightType);
+				EdmNavigationProperty edmNavigationProperty = uriResourceNavigation.getProperty();
+				Join join = appendFrom(edmNavigationProperty.getType());
+				appendOn(connection,join,edmNavigationProperty.getName(),entityType,edmNavigationProperty.getType());
 				appendWhere(uriResourceNavigation.getKeyPredicates());
+				entityType = edmNavigationProperty.getType();
 			}else if (segment instanceof UriResourceEntitySet){				
 				UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) segment;
-				edmEntitySet = uriResourceEntitySet.getEntitySet();			
-				appendFrom();
-				appendWhere(uriResourceEntitySet.getKeyPredicates());				
+				entityType = uriResourceEntitySet.getEntitySet().getEntityType();			
+				appendFrom(entityType);
+				appendWhere(uriResourceEntitySet.getKeyPredicates());			
 			}else {
 				throw new ODataApplicationException(segment.toString(), HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), 
 						Locale.ROOT);
 			}			
 		}
 	}
-
-
-
 
 
 	private void appendOn(SQLSession connection,Join join, String fKname, EdmEntityType leftType, EdmEntityType rightType) throws ODataApplicationException {
@@ -153,11 +130,11 @@ public class ReadEntityCollectionCommand extends ReadCommand{
 		}
 	}
 
-	private Join appendFrom() {
+	private Join appendFrom(EdmEntityType entity) {
 
 		FromItem from = getSelect().getFromItem();
-		String name = edmEntitySet.getEntityType().getName();
-		Table table = new Table(edmEntitySet.getEntityType().getNamespace(),name);
+		String name = entity.getName();
+		Table table = new Table(getEntityType().getNamespace(),name);
 		table.setAlias(name + "_" + index);
 		if(from == null){
 			getSelect().setFromItem(table);
@@ -192,12 +169,12 @@ public class ReadEntityCollectionCommand extends ReadCommand{
 
 	private SQLExpression appendKey(SQLExpression expression, UriParameter key) throws EdmPrimitiveTypeException {
 
-		EdmEntityType entityType =  edmEntitySet.getEntityType();
+		EdmEntityType entityType =  getEntityType();
 		String name = entityType.getName() + "_" + index;
 
 		EdmProperty keyProperty = (EdmProperty)entityType.getProperty(key.getName());	
 		Object value = getValue(key, keyProperty);
-		statementParams.put(name, value);
+		getStatementParams().put(name, value);
 
 		Column column = new Column().
 				setColumnName(key.getName()).
@@ -227,39 +204,12 @@ public class ReadEntityCollectionCommand extends ReadCommand{
 		return value;
 	}
 
-	private EdmEntitySet getNavigationTargetEntitySet(EdmNavigationProperty edmNavigationProperty)
-			throws ODataApplicationException {
-
-		if ( edmEntitySet == null) {
-			throw notImplemented();
-		}
-
-		EdmEntitySet navigationTargetEntitySet = null;
-
-		String navPropName = edmNavigationProperty.getName();
-		EdmBindingTarget edmBindingTarget = edmEntitySet.getRelatedBindingTarget(navPropName);
-
-		if (edmBindingTarget == null) {
-			throw notImplemented();
-		}
-
-		if (edmBindingTarget instanceof EdmEntitySet) {
-			navigationTargetEntitySet = (EdmEntitySet) edmBindingTarget;
-		} else {
-			throw notImplemented();
-		}
-
-		return navigationTargetEntitySet;
+	public EdmEntityType getEntityType() {		
+		return entityType;
 	}
 
-	private ODataApplicationException notImplemented() {
-		return new ODataApplicationException("Not supported.",
-				HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-	}
+	
 
-	public EdmEntitySet getEdmEntitySet() {
-		return edmEntitySet;
-	}
 
 
 }

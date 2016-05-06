@@ -1,7 +1,9 @@
 package com.github.sql.analytic.odata;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -31,6 +33,8 @@ import com.github.sql.analytic.statement.select.SelectListItem;
 
 public abstract class ReadCommand {
 
+	private Map<String, Object> statementParams = new HashMap<>();
+	
 	private PlainSelect select = new PlainSelect().setSelectItems(new ArrayList<SelectListItem>());
 
 	public abstract ResultSetIterator execute(SQLSession connection) throws ODataApplicationException ;
@@ -39,6 +43,9 @@ public abstract class ReadCommand {
 		return select;
 	}
 
+	public void setSelect(PlainSelect select){
+		this.select = select;
+	}
 
 	public ODataApplicationException internalError(Exception e) {
 		return new ODataApplicationException(e.getMessage(), HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
@@ -124,6 +131,14 @@ public abstract class ReadCommand {
 		appendLimit(uriInfo.getTopOption(),uriInfo.getSkipOption());
 		appendOrdering(alias,uriInfo.getOrderByOption());
 
+	}
+
+	public Map<String, Object> getStatementParams() {
+		return statementParams;
+	}
+
+	public void setStatementParams(Map<String, Object> statementParams) {
+		this.statementParams = statementParams;
 	}
 
 }

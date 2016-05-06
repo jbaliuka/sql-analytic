@@ -40,8 +40,6 @@ public class ExpandPropertyCommand extends ReadCommand {
 	public ResultSetIterator execute(SQLSession connection) throws ODataApplicationException {
 
 		try{
-
-			
 			String name = property.getType().getName();
 			Table table = new Table(property.getType().getNamespace(),name);
 			table.setAlias(name);
@@ -99,8 +97,5 @@ public class ExpandPropertyCommand extends ReadCommand {
 		}else {
 			 getSelect().setWhere( new AndExpression().setLeftExpression(where).setRightExpression(filter));
 		}
-		
-		
-		
 	}
 }
