@@ -185,17 +185,16 @@ public class SQLODataServletTest {
 
 	}
 	
-	@Ignore
+	@Test
 	public void testFunctionReq() throws URISyntaxException {
 		
-		Assert.fail("not implemented");
+		URI uri = new URI(serviceRoot + "myCustomers(date=2010-02-26)");
 		
-		URI uri = new URI(serviceRoot + "KeyValue(KEY='test')");
-		ODataPropertyRequest<ClientProperty> req =
-				client.getRetrieveRequestFactory().getPropertyRequest(uri);
-		ODataRetrieveResponse<ClientProperty> res = req.execute();
-		ClientProperty property = res.getBody();		
-		assertFalse( property.getCollectionValue().isEmpty() );
+		ODataEntitySetRequest<ClientEntitySet> req =
+				client.getRetrieveRequestFactory().getEntitySetRequest(uri);
+		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
+		ClientEntitySet entity = res.getBody();		
+		assertFalse( entity.getEntities().isEmpty() );
 
 	}
 	
@@ -278,7 +277,11 @@ public class SQLODataServletTest {
 
 			@Override
 			protected Map<String, Cursor> getCursors() {				
-				return Collections.emptyMap();
+				try {
+					return Loader.getCursors();
+				} catch (IOException | JSQLParserException e) {
+					throw new AssertionError(e);
+				}
 			}
 
 		};		

@@ -11,6 +11,7 @@ import org.apache.olingo.commons.api.edm.EdmFunction;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriParameter;
@@ -44,27 +45,30 @@ public class CallCursorFunctionCommand extends ReadCommand {
 				entityType = (EdmEntityType) function.getReturnType().getType();
 				functionName = function.getName();
 				setSelect((PlainSelect) cursors.get(functionName).getSelect().getSelectBody());
-				for( UriParameter param : ((UriResourceFunction) segment).getParameters()){
-					Expression expr = param.getExpression();
-					if(expr instanceof Literal ){			
-						EdmPrimitiveType type = (EdmPrimitiveType) ((Literal) expr).getType();
-						Object value = type.valueOfString(((Literal) expr).getText(),
-								true, null, null, null, true, type.getDefaultType());
-						getStatementParams().put(param.getName(),value);
+				for( UriParameter param : ((UriResourceFunction) segment).getParameters()){									
+					Object value = param.getText();					
+					Expression expr = param.getExpression();					
+					if(expr instanceof Literal ){	
+						String literal = ((Literal) expr).getText();
+						EdmPrimitiveType edmType = (EdmPrimitiveType) ((Literal) expr).getType();
+						Class<?> javaType = edmType.getDefaultType();
+						 value = edmType.valueOfString(literal,
+									true, null, null, null, true, javaType) ;
 					}
+
+					getStatementParams().put(param.getName(),value);
 				}
 			}else {
 				throw new ODataApplicationException(segment.toString(), HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), 
 						Locale.ROOT);
 			}
-		//	processUriInfo(uriInfo, getEntityType(), null);
+			//	processUriInfo(uriInfo, getEntityType(), null);
 			PreparedStatement statement = connection.create(new Select().setSelectBody(getSelect()), getStatementParams() );			
 			ResultSet rs = statement.executeQuery();			
 			statement.closeOnCompletion();
 			return new ResultSetIterator(connection, rs, getEntityType(),uriInfo.getExpandOption());
 
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception e) {			
 			throw internalError(e);
 		}
 	}
