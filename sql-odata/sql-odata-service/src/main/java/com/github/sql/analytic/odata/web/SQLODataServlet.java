@@ -3,10 +3,8 @@ package com.github.sql.analytic.odata.web;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -16,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import com.github.sql.analytic.statement.Cursor;
+import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 
 public abstract class SQLODataServlet extends HttpServlet {
@@ -28,7 +27,7 @@ public abstract class SQLODataServlet extends HttpServlet {
 			try(Connection connection = getDatasource().getConnection()){
 				try{
 					
-					SQLOdataHandler handler = new SQLOdataHandler(config,connection, getPolicy(),getCursors());
+					SQLOdataHandler handler = new SQLOdataHandler(config,connection, getPolicy(),getCursors(),getVariables());
 					handler.process(request, response);
 					connection.commit();
 
@@ -52,6 +51,7 @@ public abstract class SQLODataServlet extends HttpServlet {
 
 	abstract protected DataSource getDatasource();
 	abstract protected Map<String, Cursor> getCursors();
+	abstract protected Map<String, Variable> getVariables();
 
 
 

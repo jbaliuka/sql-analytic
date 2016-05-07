@@ -3,7 +3,6 @@ package com.github.sql.analytic.odata.web;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +20,7 @@ import com.github.sql.analytic.odata.SQLEntityCollectionProcessor;
 import com.github.sql.analytic.odata.SQLEntityProcessor;
 import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.Cursor;
+import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.policy.SessionContext;
 
@@ -30,12 +30,14 @@ public class SQLOdataHandler {
 	private List<CreatePolicy> policy;
 	private ServletConfig config;
 	private Map<String,Cursor> cursors;
+	private Map<String, Variable> variables;
 
-	public SQLOdataHandler(ServletConfig config,Connection connection,List<CreatePolicy> policy, Map<String, Cursor> cursors){
+	public SQLOdataHandler(ServletConfig config,Connection connection,List<CreatePolicy> policy, Map<String, Cursor> cursors, Map<String, Variable> variables){
 		this.connection = connection;
 		this.policy = policy;
 		this.config = config;
 		this.cursors = cursors;
+		this.variables = variables;
 	}
 
 
@@ -46,6 +48,7 @@ public class SQLOdataHandler {
 		OData odata = OData.newInstance();
 		SQLEdmProvider edmProvider = new SQLEdmProvider(session.getMetaData());
 		edmProvider.setCursors(cursors);
+		edmProvider.setVariables(variables);
 		ServiceMetadata edm = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 		ODataHttpHandler handler = odata.createHandler(edm);
 		SQLEntityCollectionProcessor processor = new SQLEntityCollectionProcessor(session);

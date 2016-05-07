@@ -107,6 +107,7 @@ import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.Cursor;
+import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.create.table.ColDataType;
 import com.github.sql.analytic.statement.create.table.ColumnDefinition;
 import com.github.sql.analytic.statement.create.table.CreateTable;
@@ -246,6 +247,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_TO: "TO" >
 |   <K_POLICY: "POLICY" >
 |  < K_CURSOR: "CURSOR" >
+|  < K_DECLARE: "DECLARE" >
 }
 
 
@@ -295,13 +297,13 @@ SQLStatement Statement() :
     |
     LOOKAHEAD(3) stm = Replace()
     |
-     (<K_CREATE> [<K_OR> <K_REPLACE>] stm = Create())    
+     [<K_CREATE> [<K_OR> <K_REPLACE>]] stm = Create()    
     |
     stm = Drop()
     |
     stm = Truncate()
-    |
-     <K_CURSOR>  stm = DeclareCursor() 
+    | LOOKAHEAD(2) [<K_DECLARE>] <K_CURSOR>  stm = DeclareCursor()
+    | LOOKAHEAD(2) [<K_DECLARE>] stm = DeclareVariable()
   	
     )
     [";"]
@@ -1766,6 +1768,23 @@ CreateView CreateView():
 
 }
 
+Variable DeclareVariable():
+{
+  Variable variable = new Variable();
+  ColumnDefinition coldef = new ColumnDefinition();
+  variable.setDefinition(coldef);
+  ColDataType colDataType = null;
+  Token name = null;}
+{
+   name = <S_IDENTIFIER>   {
+     coldef.setColumnName(name.image);   }
+   colDataType = ColDataType()
+   {
+     coldef.setColDataType(colDataType);   }
+
+  {
+    return variable;  }}
+
 Cursor DeclareCursor():
 {
   Cursor cursor = new Cursor();
@@ -1776,7 +1795,7 @@ Cursor DeclareCursor():
   Select select = null;}
 {
 
-  name = <S_IDENTIFIER>  {
+   name = <S_IDENTIFIER>  {
     cursor.setName(name.image);  }
 
   "("

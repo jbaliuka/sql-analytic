@@ -3,11 +3,13 @@ package com.github.sql.analytic.odata;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
 
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmFunction;
+import org.apache.olingo.commons.api.edm.EdmParameter;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -45,18 +47,14 @@ public class CallCursorFunctionCommand extends ReadCommand {
 				entityType = (EdmEntityType) function.getReturnType().getType();
 				functionName = function.getName();
 				setSelect((PlainSelect) cursors.get(functionName).getSelect().getSelectBody());
-				for( UriParameter param : ((UriResourceFunction) segment).getParameters()){									
-					Object value = param.getText();					
-					Expression expr = param.getExpression();					
-					if(expr instanceof Literal ){	
-						String literal = ((Literal) expr).getText();
-						EdmPrimitiveType edmType = (EdmPrimitiveType) ((Literal) expr).getType();
-						Class<?> javaType = edmType.getDefaultType();
-						 value = edmType.valueOfString(literal,
-									true, null, null, null, true, javaType) ;
+				for( UriParameter param : ((UriResourceFunction) segment).getParameters()){
+					if (param.getExpression() != null){
+						throw new IllegalArgumentException(param.getExpression().toString());
 					}
-
-					getStatementParams().put(param.getName(),value);
+								
+					EdmPrimitiveType type = (EdmPrimitiveType) function.getParameter(param.getName()).getType();
+					Object value = type.valueOfString(param.getText(), true,null, null, null, true, type.getDefaultType());					
+					getStatementParams().put(param.getName(),toJdbcValue(value));
 				}
 			}else {
 				throw new ODataApplicationException(segment.toString(), HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), 
@@ -71,6 +69,14 @@ public class CallCursorFunctionCommand extends ReadCommand {
 		} catch (Exception e) {			
 			throw internalError(e);
 		}
+	}
+
+	protected Object toJdbcValue(Object value) {
+		if(value instanceof Calendar){
+			return new java.sql.Timestamp(((Calendar) value).getTimeInMillis());
+		}
+		
+		return value;
 	}
 
 	public void setCursors(Map<String, Cursor> cursors) {

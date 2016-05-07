@@ -10,6 +10,7 @@ import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
+import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.create.table.CreateTable;
 import com.github.sql.analytic.statement.create.view.CreateView;
 import com.github.sql.analytic.statement.delete.Delete;
@@ -190,6 +191,12 @@ public class StatementTransform  implements StatementVisitor {
 		visit(cursor.getSelect());
 		newCursor.setSelect((Select) statement);		
 		statement = newCursor;
+		
+	}
+
+	@Override
+	public void visit(Variable variable) {
+		statement = variable;
 		
 	}
 

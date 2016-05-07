@@ -29,6 +29,7 @@ import org.apache.olingo.commons.api.ex.ODataException;
 
 import com.github.sql.analytic.expression.NamedParameter;
 import com.github.sql.analytic.statement.Cursor;
+import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.create.table.ColumnDefinition;
 import com.github.sql.analytic.transform.ExpressionTransform;
 import com.github.sql.analytic.transform.StatementTransform;
@@ -57,6 +58,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	private static FullQualifiedName container = new FullQualifiedName("SQLODataService",CONTAINER_NAME);
 	private DatabaseMetaData metadata;
 	private Map<String,Cursor> cursors;
+	private Map<String, Variable> variables;
 
 
 	public SQLEdmProvider(DatabaseMetaData metadata) {
@@ -66,7 +68,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 	@Override
 	public CsdlEntityType getEntityType(FullQualifiedName entityTypeName) throws ODataException {
-		
+
 		CsdlEntityType entityType = new CsdlEntityType().setName(entityTypeName.getName()); 
 		List<CsdlProperty> properties = new ArrayList<>();
 		entityType.setProperties(properties);
@@ -213,7 +215,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 				schemaContainer.setFunctionImports(new ArrayList<CsdlFunctionImport>());
 				List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();		 
 				schema.setEntityTypes(entityTypes);
-				
+
 				for( String cursor : cursors.keySet()){
 					List<CsdlFunction> f =  getFunctions(new FullQualifiedName(schema.getNamespace(), cursor));
 					schema.getFunctions().addAll(f);	
@@ -222,7 +224,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 					FullQualifiedName cursorType = new FullQualifiedName(schema.getNamespace(),cursor);
 					schema.getEntityTypes().add(getEntityType(cursorType));
 				}
-				
+
 				try (ResultSet rs = metadata.getTables(null, schema.getNamespace(),"%",null)){
 					while(rs.next()){	
 						FullQualifiedName entityTypeName = new FullQualifiedName(schema.getNamespace(),
@@ -250,7 +252,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 	private void addBindings(FullQualifiedName entityTypeName, CsdlEntitySet entitySet)
 			throws SQLException {
-		
+
 		List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
 		entitySet.setNavigationPropertyBindings(navPropBindingList);		
 		try( ResultSet rs = metadata.getImportedKeys(null, null, entityTypeName.getName()) ){						
@@ -282,7 +284,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		return entityContainerInfo;
 	}
 
-	
+
 
 	@Override
 	public List<CsdlFunction> getFunctions(FullQualifiedName functionName) throws ODataException {
@@ -318,8 +320,14 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 		for( NamedParameter param : namedParams){
 			CsdlParameter parameter = new CsdlParameter();		
-			parameter.setName(param.getName());			
-			parameter.setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+			parameter.setName(param.getName());		
+			Variable var = variables.get(param.getName());
+			if(var != null){
+				TypeMap jdbcType = TypeMap.valueOf(var.getType().getDataType().toUpperCase());
+				parameter.setType(jdbcType.getODataKind().getFullQualifiedName());
+			}else {
+				parameter.setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+			}
 			parameters.add(parameter);
 		}
 
@@ -352,6 +360,11 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 	public void setCursors(Map<String,Cursor> cursors) {
 		this.cursors = cursors;
+	}
+
+	public void setVariables(Map<String, Variable> variables) {
+		this.variables = variables;
+
 	}
 
 }

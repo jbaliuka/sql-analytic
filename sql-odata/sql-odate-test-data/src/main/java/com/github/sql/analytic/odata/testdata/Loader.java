@@ -15,7 +15,7 @@ import java.util.Map;
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.parser.CCJSqlParserManager;
 import com.github.sql.analytic.statement.Cursor;
-import com.github.sql.analytic.statement.SQLStatement;
+import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.test.TestUtil;
 
@@ -51,9 +51,23 @@ public class Loader {
 			}
 		}		
 		return cursors;
-
-
 	}
+
+	public static Map<String, Variable> getVariables() throws IOException, JSQLParserException {
+		Map<String,Variable> variables = new HashMap<>();
+		try(InputStream in = new Loader().getClass().getClassLoader().getResourceAsStream("northwind.variable")){
+			BufferedReader reader = new BufferedReader( new InputStreamReader(in));
+			String line;
+			while((line = reader.readLine()) != null){
+				CCJSqlParserManager parserManager = new CCJSqlParserManager();
+				Variable stmt =  (Variable) parserManager.parse(new StringReader(line));
+				variables.put(stmt.getName(), stmt);				
+			}
+		}		
+		return variables;
+	}
+
+
 
 	public static List<CreatePolicy> getPolicyList() throws IOException, JSQLParserException {
 
@@ -72,5 +86,6 @@ public class Loader {
 	public static void drop(Connection connection) throws IOException, SQLException {
 		loadFile(connection,"mywind/northwind-drop.sql");		
 	}
+
 
 }
