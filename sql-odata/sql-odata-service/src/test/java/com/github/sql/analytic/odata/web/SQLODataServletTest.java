@@ -124,8 +124,6 @@ public class SQLODataServletTest {
 
 	}
 	
-	
-	
 	@Test
 	public void testCreateEntityReq() throws URISyntaxException {
 		URI uri = new URI(serviceRoot + "CUSTOMERS");

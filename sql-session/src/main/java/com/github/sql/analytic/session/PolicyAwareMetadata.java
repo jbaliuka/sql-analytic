@@ -6,11 +6,88 @@ import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
 
+import com.github.sql.analytic.schema.Column;
+import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.policy.Policy;
 
 public class PolicyAwareMetadata implements DatabaseMetaData{
 	
+	private static final String FKTABLE_NAME = "FKTABLE_NAME";
+	private static final String PKTABLE_NAME = "PKTABLE_NAME";
+	private static final String COLUMN_NAME = "COLUMN_NAME";
+	private static final String TABLE_SCHEM = "TABLE_SCHEM";
+	private static final String TABLE_NAME = "TABLE_NAME";
+
+	class ColumnResultSet extends SQLResultSet {
+		private ColumnResultSet(ResultSet rs) {
+			super(null, rs);
+		}
+		@Override
+		public boolean next() throws SQLException {
+			while(super.next()){
+				String table = getString(TABLE_NAME);
+				String col = getString(COLUMN_NAME);
+				for(CreatePolicy pol : policy.getPolicyList()){
+					if(table.equalsIgnoreCase(pol.getTable().getName())){
+						if(pol.getColumns() == null){
+							return true;
+						}else {
+							for(Column c : pol.getColumns() ){
+								if(c.getColumnName().equalsIgnoreCase(col)){
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	class TableResultSet extends SQLResultSet {
+		private String fieldName;
+		private TableResultSet(ResultSet rs,String fieldName) {
+			super(null, rs);
+			this.fieldName = fieldName;
+		}
+
+		@Override
+		public boolean next() throws SQLException {
+			while(super.next()){
+				String table = getString(fieldName);				
+				if(policy.hasPolicy(new Table(null,table))){
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	  class SchemasResultSet extends SQLResultSet {
+		private SchemasResultSet(ResultSet schemas) {
+			super(null, schemas);			
+		}
+		@Override
+		public boolean next() throws SQLException {				
+			while(super.next()){
+				String schema = getString(TABLE_SCHEM);
+				if(schema.equalsIgnoreCase(session.getContext().getDefaultSchema())){
+					return true;
+				}else {
+					for( CreatePolicy policy : session.getPolicy()){
+						if(schema.equalsIgnoreCase(policy.getTable().getSchemaName())){
+							return true;
+						}
+					}						
+				}
+				
+			}
+			return false;
+		}
+	}
+
 	private SQLSession session;
     private Policy policy;
     private DatabaseMetaData metadata;
@@ -514,32 +591,12 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types)
 			throws SQLException {
-		return metadata.getTables(catalog, schemaPattern, tableNamePattern, types);
+		ResultSet tables = metadata.getTables(catalog, schemaPattern, tableNamePattern, types);  
+		return new TableResultSet(tables,TABLE_NAME);
 	}
 
-	public ResultSet getSchemas() throws SQLException {
-		final ResultSet schemas = metadata.getSchemas();
-		return new SQLResultSet(null, schemas){
-			
-			@Override
-			public boolean next() throws SQLException {				
-				while(super.next()){
-					String schema = schemas.getString("TABLE_SCHEM");
-					if(schema.equalsIgnoreCase(session.getContext().getDefaultSchema())){
-						return true;
-					}else {
-						for( CreatePolicy policy : session.getPolicy()){
-							if(schema.equalsIgnoreCase(policy.getTable().getSchemaName())){
-								return true;
-							}
-						}						
-					}
-					
-				}
-				return false;
-			}
-			
-		};
+	public ResultSet getSchemas() throws SQLException {		
+		return new SchemasResultSet(metadata.getSchemas());
 	}
 
 	public ResultSet getCatalogs() throws SQLException {
@@ -552,17 +609,18 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 
 	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
 			throws SQLException {
-		return metadata.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
+		ResultSet columns = metadata.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
+		return new ColumnResultSet(columns);
 	}
 
 	public ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern)
 			throws SQLException {
-		return metadata.getColumnPrivileges(catalog, schema, table, columnNamePattern);
+		return new ColumnResultSet(metadata.getColumnPrivileges(catalog, schema, table, columnNamePattern));
 	}
 
 	public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
 			throws SQLException {
-		return metadata.getTablePrivileges(catalog, schemaPattern, tableNamePattern);
+		return new TableResultSet(metadata.getTablePrivileges(catalog, schemaPattern, tableNamePattern),TABLE_NAME);
 	}
 
 	public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable)
@@ -575,21 +633,21 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 	}
 
 	public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
-		return metadata.getPrimaryKeys(catalog, schema, table);
+		return new ColumnResultSet(metadata.getPrimaryKeys(catalog, schema, table));
 	}
 
 	public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
-		return metadata.getImportedKeys(catalog, schema, table);
+		return new TableResultSet(metadata.getImportedKeys(catalog, schema, table),PKTABLE_NAME);
 	}
 
 	public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
-		return metadata.getExportedKeys(catalog, schema, table);
+		return new TableResultSet(metadata.getExportedKeys(catalog, schema, table),FKTABLE_NAME);
 	}
 
 	public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable,
 			String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
-		return metadata.getCrossReference(parentCatalog, parentSchema, parentTable, foreignCatalog, foreignSchema,
-				foreignTable);
+		return new TableResultSet(metadata.getCrossReference(parentCatalog, parentSchema, parentTable, foreignCatalog, foreignSchema,
+				foreignTable),PKTABLE_NAME);
 	}
 
 	public ResultSet getTypeInfo() throws SQLException {
@@ -728,7 +786,7 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 	}
 
 	public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-		return metadata.getSchemas(catalog, schemaPattern);
+		return new SchemasResultSet(metadata.getSchemas(catalog, schemaPattern));
 	}
 
 	public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
