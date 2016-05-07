@@ -35,6 +35,11 @@ public class ParamsDeparserTest extends TestCase {
 			public String getCurrentUser() {				
 				return "testUser";
 			}
+
+			@Override
+			public String getDefaultSchema() {			
+				return null;
+			}
 		};
 		List<CreatePolicy> policyList = new ArrayList<>();
 		CCJSqlParserManager parserManager = new CCJSqlParserManager();

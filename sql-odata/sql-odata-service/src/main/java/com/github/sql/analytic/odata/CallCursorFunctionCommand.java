@@ -62,8 +62,7 @@ public class CallCursorFunctionCommand extends ReadCommand {
 			statement.closeOnCompletion();
 			return new ResultSetIterator(connection, rs, getEntityType(),uriInfo.getExpandOption());
 
-		} catch (Exception e) {		
-			e.printStackTrace();
+		} catch (Exception e) {
 			throw internalError(e);
 		}
 	}

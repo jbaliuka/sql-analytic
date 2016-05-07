@@ -41,7 +41,7 @@ public class Policy extends StatementTransform {
 
 		for(CreatePolicy policy : allPolicies){
 			if( applicableFor(policy,action)){				
-				if(table.getWholeTableName().equalsIgnoreCase(policy.getTable().getWholeTableName())){		
+				if(mach(table, policy)){		
 					if(policy.getRoles() != null){
 						for(String role: policy.getRoles()){
 							if(getSessionContext().isUserInRole(role)){
@@ -62,6 +62,28 @@ public class Policy extends StatementTransform {
 		}
 		
 		return newPolicyList;
+	}
+
+
+	private boolean mach(Table table, CreatePolicy policy) {
+		
+		if(table.getName().equalsIgnoreCase(policy.getTable().getName())){			
+			if(table.getSchemaName() == policy.getTable().getSchemaName()){
+				return true; 
+			}
+			String tableSchema = table.getSchemaName() == null ? sessionContext.getDefaultSchema() : table.getSchemaName();
+			String policySchema =  policy.getTable().getSchemaName() == null ? sessionContext.getDefaultSchema() : policy.getTable().getSchemaName();
+			if(tableSchema != null){
+				return tableSchema.equalsIgnoreCase(policySchema);
+			}else {
+				return false;
+			}
+		}else {
+			return false;
+		}
+		
+		
+		 
 	}
 
 	private boolean applicableFor(CreatePolicy policy,String actiony) {

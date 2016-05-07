@@ -76,6 +76,11 @@ public class TestUtil {
 				return null;
 			}
 
+			@Override
+			public String getDefaultSchema() {				
+				return null;
+			}
+
 		};
 		return context;
 	}

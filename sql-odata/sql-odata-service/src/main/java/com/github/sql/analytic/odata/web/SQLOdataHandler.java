@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.olingo.commons.api.edmx.EdmxReference;
+import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
@@ -26,11 +27,13 @@ import com.github.sql.analytic.transform.policy.SessionContext;
 
 public class SQLOdataHandler {
 
+	private static final String PUBLIC = "PUBLIC";
 	private Connection connection;
 	private List<CreatePolicy> policy;
 	private ServletConfig config;
 	private Map<String,Cursor> cursors;
 	private Map<String, Variable> variables;
+	private String schema;
 
 	public SQLOdataHandler(ServletConfig config,Connection connection,List<CreatePolicy> policy, Map<String, Cursor> cursors, Map<String, Variable> variables){
 		this.connection = connection;
@@ -88,6 +91,19 @@ public class SQLOdataHandler {
 			@Override
 			public String getCurrentUser() {							
 				return request.getUserPrincipal() == null ? null : request.getUserPrincipal().getName();
+			}
+
+			@Override
+			public String getDefaultSchema() {
+				if(schema != null){
+					return schema;
+				}
+				try {
+					schema = connection.getSchema();
+				} catch (Throwable e) {
+					schema = PUBLIC;
+				} 
+				return schema == null ? PUBLIC : schema;
 			}
 		};
 	}
