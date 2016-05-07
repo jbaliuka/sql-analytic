@@ -22,11 +22,10 @@
 
 package com.github.sql.analytic.statement.select;
 
-import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
 import com.github.sql.analytic.expression.operators.relational.ItemsListVisitor;
-import com.github.sql.analytic.statement.StatementVisitor;
 
 
 
@@ -47,8 +46,9 @@ public class SubSelect implements FromItem, SQLExpression, ItemsList {
 		return selectBody;
 	}
 
-	public void setSelectBody(SelectBody body) {
+	public SubSelect setSelectBody(SelectBody body) {
 		selectBody = body;
+		return this;
 	}
 
 	public void accept(ExpressionVisitor expressionVisitor) {
@@ -60,7 +60,7 @@ public class SubSelect implements FromItem, SQLExpression, ItemsList {
 	}
 
 	public void setAlias(String string) {
-		alias = string;
+		alias = string;		
 	}
 
 	public void accept(ItemsListVisitor itemsListVisitor) {
@@ -71,8 +71,9 @@ public class SubSelect implements FromItem, SQLExpression, ItemsList {
 		return "("+selectBody+")"+((alias!=null)?" AS "+alias:"");
 	}
 
-	public void setExpression(boolean expression) {
+	public SubSelect setExpression(boolean expression) {
 		this.expression = expression;
+		return this;
 	}
 
 	public boolean isExpression() {

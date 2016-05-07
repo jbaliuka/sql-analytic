@@ -48,14 +48,13 @@ public class InsertDeParser implements ItemsListVisitor {
 		this.buffer = buffer;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void deParse(Insert insert) {
 		buffer.append("INSERT INTO ");
 		buffer.append(insert.getTable().getWholeTableName());
 		if (insert.getColumns() != null) {
 			buffer.append("(");
-			for (Iterator iter = insert.getColumns().iterator(); iter.hasNext();) {
-				Column column = (Column) iter.next();
+			for (Iterator<Column> iter = insert.getColumns().iterator(); iter.hasNext();) {
+				Column column =  iter.next();
 				buffer.append(column.getColumnName());
 				if (iter.hasNext()) {
 					buffer.append(", ");
@@ -68,10 +67,9 @@ public class InsertDeParser implements ItemsListVisitor {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	public void visit(ExpressionList expressionList) {
 		buffer.append(" VALUES (");
-		for (Iterator iter = expressionList.getExpressions().iterator(); iter.hasNext();) {
+		for (Iterator<SQLExpression> iter = expressionList.getExpressions().iterator(); iter.hasNext();) {
 			SQLExpression expression = (SQLExpression) iter.next();
 			expression.accept(expressionVisitor);
 			if (iter.hasNext()){

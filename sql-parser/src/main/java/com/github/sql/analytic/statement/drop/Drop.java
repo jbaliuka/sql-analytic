@@ -11,8 +11,7 @@ import com.github.sql.analytic.statement.select.PlainSelect;
 public class Drop implements SQLStatement {
 	private String type;
 	private String name;
-	@SuppressWarnings("unchecked")
-	private List parameters;
+	private List<String> parameters;
 	
 	public void accept(StatementVisitor statementVisitor) {
 		statementVisitor.visit(this);
@@ -22,8 +21,7 @@ public class Drop implements SQLStatement {
 		return name;
 	}
 
-	@SuppressWarnings("unchecked")
-	public List getParameters() {
+	public List<String> getParameters() {
 		return parameters;
 	}
 
@@ -35,8 +33,7 @@ public class Drop implements SQLStatement {
 		name = string;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void setParameters(List list) {
+	public void setParameters(List<String> list) {
 		parameters = list;
 	}
 

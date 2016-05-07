@@ -22,8 +22,6 @@
  
 package com.github.sql.analytic.expression;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import com.github.sql.analytic.parser.Token;
 
 /**

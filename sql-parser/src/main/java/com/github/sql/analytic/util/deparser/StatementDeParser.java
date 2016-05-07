@@ -15,7 +15,6 @@ import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.replace.Replace;
 import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.Select;
-import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.WithItem;
 import com.github.sql.analytic.statement.truncate.Truncate;
 import com.github.sql.analytic.statement.update.Update;

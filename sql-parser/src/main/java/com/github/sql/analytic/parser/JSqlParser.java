@@ -25,7 +25,6 @@ package com.github.sql.analytic.parser;
 import java.io.Reader;
 
 import com.github.sql.analytic.JSQLParserException;
-import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.statement.SQLStatement;
 
 

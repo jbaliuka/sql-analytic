@@ -23,13 +23,12 @@
 
 package com.github.sql.analytic.schema;
 
-import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
-import com.github.sql.analytic.statement.StatementVisitor;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.statement.select.ColumnReference;
 import com.github.sql.analytic.statement.select.ColumnReferenceVisitor;
-import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.SelectItemVisitor;
+import com.github.sql.analytic.statement.select.SelectListItem;
 
 
 /**

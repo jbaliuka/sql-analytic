@@ -2,38 +2,25 @@ package com.github.sql.analytic.odata;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.security.auth.Subject;
-
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmFunction;
-import org.apache.olingo.commons.api.edm.EdmParameter;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceFunction;
-import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
-import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
 
-import com.github.sql.analytic.schema.Column;
-import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.SQLStatement;
-import com.github.sql.analytic.statement.select.FromItem;
-import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.Select;
-import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.SubSelect;
 import com.github.sql.analytic.statement.select.WithItem;
 

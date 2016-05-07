@@ -41,7 +41,7 @@ public class CreateTable implements SQLStatement {
      * A list of {@link ColumnDefinition}s of this table.
      */
     
-	public List<?> getColumnDefinitions() {
+	public List<ColumnDefinition> getColumnDefinitions() {
         return columnDefinitions;
     }
 
