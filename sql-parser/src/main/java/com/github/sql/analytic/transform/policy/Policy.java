@@ -34,14 +34,14 @@ public class Policy extends StatementTransform {
 	}
 
 
-	public List<CreatePolicy> findTablePolicies(String action,Table table) {
+	public List<CreatePolicy> currentPolicies(String action,Table table) {
 
 		List<CreatePolicy> allPolicies = policyList;
 		List<CreatePolicy> newPolicyList = new ArrayList<CreatePolicy>();
 
 		for(CreatePolicy policy : allPolicies){
 			if( applicableFor(policy,action)){				
-				if(mach(table, policy)){		
+				if(match(table, policy)){		
 					if(policy.getRoles() != null){
 						for(String role: policy.getRoles()){
 							if(getSessionContext().isUserInRole(role)){
@@ -64,8 +64,17 @@ public class Policy extends StatementTransform {
 		return newPolicyList;
 	}
 
+	public boolean hasPolicy(Table table){	
+		for(CreatePolicy next : policyList){
+			if(match(table,next)){
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
-	private boolean mach(Table table, CreatePolicy policy) {
+	public  boolean match(Table table, CreatePolicy policy) {
 		
 		if(table.getName().equalsIgnoreCase(policy.getTable().getName())){			
 			if(table.getSchemaName() == policy.getTable().getSchemaName()){

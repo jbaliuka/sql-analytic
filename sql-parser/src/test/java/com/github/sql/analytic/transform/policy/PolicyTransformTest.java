@@ -33,7 +33,7 @@ public class PolicyTransformTest extends TestCase {
 		Policy transform = new Policy(list, TestUtil.mockContext("testUser","testRole")  );
 		List<String> names = new ArrayList<String>();	
 		
-		for (CreatePolicy next : transform.findTablePolicies("SELECT", new Table(null, "TEST"))){
+		for (CreatePolicy next : transform.currentPolicies("SELECT", new Table(null, "TEST"))){
 			names.add(next.getName());
 		}
 

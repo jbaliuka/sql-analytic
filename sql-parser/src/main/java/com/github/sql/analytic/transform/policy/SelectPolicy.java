@@ -160,7 +160,7 @@ public class SelectPolicy extends SelectTransform {
 
 	protected SQLExpression getCheckFilter(SQLExpression filter) {
 		
-		List<CreatePolicy> list = statementTransform.findTablePolicies(action, toTable);
+		List<CreatePolicy> list = statementTransform.currentPolicies(action, toTable);
 		SQLExpression checkFilter = null;		
 		for(CreatePolicy policy: list){				
 			if(policy.getCheck() != null){
@@ -194,7 +194,7 @@ public class SelectPolicy extends SelectTransform {
 	private SQLExpression getUsingFilter(Table table) {
 
 		SQLExpression filter = null;
-		List<CreatePolicy> list = statementTransform.findTablePolicies(action, table);		
+		List<CreatePolicy> list = statementTransform.currentPolicies(action, table);		
 		
 			for(CreatePolicy policy: list){
 				if(policy.getUsing() != null){

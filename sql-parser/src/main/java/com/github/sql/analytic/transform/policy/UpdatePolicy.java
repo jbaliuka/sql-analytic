@@ -38,7 +38,7 @@ public class UpdatePolicy extends UpdateTransform {
 
 	protected void checkColumnPolicy() {
 		
-		List<CreatePolicy> list = policyTransform.findTablePolicies("UPDATE", getTable());
+		List<CreatePolicy> list = policyTransform.currentPolicies("UPDATE", getTable());
 		for( NewValue value : values ){
 			boolean auth = false;
 			for(CreatePolicy p : list ){

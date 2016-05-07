@@ -75,10 +75,9 @@ public class SQLODataServletTest {
 		XMLMetadata body = res.getBody();
 
 		Map<String, CsdlSchema> shemas = body.getSchemaByNsOrAlias();
-		assertTrue(shemas.size() == 2);
+		assertTrue(shemas.size() == 1);
 		assertTrue(shemas.containsKey("PUBLIC"));
-		assertTrue(shemas.containsKey("INFORMATION_SCHEMA"));
-
+		
 		CsdlSchema publicSchema = shemas.get("PUBLIC");
 
 		CsdlEntityType customers = publicSchema.getEntityType("CUSTOMERS");
