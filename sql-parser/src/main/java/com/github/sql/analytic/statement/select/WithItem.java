@@ -18,8 +18,9 @@ public class WithItem {
 	public String getName() {
 		return name;
 	}
-	public void setName(String name) {
+	public WithItem setName(String name) {
 		this.name = name;
+		return this;
 	}
 	
 	/**
@@ -29,8 +30,9 @@ public class WithItem {
 	public SelectBody getSelectBody() {
 		return selectBody;
 	}
-	public void setSelectBody(SelectBody selectBody) {
+	public WithItem setSelectBody(SelectBody selectBody) {
 		this.selectBody = selectBody;
+		return this;
 	}
 	
 	/**

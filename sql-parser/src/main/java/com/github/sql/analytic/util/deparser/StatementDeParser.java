@@ -13,7 +13,9 @@ import com.github.sql.analytic.statement.drop.Drop;
 import com.github.sql.analytic.statement.insert.Insert;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.replace.Replace;
+import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.Select;
+import com.github.sql.analytic.statement.select.SelectListItem;
 import com.github.sql.analytic.statement.select.WithItem;
 import com.github.sql.analytic.statement.truncate.Truncate;
 import com.github.sql.analytic.statement.update.Update;
@@ -78,10 +80,19 @@ public class StatementDeParser implements StatementVisitor {
 
 		selectDeParser.setExpressionVisitor(expressionDeParser);
 		if (select.getWithItemsList() != null && !select.getWithItemsList().isEmpty()) {
-			buffer.append("WITH ");
-			for (Iterator iter = select.getWithItemsList().iterator(); iter.hasNext();) {
-				WithItem withItem = (WithItem)iter.next();
-				buffer.append(withItem);
+			buffer.append("WITH ");			
+			for (Iterator<WithItem> iter = select.getWithItemsList().iterator(); iter.hasNext();) {
+				WithItem withItem = iter.next();
+				buffer.append(withItem.getName());
+				if(withItem.getWithItemList() != null){
+					buffer.append("(");					
+					buffer.append(PlainSelect.getStringList(withItem.getWithItemList(),true,false));					
+					buffer.append(")");
+				}
+				buffer.append(" AS (");							
+				withItem.getSelectBody().accept(selectDeParser);
+				buffer.append(" )");
+
 				if (iter.hasNext()){
 					buffer.append(",");
 				}
@@ -130,7 +141,7 @@ public class StatementDeParser implements StatementVisitor {
 
 		buffer.append("CREATE POLICY ").
 		append(policy.getName()).append(" ON ").append(policy.getTable());
-		
+
 		if(policy.getColumns() != null){
 			buffer.append("(");
 			int i = 0;
@@ -142,7 +153,7 @@ public class StatementDeParser implements StatementVisitor {
 			}
 			buffer.append(")");
 		}
-		
+
 		if(policy.getAction() != null){
 			buffer.append(" FOR ").append(policy.getAction());	
 		}		
@@ -166,8 +177,8 @@ public class StatementDeParser implements StatementVisitor {
 			buffer.append(policy.getCheck());
 			buffer.append(")");
 		}
-		
-		
+
+
 
 	}
 
@@ -179,7 +190,7 @@ public class StatementDeParser implements StatementVisitor {
 	@Override
 	public void visit(Variable variable) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 

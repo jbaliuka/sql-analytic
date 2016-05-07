@@ -68,23 +68,27 @@ public class StatementTransform  implements StatementVisitor {
 
 
 	public SelectBody transform(SelectBody selectBody) {
-		
+
 		SelectTransform selectTranssform = createSelectTransform();		
 		selectBody.accept(selectTranssform);
-		
+
 		return selectTranssform.getSelectBody();
-		
+
 	}
-	
-	
+
+
 	public void visit(Select select) {
-		
+
 		statement = new Select();
 		SelectTransform selectTranssform = createSelectTransform();
 
 		if (select.getWithItemsList() != null && !select.getWithItemsList().isEmpty()) {
 			List<WithItem> withItems = new ArrayList<WithItem>();
 			((Select)statement).setWithItemsList(withItems);			
+			for (Iterator<WithItem> iter = select.getWithItemsList().iterator(); iter.hasNext();) {
+				WithItem withItem = iter.next();
+				selectTranssform.visit(withItem);
+			}
 			for (Iterator<WithItem> iter = select.getWithItemsList().iterator(); iter.hasNext();) {
 				WithItem withItem = iter.next();
 				WithItem newItem = new WithItem();
@@ -94,16 +98,15 @@ public class StatementTransform  implements StatementVisitor {
 					for(SelectListItem item: withItem.getWithItemList()){
 						selectItems.add(item);
 					}
+					newItem.setWithItemList(selectItems);
 				}
-				selectTranssform.visit(newItem);
-
 				withItem.getSelectBody().accept(selectTranssform);
 				newItem.setSelectBody(selectTranssform.getSelectBody());
 				withItems.add(newItem);
 
 			}
 		}
-		
+
 		((Select)statement).setSelectBody(transform(select.getSelectBody()));
 
 	}
@@ -142,7 +145,7 @@ public class StatementTransform  implements StatementVisitor {
 
 	}
 
-	
+
 
 	public ItemListTransform createItemListTransform() {		
 		return new ItemListTransform(this);
@@ -165,10 +168,10 @@ public class StatementTransform  implements StatementVisitor {
 		return new SelectItemTransfrom(this);
 	}
 
-	
+
 
 	protected Table copy(Table table) {
-		
+
 		Table newTable = new Table(table.getSchemaName(),table.getName());
 		newTable.setAlias(table.getAlias());
 		newTable.setPartition(table.getPartition());
@@ -179,27 +182,27 @@ public class StatementTransform  implements StatementVisitor {
 
 	public void visit(CreatePolicy policy) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void visit(Cursor cursor) {
-		
+
 		Cursor newCursor = new Cursor();		
 		newCursor.setName(cursor.getName());
 		newCursor.setColumnDefinitions(cursor.getColumnDefinitions());		
 		visit(cursor.getSelect());
 		newCursor.setSelect((Select) statement);		
 		statement = newCursor;
-		
+
 	}
 
 	@Override
 	public void visit(Variable variable) {
 		statement = variable;
-		
+
 	}
 
-	
+
 
 }

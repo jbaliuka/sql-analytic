@@ -3,9 +3,12 @@ package com.github.sql.analytic.odata;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
+
+import javax.security.auth.Subject;
 
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmFunction;
@@ -22,10 +25,17 @@ import org.apache.olingo.server.api.uri.UriResourceFunction;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
 
+import com.github.sql.analytic.schema.Column;
+import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.Cursor;
+import com.github.sql.analytic.statement.SQLStatement;
+import com.github.sql.analytic.statement.select.FromItem;
 import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.Select;
+import com.github.sql.analytic.statement.select.SelectListItem;
+import com.github.sql.analytic.statement.select.SubSelect;
+import com.github.sql.analytic.statement.select.WithItem;
 
 public class CallCursorFunctionCommand extends ReadCommand {
 
@@ -41,17 +51,16 @@ public class CallCursorFunctionCommand extends ReadCommand {
 	public ResultSetIterator execute(SQLSession connection) throws ODataApplicationException {
 		try{
 			UriResource segment = uriInfo.getUriResourceParts().get(0);
-			String functionName;
+			EdmFunction function;
 			if (segment instanceof UriResourceFunction){				
-				EdmFunction function = ((UriResourceFunction) segment).getFunction();
+				function = ((UriResourceFunction) segment).getFunction();
 				entityType = (EdmEntityType) function.getReturnType().getType();
-				functionName = function.getName();
-				setSelect((PlainSelect) cursors.get(functionName).getSelect().getSelectBody());
+
 				for( UriParameter param : ((UriResourceFunction) segment).getParameters()){
 					if (param.getExpression() != null){
 						throw new IllegalArgumentException(param.getExpression().toString());
 					}
-								
+
 					EdmPrimitiveType type = (EdmPrimitiveType) function.getParameter(param.getName()).getType();
 					Object value = type.valueOfString(param.getText(), true,null, null, null, true, type.getDefaultType());					
 					getStatementParams().put(param.getName(),toJdbcValue(value));
@@ -60,22 +69,42 @@ public class CallCursorFunctionCommand extends ReadCommand {
 				throw new ODataApplicationException(segment.toString(), HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), 
 						Locale.ROOT);
 			}
-			//	processUriInfo(uriInfo, getEntityType(), null);
-			PreparedStatement statement = connection.create(new Select().setSelectBody(getSelect()), getStatementParams() );			
+			processUriInfo(uriInfo, getEntityType(), function.getName());
+			PreparedStatement statement = connection.create( buildSelect(function), getStatementParams() );			
 			ResultSet rs = statement.executeQuery();			
 			statement.closeOnCompletion();
 			return new ResultSetIterator(connection, rs, getEntityType(),uriInfo.getExpandOption());
 
-		} catch (Exception e) {			
+		} catch (Exception e) {		
+			e.printStackTrace();
 			throw internalError(e);
 		}
+	}
+
+	private SQLStatement buildSelect(EdmFunction function) {
+		Cursor cursor = cursors.get(function.getName());
+		Select newSelect = new Select();
+		newSelect.setWithItemsList(new ArrayList<WithItem>());
+			
+		if(cursor.getSelect().getWithItemsList() != null){
+			for( WithItem item : cursor.getSelect().getWithItemsList()){
+				newSelect.getWithItemsList().add(item);
+			}
+		}		
+		newSelect.setSelectBody(getSelect());
+		SubSelect subSelect = new SubSelect();
+		subSelect.setSelectBody(cursor.getSelect().getSelectBody());
+		subSelect.setAlias(function.getName());
+		getSelect().setFromItem(subSelect);
+		
+		return newSelect;
 	}
 
 	protected Object toJdbcValue(Object value) {
 		if(value instanceof Calendar){
 			return new java.sql.Timestamp(((Calendar) value).getTimeInMillis());
 		}
-		
+
 		return value;
 	}
 
