@@ -13,21 +13,50 @@ import com.github.sql.analytic.transform.policy.Policy;
 
 public class PolicyAwareMetadata implements DatabaseMetaData{
 	
-	private static final String FKTABLE_NAME = "FKTABLE_NAME";
-	private static final String PKTABLE_NAME = "PKTABLE_NAME";
-	private static final String COLUMN_NAME = "COLUMN_NAME";
-	private static final String TABLE_SCHEM = "TABLE_SCHEM";
-	private static final String TABLE_NAME = "TABLE_NAME";
+	public static final String FKTABLE_NAME = "FKTABLE_NAME";
+	public static final String PKTABLE_NAME = "PKTABLE_NAME";
+	public static final String COLUMN_NAME = "COLUMN_NAME";
+	public static final String TABLE_SCHEM = "TABLE_SCHEM";
+	public static final String TABLE_NAME = "TABLE_NAME";
+	public static final String DATA_TYPE = "DATA_TYPE";
+	public static final String DECIMAL_DIGITS = "DECIMAL_DIGITS";
+	public static final String COLUMN_SIZE = "COLUMN_SIZE";
+	public static final String COLUMN_DEF = "COLUMN_DEF";
+	public static final String NULLABLE = "NULLABLE";	
+	public static final String CONTAINER_NAME = "Container";
+	public static final String PKTABLE_SCHEM = "PKTABLE_SCHEM"; 
+	public static final String FKTABLE_SCHEM = "FKTABLE_SCHEM";	 
+	public static final String KEY_SEQ = "KEY_SEQ";
+	public static final String DELETE_RULE = "DELETE_RULE";
+	public static final String FK_NAME = "FK_NAME";
+	public static final String PKCOLUMN_NAME = "PKCOLUMN_NAME";
+	public static final String FKCOLUMN_NAME = "FKCOLUMN_NAME"; 
 
+
+	class EmptyResultSet extends SQLResultSet{
+
+		public EmptyResultSet() {
+			super(null, null);			
+		}
+		@Override
+		public boolean next() throws SQLException {
+			return false;
+		}
+		
+	}
 	class ColumnResultSet extends SQLResultSet {
-		private ColumnResultSet(ResultSet rs) {
+		private String colFieldName;
+		private String tabFieldName;
+		private ColumnResultSet(ResultSet rs,String colFieldName,String tabFieldName) {
 			super(null, rs);
+			this.colFieldName = colFieldName;
+			this.tabFieldName = tabFieldName;
 		}
 		@Override
 		public boolean next() throws SQLException {
 			while(super.next()){
-				String table = getString(TABLE_NAME);
-				String col = getString(COLUMN_NAME);
+				String table = getString(tabFieldName);
+				String col = getString(colFieldName);
 				for(CreatePolicy pol : policy.getPolicyList()){
 					if(table.equalsIgnoreCase(pol.getTable().getName())){
 						if(pol.getColumns() == null){
@@ -610,12 +639,15 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
 			throws SQLException {
 		ResultSet columns = metadata.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
-		return new ColumnResultSet(columns);
+		return new ColumnResultSet(columns,COLUMN_NAME,TABLE_NAME);
 	}
 
 	public ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern)
 			throws SQLException {
-		return new ColumnResultSet(metadata.getColumnPrivileges(catalog, schema, table, columnNamePattern));
+		if(!policy.hasPolicy(new Table(schema,table))){
+			return new EmptyResultSet();
+		}
+		return new ColumnResultSet(metadata.getColumnPrivileges(catalog, schema, table, columnNamePattern),COLUMN_NAME,TABLE_NAME);
 	}
 
 	public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
@@ -625,29 +657,51 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 
 	public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable)
 			throws SQLException {
+		if(!policy.hasPolicy(new Table(schema,table))){
+			return new EmptyResultSet();
+		}
 		return metadata.getBestRowIdentifier(catalog, schema, table, scope, nullable);
 	}
 
 	public ResultSet getVersionColumns(String catalog, String schema, String table) throws SQLException {
+		if(!policy.hasPolicy(new Table(schema,table))){
+			return new EmptyResultSet();
+		}
 		return metadata.getVersionColumns(catalog, schema, table);
 	}
 
 	public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
-		return new ColumnResultSet(metadata.getPrimaryKeys(catalog, schema, table));
+		if(!policy.hasPolicy(new Table(schema,table))){
+			return new EmptyResultSet();
+		}
+		return metadata.getPrimaryKeys(catalog, schema, table);
 	}
 
 	public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
+		if(!policy.hasPolicy(new Table(schema,table))){
+			return new EmptyResultSet();
+		}
 		return new TableResultSet(metadata.getImportedKeys(catalog, schema, table),PKTABLE_NAME);
 	}
 
 	public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
+		if(!policy.hasPolicy(new Table(schema,table))){
+			return new EmptyResultSet();
+		}
 		return new TableResultSet(metadata.getExportedKeys(catalog, schema, table),FKTABLE_NAME);
 	}
 
 	public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable,
 			String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
-		return new TableResultSet(metadata.getCrossReference(parentCatalog, parentSchema, parentTable, foreignCatalog, foreignSchema,
-				foreignTable),PKTABLE_NAME);
+		
+		if(!policy.hasPolicy(new Table(parentSchema,parentTable))){
+			return new EmptyResultSet();
+		}
+		if(!policy.hasPolicy(new Table(foreignSchema,foreignTable))){
+			return new EmptyResultSet();
+		}
+		return metadata.getCrossReference(parentCatalog, parentSchema, parentTable, 
+				foreignCatalog, foreignSchema,foreignTable);
 	}
 
 	public ResultSet getTypeInfo() throws SQLException {
@@ -656,6 +710,9 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 
 	public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate)
 			throws SQLException {
+		if(!policy.hasPolicy(new Table(schema,table))){
+			return new EmptyResultSet();
+		}
 		return metadata.getIndexInfo(catalog, schema, table, unique, approximate);
 	}
 
@@ -737,7 +794,7 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 	}
 
 	public ResultSet getSuperTables(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
-		return metadata.getSuperTables(catalog, schemaPattern, tableNamePattern);
+		return new TableResultSet(metadata.getSuperTables(catalog, schemaPattern, tableNamePattern),TABLE_NAME);
 	}
 
 	public ResultSet getAttributes(String catalog, String schemaPattern, String typeNamePattern,

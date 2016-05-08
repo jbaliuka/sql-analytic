@@ -31,6 +31,7 @@ import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.select.FromItem;
 import com.github.sql.analytic.statement.select.Join;
 import com.github.sql.analytic.statement.select.Select;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.*;
 
 public class ReadEntityCollectionCommand extends ReadCommand{
 
@@ -92,7 +93,7 @@ public class ReadEntityCollectionCommand extends ReadCommand{
 		boolean found = false;
 		try(ResultSet rs = connection.getMetaData().getImportedKeys(null, rightType.getNamespace(), rightType.getName())){			
 			while(rs.next()){
-				if(fKname.equalsIgnoreCase(rs.getString(SQLEdmProvider.FK_NAME))){
+				if(fKname.equalsIgnoreCase(rs.getString(FK_NAME))){
 					found = true;
 					setOn(join, rs,index - 1,index);					
 				}
@@ -100,7 +101,7 @@ public class ReadEntityCollectionCommand extends ReadCommand{
 			if(!found){
 				try(ResultSet right = connection.getMetaData().getExportedKeys(null, rightType.getNamespace(), rightType.getName())){					
 					while(right.next()){
-						if(fKname.equalsIgnoreCase(right.getString(SQLEdmProvider.FK_NAME))){
+						if(fKname.equalsIgnoreCase(right.getString(FK_NAME))){
 							found = true;
 							setOn(join, right,index,index - 1 );					
 						}
@@ -115,11 +116,11 @@ public class ReadEntityCollectionCommand extends ReadCommand{
 
 	private void setOn(Join join, ResultSet rs, int pkIndex,int fkIndex) throws SQLException {
 
-		Table pkTable = new Table(null, rs.getString(SQLEdmProvider.PKTABLE_NAME)+ "_" + pkIndex);
-		Column pfCol = new Column(pkTable,rs.getString(SQLEdmProvider.PKCOLUMN_NAME));
+		Table pkTable = new Table(null, rs.getString(PKTABLE_NAME)+ "_" + pkIndex);
+		Column pfCol = new Column(pkTable,rs.getString(PKCOLUMN_NAME));
 
-		Table fkTable = new Table(null, rs.getString(SQLEdmProvider.FKTABLE_NAME) + "_" + fkIndex);
-		Column fkCol = new Column(fkTable,rs.getString(SQLEdmProvider.FKCOLUMN_NAME));
+		Table fkTable = new Table(null, rs.getString(FKTABLE_NAME) + "_" + fkIndex);
+		Column fkCol = new Column(fkTable,rs.getString(FKCOLUMN_NAME));
 
 		BinaryExpression eq = new EqualsTo().setLeftExpression(pfCol).setRightExpression(fkCol);
 

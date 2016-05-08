@@ -21,6 +21,7 @@ import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.select.Select;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.*;
 
 public class ExpandPropertyCommand extends ReadCommand {
 
@@ -49,10 +50,10 @@ public class ExpandPropertyCommand extends ReadCommand {
 			if(property.isCollection()){
 					try (ResultSet rs = md.getImportedKeys(null, property.getType().getNamespace(), name)){
 						while(rs.next()){
-							if(property.getName().equals(rs.getString(SQLEdmProvider.FK_NAME))){
-								String parentKey = rs.getString(SQLEdmProvider.PKCOLUMN_NAME);
+							if(property.getName().equals(rs.getString(FK_NAME))){
+								String parentKey = rs.getString(PKCOLUMN_NAME);
 								Property keyProp = entity.getProperty(parentKey);								
-								String childKey = rs.getString(SQLEdmProvider.FKCOLUMN_NAME);
+								String childKey = rs.getString(FKCOLUMN_NAME);
 								appendKeyFilter(name,childKey,keyProp.getValue());
 							}
 						}
@@ -61,10 +62,10 @@ public class ExpandPropertyCommand extends ReadCommand {
 			}else {
 				try (ResultSet rs = md.getExportedKeys(null, property.getType().getNamespace(), name)){
 					while(rs.next()){
-						if(property.getName().equals(rs.getString(SQLEdmProvider.FK_NAME))){
-							String parentKey = rs.getString(SQLEdmProvider.FKCOLUMN_NAME);
+						if(property.getName().equals(rs.getString(FK_NAME))){
+							String parentKey = rs.getString(FKCOLUMN_NAME);
 							Property keyProp = entity.getProperty(parentKey);								
-							String childKey = rs.getString(SQLEdmProvider.PKCOLUMN_NAME);
+							String childKey = rs.getString(PKCOLUMN_NAME);
 							appendKeyFilter(name,childKey,keyProp.getValue());
 						}
 					}

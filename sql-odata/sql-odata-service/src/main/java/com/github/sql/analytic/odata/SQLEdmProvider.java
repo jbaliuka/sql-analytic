@@ -28,6 +28,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.ex.ODataException;
 
 import com.github.sql.analytic.expression.NamedParameter;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.*;
 import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.create.table.ColumnDefinition;
@@ -36,25 +37,7 @@ import com.github.sql.analytic.transform.StatementTransform;
 
 public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
-	public static final String TABLE_SCHEM = "TABLE_SCHEM";
-	public static final String TABLE_NAME = "TABLE_NAME";
-	public static final String DATA_TYPE = "DATA_TYPE";
-	public static final String DECIMAL_DIGITS = "DECIMAL_DIGITS";
-	public static final String COLUMN_SIZE = "COLUMN_SIZE";
-	public static final String COLUMN_DEF = "COLUMN_DEF";
-	public static final String NULLABLE = "NULLABLE";
-	public static final String COLUMN_NAME = "COLUMN_NAME";
-	public static final String CONTAINER_NAME = "Container";
-	public static final String PKTABLE_SCHEM = "PKTABLE_SCHEM"; 
-	public static final String PKTABLE_NAME = "PKTABLE_NAME"; 
-	public static final String FKTABLE_SCHEM = "FKTABLE_SCHEM"; 
-	public static final String FKTABLE_NAME = "FKTABLE_NAME"; 
-	public static final String KEY_SEQ = "KEY_SEQ";
-	public static final String DELETE_RULE = "DELETE_RULE";
-	public static final String FK_NAME = "FK_NAME";
-	public static final String PKCOLUMN_NAME = "PKCOLUMN_NAME";
-	public static final String FKCOLUMN_NAME = "FKCOLUMN_NAME"; 
-
+	
 	private static FullQualifiedName container = new FullQualifiedName("SQLODataService",CONTAINER_NAME);
 	private DatabaseMetaData metadata;
 	private Map<String,Cursor> cursors;
