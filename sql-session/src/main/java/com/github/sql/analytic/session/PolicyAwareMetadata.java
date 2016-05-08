@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
+import java.util.List;
 
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
@@ -31,6 +32,7 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 	public static final String FK_NAME = "FK_NAME";
 	public static final String PKCOLUMN_NAME = "PKCOLUMN_NAME";
 	public static final String FKCOLUMN_NAME = "FKCOLUMN_NAME"; 
+	public static final String PRIVILEGE = "PRIVILEGE";
 
 
 	class EmptyResultSet extends SQLResultSet{
@@ -55,10 +57,9 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 		@Override
 		public boolean next() throws SQLException {
 			while(super.next()){
-				String table = getString(tabFieldName);
+				Table table = new Table().setName(getString(tabFieldName));
 				String col = getString(colFieldName);
-				for(CreatePolicy pol : policy.getPolicyList()){
-					if(table.equalsIgnoreCase(pol.getTable().getName())){
+				for(CreatePolicy pol : policy.allTablePolicies(table)){					
 						if(pol.getColumns() == null){
 							return true;
 						}else {
@@ -68,8 +69,62 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 								}
 							}
 						}
-					}
 				}
+			}
+			return false;
+		}
+	}
+	
+	class ColumnPrivilegesResultSet extends SQLResultSet {
+		private ColumnPrivilegesResultSet(ResultSet rs) {
+			super(null, rs);			
+		}
+		@Override
+		public boolean next() throws SQLException {
+			while(super.next()){
+				Table table = new Table().setName(getString(TABLE_NAME)).
+						setSchemaName(getString(TABLE_SCHEM));				
+				String col = getString(COLUMN_NAME);
+				String action = getString(PRIVILEGE);				
+				for(CreatePolicy pol : policy.allTablePolicies(table)){					
+						if(pol.getColumns() == null && applicable(action, pol) ){
+							return true;
+						}else {
+							for(Column c : pol.getColumns() ){
+								if(c.getColumnName().equalsIgnoreCase(col) && applicable(action, pol)){
+									return true;
+								}
+							}
+						}
+				}
+			}
+			return false;
+		}
+		private boolean applicable(String action, CreatePolicy pol) {
+			return policy.applicableFor(pol, action);
+		}
+	}
+	
+	class TablePrivilegesResultSet extends SQLResultSet {		
+		
+
+		private TablePrivilegesResultSet(ResultSet rs) {
+			super(null, rs);		
+		}
+
+		@Override
+		public boolean next() throws SQLException {
+			while(super.next()){
+				String table = getString(TABLE_NAME);
+				String schema = getString(TABLE_SCHEM);
+				String action = getString(PRIVILEGE);
+				List<CreatePolicy> policies = policy.allTablePolicies(new Table(schema,table));
+				 for(CreatePolicy pol : policies){
+					 if(policy.applicableFor(pol, action)){
+						 return true;
+					 }
+				 }
+				
 			}
 			return false;
 		}
@@ -124,7 +179,7 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
     public PolicyAwareMetadata(SQLSession session,DatabaseMetaData metadata){
 		this.session = session;
 		this.metadata = metadata;
-		policy = session.createPolicy();
+		this.policy = session.createPolicy();
 	}
 
 	
@@ -647,12 +702,12 @@ public class PolicyAwareMetadata implements DatabaseMetaData{
 		if(!policy.hasPolicy(new Table(schema,table))){
 			return new EmptyResultSet();
 		}
-		return new ColumnResultSet(metadata.getColumnPrivileges(catalog, schema, table, columnNamePattern),COLUMN_NAME,TABLE_NAME);
+		return new ColumnPrivilegesResultSet(metadata.getColumnPrivileges(catalog, schema, table, columnNamePattern));
 	}
 
 	public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
 			throws SQLException {
-		return new TableResultSet(metadata.getTablePrivileges(catalog, schemaPattern, tableNamePattern),TABLE_NAME);
+		return new TablePrivilegesResultSet(metadata.getTablePrivileges(catalog, schemaPattern, tableNamePattern));
 	}
 
 	public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable)

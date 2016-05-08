@@ -13,7 +13,7 @@ public class CreatePolicy implements SQLStatement{
 	private String name;
 	private Table table;
 	private List<Column> columns;
-	private String action;
+	private List<String> actions;
 	private List<String> roles;
 	private SQLExpression using;
 	private SQLExpression check;
@@ -27,56 +27,64 @@ public class CreatePolicy implements SQLStatement{
 		return table;
 	}
 
-	public void setTable(Table table) {
+	public CreatePolicy setTable(Table table) {
 		this.table = table;
+		return this;
 	}
-
-	public String getAction() {
-		return action;
-	}
-
-	public void setAction(String action) {
-		this.action = action;
-	}
+	
 
 	public List<String> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(List<String> roles) {
+	public CreatePolicy setRoles(List<String> roles) {
 		this.roles = roles;
+		return this;
 	}
 
 	public SQLExpression getUsing() {
 		return using;
 	}
 
-	public void setUsing(SQLExpression using) {
+	public CreatePolicy setUsing(SQLExpression using) {
 		this.using = using;
+		return this;
 	}
 
 	public SQLExpression getCheck() {
 		return check;
 	}
 
-	public void setCheck(SQLExpression check) {
+	public CreatePolicy setCheck(SQLExpression check) {
 		this.check = check;
+		return this;
 	}
 
 	public List<Column> getColumns() {
 		return columns;
 	}
 
-	public void setColumns(List<Column> columns) {
+	public CreatePolicy setColumns(List<Column> columns) {
 		this.columns = columns;
+		return this;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public CreatePolicy setName(String name) {
 		this.name = name;
+		return this;
+	}
+
+	public List<String> getActions() {
+		return actions;
+	}
+
+	public CreatePolicy setActions(List<String> actions) {
+		this.actions = actions;
+		return this;
 	}
 
 

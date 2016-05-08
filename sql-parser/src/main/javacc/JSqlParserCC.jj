@@ -337,15 +337,24 @@ CreatePolicy CreatePolicy():
   List<String> roles = new ArrayList<String>();
   Token token;
   SQLExpression expression;
-  Table table;}{
+  Table table;
+  List actions  = new ArrayList();}{
   token = <S_IDENTIFIER>  {
     policy.setName(token.image);  }
   <K_ON> table = Table() [ "(" column = Column() {columns.add(column);} ("," column = Column() {columns.add(column);})* ")" ] 
   [LOOKAHEAD(2) <K_FOR>
   (
-    token = <K_ALL> | token = <K_SELECT> | token = <K_INSERT> | token = <K_UPDATE> | token = <K_DELETE>
-  )  {
-    policy.setAction(token.image);  }
+    (      token =  <K_ALL> |token = < K_SELECT > | token = < K_UPDATE > | token = < K_DELETE > | token = < K_INSERT >
+    )
+          {
+      actions.add(token.image);    }
+    ( ","
+    (      token =  <K_ALL> | token = < K_SELECT > | token = < K_UPDATE > | token = < K_DELETE > | token = < K_INSERT >
+    ) 
+    {
+      actions.add(token.image);
+    }    )*
+  )  
   ]
   [
   	<K_TO> token = <S_IDENTIFIER >	{ roles.add(token.image); }
@@ -359,6 +368,8 @@ CreatePolicy CreatePolicy():
       policy.setColumns(columns);    }
     if(roles.size() > 0)    {
       policy.setRoles(roles);    }
+    if(actions.size() > 0)    {
+      policy.setActions(actions);    }
     return policy;  }}
 
 Update Update():

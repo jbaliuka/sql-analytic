@@ -153,8 +153,14 @@ public class StatementDeParser implements StatementVisitor {
 			buffer.append(")");
 		}
 
-		if(policy.getAction() != null){
-			buffer.append(" FOR ").append(policy.getAction());	
+		if(policy.getActions() != null){
+			buffer.append(" FOR ");
+			for(Iterator<String> it = policy.getActions().iterator(); it.hasNext();  ){
+				buffer.append(it.next());
+				if(it.hasNext()){
+					buffer.append(",");	
+				}
+			}
 		}		
 		if( policy.getRoles() != null ){
 			buffer.append(" TO ");
