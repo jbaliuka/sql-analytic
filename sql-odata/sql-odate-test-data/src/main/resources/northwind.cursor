@@ -1,1 +1,2 @@
-CURSOR myCustomers (id INT(11) ,company VARCHAR(50),last_name VARCHAR(50),first_name VARCHAR(50)) AS select c.id,company,c.last_name,c.first_name from public.customers c inner join public.orders t on c.id = t.customer_id where t.order_date < :date 
+CURSOR myCustomers (id INT(11) ,company VARCHAR(50),last_name VARCHAR(50),first_name VARCHAR(50)) AS select c.id,c.company,c.last_name,c.first_name from public.customers c inner join public.orders t on c.id = t.customer_id where t.order_date < :date 
+CURSOR yourCustomers (id INT(11) ,company VARCHAR(50),last_name VARCHAR(50),first_name VARCHAR(50)) AS select id,company,last_name,first_name from customers  

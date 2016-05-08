@@ -19,11 +19,14 @@ public class PolicyFromItemTransfrom extends FromItemTransform {
 	@Override
 	public void visit(Table tableName) {		
 		super.visit(tableName);
-		List<WithItem> withItems = policySelectTransform.getPolicyTransform().getWithItems();
+		List<WithItem> withItems = policySelectTransform.getPolicyTransform().getWithItems();		
 		boolean cte = false;
 		for(WithItem item: withItems ){
 			cte = cte || item.getName().equalsIgnoreCase(tableName.getWholeTableName());
-		}
+			if(cte){
+				break;
+			}
+		}				
 		if(!cte){
 		  policySelectTransform.addFrom(tableName);
 		}

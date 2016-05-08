@@ -3,6 +3,7 @@ package com.github.sql.analytic.odata.web.test;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.List;
@@ -27,8 +28,6 @@ public class TestSQLODataServlet extends SQLODataServlet {
 	private static final long serialVersionUID = 1L;
 
 	static final String url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
-
-	
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {		
@@ -64,8 +63,6 @@ public class TestSQLODataServlet extends SQLODataServlet {
 		}
 	}
 
-
-
 	@Override
 	protected DataSource getDatasource() {		
 		return new H2Datasource();
@@ -79,7 +76,6 @@ public class TestSQLODataServlet extends SQLODataServlet {
 			throw new AssertionError(e);
 		}
 	}
-
 
 }
 
@@ -134,8 +130,7 @@ class H2Datasource implements DataSource {
 
 	@Override
 	public Connection getConnection() throws SQLException {
-
-		return  new org.h2.Driver().connect(TestSQLODataServlet.url, new Properties());
+		return  DriverManager.getConnection(TestSQLODataServlet.url, new Properties());
 	}
 }
 

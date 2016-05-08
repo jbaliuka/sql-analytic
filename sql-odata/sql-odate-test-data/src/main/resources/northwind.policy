@@ -1,4 +1,4 @@
-CREATE POLICY   customers ON  customers;
+CREATE POLICY   customers ON  customers(id,company,last_name,first_name,job_title,business_phone,home_phone,mobile_phone,fax_number,address,zip_postal_code );
 CREATE POLICY   employees ON PUBLIC.employees;
 CREATE POLICY   privileges ON PUBLIC.privileges;
 CREATE POLICY   employee_privileges ON PUBLIC.employee_privileges;

@@ -11,6 +11,7 @@ public interface SQLDialect {
 	
 	SQLSession geSQLSession(SessionContext context, Connection connection, List<CreatePolicy> policy)
 			throws SQLException;
+	
 	boolean acceptsURL(String url) throws SQLException;
 	
 

@@ -34,8 +34,7 @@ public class SelectPolicy extends SelectTransform {
 	public SelectPolicy(String action,List<NewValue> newValues,Policy statementTransform) {
 		super(statementTransform);
 		this.statementTransform = statementTransform;
-		this.action = action;
-		
+		this.action = action;		
 		this.newValues = newValues;
 		
 	}
@@ -113,7 +112,7 @@ public class SelectPolicy extends SelectTransform {
 
 		if(statementTransform.isCheckColumns()){
 			for(SelectListItem item : list){			
-				item.accept(new ColumnsPolicy(this));
+				item.accept(new ColumnsPolicy(this,action));
 			}
 		}
 

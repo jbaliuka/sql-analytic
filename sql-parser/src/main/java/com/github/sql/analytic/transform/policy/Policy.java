@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
+import com.github.sql.analytic.statement.select.SubSelect;
 import com.github.sql.analytic.statement.select.WithItem;
 import com.github.sql.analytic.transform.DeleteTransform;
 import com.github.sql.analytic.transform.InsertTransform;
@@ -19,7 +20,7 @@ public class Policy extends StatementTransform {
 	private List<CreatePolicy> policyList;
 	private SessionContext sessionContext;
 	private Set<Table> tables = new HashSet<Table>();
-	private List<WithItem> withItems = new ArrayList<WithItem>();
+	private List<WithItem> withItems = new ArrayList<WithItem>();	
 	private boolean checkColumns;
 
 	public boolean isCheckColumns() {
@@ -142,6 +143,6 @@ public class Policy extends StatementTransform {
 	public List<WithItem> getWithItems() {		
 		return withItems ;
 	}
-
+	
 
 }

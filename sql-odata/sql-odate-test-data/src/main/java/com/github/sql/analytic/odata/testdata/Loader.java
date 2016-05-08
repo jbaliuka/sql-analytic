@@ -15,6 +15,7 @@ import java.util.Map;
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.parser.CCJSqlParserManager;
 import com.github.sql.analytic.statement.Cursor;
+import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.test.TestUtil;
@@ -80,9 +81,20 @@ public class Loader {
 			}
 		}		
 
-		return TestUtil.parsePolicyList(policyList);
+		return parsePolicyList(policyList);
 	}
 
+	public static List<CreatePolicy> parsePolicyList(List<String> policyList) throws JSQLParserException {
+		List<CreatePolicy> list = new ArrayList<CreatePolicy>();	
+		for(String policy : policyList){		
+			CCJSqlParserManager parserManager = new CCJSqlParserManager();
+			SQLStatement stmt =  parserManager.parse(new StringReader(policy));
+			list.add((CreatePolicy) stmt);
+		}
+		return list;
+
+	}
+	
 	public static void drop(Connection connection) throws IOException, SQLException {
 		loadFile(connection,"mywind/northwind-drop.sql");		
 	}
