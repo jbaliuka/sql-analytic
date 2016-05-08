@@ -5,12 +5,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.olingo.commons.api.edmx.EdmxReference;
+import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
@@ -18,6 +20,7 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import com.github.sql.analytic.odata.SQLEdmProvider;
 import com.github.sql.analytic.odata.SQLEntityCollectionProcessor;
 import com.github.sql.analytic.odata.SQLEntityProcessor;
+import com.github.sql.analytic.session.SQLDialect;
 import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.Variable;
@@ -25,14 +28,14 @@ import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.policy.SessionContext;
 
 public class SQLOdataHandler {
-
-	private static final String PUBLIC = "PUBLIC";
+	
 	private Connection connection;
 	private List<CreatePolicy> policy;
 	private ServletConfig config;
 	private Map<String,Cursor> cursors;
-	private Map<String, Variable> variables;
-	private String schema;
+	private Map<String, Variable> variables;	
+	private SQLDialect dialect;
+	private SQLSession session;
 
 	public SQLOdataHandler(ServletConfig config,Connection connection,List<CreatePolicy> policy, Map<String, Cursor> cursors, Map<String, Variable> variables){
 		this.connection = connection;
@@ -40,13 +43,31 @@ public class SQLOdataHandler {
 		this.config = config;
 		this.cursors = cursors;
 		this.variables = variables;
+		loadDialect(connection);
+	}
+
+
+	private void loadDialect(Connection connection) {
+		try{
+		for(SQLDialect dialect :  ServiceLoader.load(SQLDialect.class)){			
+				if(dialect.acceptsURL(connection.getMetaData().getURL())){
+					this.setDialect(dialect);
+					break;
+				}			
+		}
+		if(getDialect() == null){
+			throw new ODataRuntimeException("Unable to find dialect for " + connection.getMetaData().getURL());
+		}
+		} catch (SQLException e) {
+			throw new ODataRuntimeException(e);
+		}
 	}
 
 
 	public void process(final HttpServletRequest request, HttpServletResponse response) throws SQLException{
 
 		SessionContext context = createContext(request);										
-		SQLSession session = createSession(context);					
+		session = createSession(context);					
 		OData odata = OData.newInstance();
 		SQLEdmProvider edmProvider = new SQLEdmProvider(session.getMetaData());
 		edmProvider.setCursors(cursors);
@@ -62,7 +83,11 @@ public class SQLOdataHandler {
 	}
 
 	protected SQLSession createSession(SessionContext context) {
-		return new SQLSession(context , connection, policy);
+		try {
+			return getDialect().geSQLSession(context , connection, policy);
+		} catch (SQLException e) {
+			throw new ODataRuntimeException(e);
+		}
 	}
 
 	protected SessionContext createContext(final HttpServletRequest request) {
@@ -93,18 +118,26 @@ public class SQLOdataHandler {
 			}
 
 			@Override
-			public String getDefaultSchema() {
-				if(schema != null){
-					return schema;
-				}
-				try {
-					schema = connection.getSchema();
-				} catch (Throwable e) {
-					schema = PUBLIC;
-				} 
-				return schema == null ? PUBLIC : schema;
+			public String getDefaultSchema() {				
+					try {
+						return session.getSchema();
+					} catch (SQLException e) {
+						return null;
+					}
+				 
+				
 			}
 		};
+	}
+
+
+	public SQLDialect getDialect() {
+		return dialect;
+	}
+
+
+	public void setDialect(SQLDialect dialect) {
+		this.dialect = dialect;
 	}
 
 }

@@ -90,6 +90,11 @@
 				<version>${project.version}</version>
 				<artifactId>sql-odate-test-data</artifactId>
 			</dependency>
+			<dependency>
+		    <groupId>sql-analytic</groupId>
+		 	<artifactId>sql-dialect-h2</artifactId>
+		 	<version>${project.version}</version>
+		</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>
