@@ -27,5 +27,7 @@ public interface FunctionCommand {
 	 * @return Odata compatible primitive
 	 */
 	Object execute(Map<String,Object> parameters);
+	
+	String getContentType();
 
 }

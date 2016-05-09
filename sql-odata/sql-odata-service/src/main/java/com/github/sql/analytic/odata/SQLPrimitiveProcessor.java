@@ -77,7 +77,7 @@ public class SQLPrimitiveProcessor implements PrimitiveProcessor {
 				notImplemented();		
 			}
 			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.getType());
+			response.setHeader(HttpHeader.CONTENT_TYPE, command.getContentType());
 
 
 		}
