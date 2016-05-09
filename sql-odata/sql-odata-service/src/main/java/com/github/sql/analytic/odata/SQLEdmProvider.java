@@ -247,14 +247,15 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	}
 
 	private void registerPrimitiveFunctions(CsdlEntityContainer schemaContainer, CsdlSchema schema) throws ODataException {
-		String functionName = "resource";
-		List<CsdlFunction> f =  getFunctions(new FullQualifiedName(schema.getNamespace(), functionName));
+		for(String key : javaFunctions.keySet()){
+		List<CsdlFunction> f =  getFunctions(new FullQualifiedName(schema.getNamespace(),key));
 		for(CsdlFunction next : f){
-			if(next.getName().equalsIgnoreCase(functionName)){
+			if(next.getName().equalsIgnoreCase(key)){
 				schema.getFunctions().add(next);	
 				FullQualifiedName containerName = new FullQualifiedName("SQLODataService",schema.getNamespace());
-				schemaContainer.getFunctionImports().add(getFunctionImport(containerName,functionName));				
+				schemaContainer.getFunctionImports().add(getFunctionImport(containerName,key));				
 			}
+		}
 		}
 
 	}

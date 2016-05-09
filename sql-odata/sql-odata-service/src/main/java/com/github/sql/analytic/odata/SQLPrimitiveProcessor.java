@@ -28,14 +28,18 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceFunction;
 
+import com.github.sql.analytic.session.SQLSession;
+
 public class SQLPrimitiveProcessor implements PrimitiveProcessor {
 
 	private Object odata;
 	private Object serviceMetadata;
 	private Map<String,FunctionCommand> javaFunctions;
+	private SQLSession session;
 
-	public SQLPrimitiveProcessor(Map<String, FunctionCommand> functions){
+	public SQLPrimitiveProcessor(SQLSession session,Map<String, FunctionCommand> functions){
 		this.javaFunctions = functions;	
+		this.session = session;
 	}
 
 	@Override
@@ -69,7 +73,7 @@ public class SQLPrimitiveProcessor implements PrimitiveProcessor {
 				}
 			}
 
-			Object result = command.execute(cmdParams);
+			Object result = command.execute(session,cmdParams);
 
 			if(result instanceof InputStream){
 				response.setContent((InputStream) result);	

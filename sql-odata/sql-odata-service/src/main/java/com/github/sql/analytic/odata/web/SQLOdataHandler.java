@@ -82,7 +82,7 @@ public class SQLOdataHandler {
 		processor.setCursors(cursors);
 		handler.register(processor);	      
 		handler.register(new SQLEntityProcessor(session));
-		handler.register(new SQLPrimitiveProcessor(functions));
+		handler.register(new SQLPrimitiveProcessor(session,functions));
 		handler.process(request, response);	
 
 	}

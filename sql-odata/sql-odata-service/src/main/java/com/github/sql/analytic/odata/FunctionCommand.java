@@ -2,6 +2,8 @@ package com.github.sql.analytic.odata;
 
 import java.util.Map;
 
+import com.github.sql.analytic.session.SQLSession;
+
 /**
  * Primitive Odata function adapter interface
  * Function implementation should not produce any side effects
@@ -26,7 +28,7 @@ public interface FunctionCommand {
 	 * @param parameters
 	 * @return Odata compatible primitive
 	 */
-	Object execute(Map<String,Object> parameters);
+	Object execute(SQLSession session,Map<String,Object> parameters);
 	
 	String getContentType();
 
