@@ -5,12 +5,14 @@ target/
 *.tmp
 *.bak
 *.swp
+*.log
 *~.nib
 local.properties
 .settings/
 .loadpath
 .recommenders
-
+out
+err
 # Eclipse Core
 .project
 
