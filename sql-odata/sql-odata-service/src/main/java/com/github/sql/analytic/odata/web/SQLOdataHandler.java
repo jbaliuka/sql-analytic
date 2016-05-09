@@ -23,7 +23,6 @@ import com.github.sql.analytic.odata.SQLEntityProcessor;
 import com.github.sql.analytic.session.SQLDialect;
 import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.Cursor;
-import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.transform.policy.SessionContext;
 
@@ -33,16 +32,14 @@ public class SQLOdataHandler {
 	private List<CreatePolicy> policy;
 	private ServletConfig config;
 	private Map<String,Cursor> cursors;
-	private Map<String, Variable> variables;	
 	private SQLDialect dialect;
 	private SQLSession session;
 
-	public SQLOdataHandler(ServletConfig config,Connection connection,List<CreatePolicy> policy, Map<String, Cursor> cursors, Map<String, Variable> variables){
+	public SQLOdataHandler(ServletConfig config,Connection connection,List<CreatePolicy> policy, Map<String, Cursor> cursors){
 		this.connection = connection;
 		this.policy = policy;
 		this.config = config;
 		this.cursors = cursors;
-		this.variables = variables;
 		loadDialect(connection);
 	}
 
@@ -71,7 +68,6 @@ public class SQLOdataHandler {
 		OData odata = OData.newInstance();
 		SQLEdmProvider edmProvider = new SQLEdmProvider(session.getMetaData());
 		edmProvider.setCursors(cursors);
-		edmProvider.setVariables(variables);
 		ServiceMetadata edm = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 		ODataHttpHandler handler = odata.createHandler(edm);
 		SQLEntityCollectionProcessor processor = new SQLEntityCollectionProcessor(session);

@@ -107,7 +107,6 @@ import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.Cursor;
-import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.create.table.ColDataType;
 import com.github.sql.analytic.statement.create.table.ColumnDefinition;
 import com.github.sql.analytic.statement.create.table.CreateTable;
@@ -302,9 +301,8 @@ SQLStatement Statement() :
     stm = Drop()
     |
     stm = Truncate()
-    | LOOKAHEAD(2) [<K_DECLARE>] <K_CURSOR>  stm = DeclareCursor()
-    | LOOKAHEAD(2) [<K_DECLARE>] stm = DeclareVariable()
-  	
+    | LOOKAHEAD(2) <K_DECLARE>  stm = DeclareCursor()
+    
     )
     [";"]
     <EOF>
@@ -1779,22 +1777,6 @@ CreateView CreateView():
 
 }
 
-Variable DeclareVariable():
-{
-  Variable variable = new Variable();
-  ColumnDefinition coldef = new ColumnDefinition();
-  variable.setDefinition(coldef);
-  ColDataType colDataType = null;
-  Token name = null;}
-{
-   name = <S_IDENTIFIER>   {
-     coldef.setColumnName(name.image);   }
-   colDataType = ColDataType()
-   {
-     coldef.setColDataType(colDataType);   }
-
-  {
-    return variable;  }}
 
 Cursor DeclareCursor():
 {
@@ -1803,9 +1785,29 @@ Cursor DeclareCursor():
   ColDataType colDataType = null;
   ColumnDefinition coldef = null;
   ArrayList columnDefinitions = new ArrayList();
-  Select select = null;}
+  Select select = null;  
+  ArrayList variableDefinitions = new ArrayList();
+  cursor.setVariables(variableDefinitions);}
 {
 
+
+   [ name = <S_IDENTIFIER> colDataType = ColDataType()
+   {
+     ColumnDefinition varDef = new ColumnDefinition();
+     varDef.setColumnName(name.image);
+     varDef.setColDataType(colDataType);
+     variableDefinitions.add(varDef);
+   } (
+     name = <S_IDENTIFIER> colDataType = ColDataType()
+   {
+     varDef = new ColumnDefinition();
+     varDef.setColumnName(name.image);
+     varDef.setColDataType(colDataType);
+     variableDefinitions.add(varDef);
+   }
+     )*
+   ]
+   <K_CURSOR>
    name = <S_IDENTIFIER>  {
     cursor.setName(name.image);  }
 

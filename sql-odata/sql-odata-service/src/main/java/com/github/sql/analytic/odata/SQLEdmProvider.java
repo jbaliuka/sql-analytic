@@ -1,5 +1,22 @@
 package com.github.sql.analytic.odata;
 
+import static com.github.sql.analytic.session.PolicyAwareMetadata.COLUMN_DEF;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.COLUMN_NAME;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.COLUMN_SIZE;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.CONTAINER_NAME;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.DATA_TYPE;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.DECIMAL_DIGITS;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.DELETE_RULE;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.FKTABLE_NAME;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.FKTABLE_SCHEM;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.FK_NAME;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.KEY_SEQ;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.NULLABLE;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.PKTABLE_NAME;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.PKTABLE_SCHEM;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.TABLE_NAME;
+import static com.github.sql.analytic.session.PolicyAwareMetadata.TABLE_SCHEM;
+
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
@@ -27,13 +43,8 @@ import org.apache.olingo.commons.api.edm.provider.CsdlReturnType;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.ex.ODataException;
 
-import com.github.sql.analytic.expression.NamedParameter;
-import static com.github.sql.analytic.session.PolicyAwareMetadata.*;
 import com.github.sql.analytic.statement.Cursor;
-import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.create.table.ColumnDefinition;
-import com.github.sql.analytic.transform.ExpressionTransform;
-import com.github.sql.analytic.transform.StatementTransform;
 
 public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
@@ -41,8 +52,7 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	private static FullQualifiedName container = new FullQualifiedName("SQLODataService",CONTAINER_NAME);
 	private DatabaseMetaData metadata;
 	private Map<String,Cursor> cursors;
-	private Map<String, Variable> variables;
-
+	
 
 	public SQLEdmProvider(DatabaseMetaData metadata) {
 
@@ -282,36 +292,15 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 		List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
 		List<CsdlParameter> parameters = new ArrayList<>();
-		final List<NamedParameter> namedParams = new ArrayList<>();
-		StatementTransform transform = new StatementTransform(){
 
-			@Override
-			protected ExpressionTransform createExpressionTransform() {				 
-				return  new ExpressionTransform(this){
-
-					@Override
-					public void visit(NamedParameter namedParameter) {
-						namedParams.add(namedParameter);
-					}
-
-				};
-			}
-
-		};
-
-		transform.visit(cursor.getSelect());
-
-		for( NamedParameter param : namedParams){
+		if(cursor.getVariables() != null){
+		for( ColumnDefinition param : cursor.getVariables()){
 			CsdlParameter parameter = new CsdlParameter();		
-			parameter.setName(param.getName());		
-			Variable var = variables.get(param.getName());
-			if(var != null){
-				TypeMap jdbcType = TypeMap.valueOf(var.getType().getDataType().toUpperCase());
-				parameter.setType(jdbcType.getODataKind().getFullQualifiedName());
-			}else {
-				parameter.setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-			}
+			parameter.setName(param.getColumnName());		
+			TypeMap jdbcType = TypeMap.valueOf(param.getColDataType().getDataType().toUpperCase());
+			parameter.setType(jdbcType.getODataKind().getFullQualifiedName());			
 			parameters.add(parameter);
+		}
 		}
 
 		final CsdlReturnType returnType = new CsdlReturnType();
@@ -345,9 +334,6 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		this.cursors = cursors;
 	}
 
-	public void setVariables(Map<String, Variable> variables) {
-		this.variables = variables;
-
-	}
+	
 
 }

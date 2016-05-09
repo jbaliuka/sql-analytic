@@ -55,7 +55,6 @@ import org.junit.Test;
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
 import com.github.sql.analytic.statement.Cursor;
-import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 
 public class SQLODataServletTest {
@@ -273,15 +272,6 @@ public class SQLODataServletTest {
 			protected Map<String, Cursor> getCursors() {				
 				try {
 					return Loader.getCursors();
-				} catch (IOException | JSQLParserException e) {
-					throw new AssertionError(e);
-				}
-			}
-
-			@Override
-			protected Map<String, Variable> getVariables() {
-				try {
-					return Loader.getVariables();
 				} catch (IOException | JSQLParserException e) {
 					throw new AssertionError(e);
 				}

@@ -19,7 +19,6 @@ import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
 import com.github.sql.analytic.odata.web.SQLODataServlet;
 import com.github.sql.analytic.statement.Cursor;
-import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 
 public class TestSQLODataServlet extends SQLODataServlet {
@@ -66,15 +65,6 @@ public class TestSQLODataServlet extends SQLODataServlet {
 	@Override
 	protected DataSource getDatasource() {		
 		return new H2Datasource();
-	}
-
-	@Override
-	protected Map<String, Variable> getVariables() {
-		try {
-			return Loader.getVariables();
-		} catch (IOException | JSQLParserException e) {
-			throw new AssertionError(e);
-		}
 	}
 
 }

@@ -11,6 +11,7 @@ public class Cursor implements SQLStatement{
 	private Select select;
 	private List<ColumnDefinition> columnDefinitions;
 	private String name;
+	private List<ColumnDefinition> variables;
 	
 	@Override
 	public void accept(StatementVisitor statementVisitor) {
@@ -30,6 +31,14 @@ public class Cursor implements SQLStatement{
 
 	public List<ColumnDefinition> getColumnDefinitions() {
 		return columnDefinitions;
+	}
+	
+	public Cursor setVariables( List<ColumnDefinition> variables){
+		this.variables = variables;
+		return this;
+	}
+	public List<ColumnDefinition> getVariables(){
+		return variables;
 	}
 
 	public Cursor setColumnDefinitions(List<ColumnDefinition> columnDefinitions) {

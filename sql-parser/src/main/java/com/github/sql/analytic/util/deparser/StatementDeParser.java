@@ -5,7 +5,6 @@ import java.util.Iterator;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.StatementVisitor;
-import com.github.sql.analytic.statement.Variable;
 import com.github.sql.analytic.statement.create.table.CreateTable;
 import com.github.sql.analytic.statement.create.view.CreateView;
 import com.github.sql.analytic.statement.delete.Delete;
@@ -192,12 +191,6 @@ public class StatementDeParser implements StatementVisitor {
 		// TODO Auto-generated method stub
 	}
 
-	@Override
-	public void visit(Variable variable) {
-		// TODO Auto-generated method stub
-
-	}
-
-
+	
 
 }
