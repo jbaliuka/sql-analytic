@@ -1,4 +1,4 @@
-package com.github.sql.analytic.odata;
+package com.github.sql.analytic.odata.cmd;
 
 import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.data.Entity;
@@ -12,6 +12,7 @@ import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 
+import com.github.sql.analytic.odata.ResultSetIterator;
 import com.github.sql.analytic.session.SQLSession;
 
 public class ExpandCommad {

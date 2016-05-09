@@ -23,7 +23,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
@@ -42,17 +45,19 @@ import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
 import org.apache.olingo.commons.api.edm.provider.CsdlReturnType;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.ex.ODataException;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmPrimitiveTypeFactory;
 
 import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.create.table.ColumnDefinition;
 
 public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
-	
+
 	private static FullQualifiedName container = new FullQualifiedName("SQLODataService",CONTAINER_NAME);
 	private DatabaseMetaData metadata;
 	private Map<String,Cursor> cursors;
-	
+	private Map<String, FunctionCommand> javaFunctions;
+
 
 	public SQLEdmProvider(DatabaseMetaData metadata) {
 
@@ -209,13 +214,11 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 				List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();		 
 				schema.setEntityTypes(entityTypes);
 
-				for( String cursor : cursors.keySet()){
-					List<CsdlFunction> f =  getFunctions(new FullQualifiedName(schema.getNamespace(), cursor));
-					schema.getFunctions().addAll(f);	
-					FullQualifiedName containerName = new FullQualifiedName("SQLODataService",schema.getNamespace());
-					schemaContainer.getFunctionImports().add(getFunctionImport(containerName,cursor));
-					FullQualifiedName cursorType = new FullQualifiedName(schema.getNamespace(),cursor);
-					schema.getEntityTypes().add(getEntityType(cursorType));
+				if(schema.getNamespace().equalsIgnoreCase(metadata.getConnection().getSchema())){
+					for( String cursor : cursors.keySet()){
+						registerCursorFunctions(schemaContainer, schema, cursor);
+					}
+					registerPrimitiveFunctions(schemaContainer, schema);
 				}
 
 				try (ResultSet rs = metadata.getTables(null, schema.getNamespace(),"%",null)){
@@ -241,6 +244,34 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 
 
 		return schemas;
+	}
+
+	private void registerPrimitiveFunctions(CsdlEntityContainer schemaContainer, CsdlSchema schema) throws ODataException {
+		String functionName = "resource";
+		List<CsdlFunction> f =  getFunctions(new FullQualifiedName(schema.getNamespace(), functionName));
+		for(CsdlFunction next : f){
+			if(next.getName().equalsIgnoreCase(functionName)){
+				schema.getFunctions().add(next);	
+				FullQualifiedName containerName = new FullQualifiedName("SQLODataService",schema.getNamespace());
+				schemaContainer.getFunctionImports().add(getFunctionImport(containerName,functionName));				
+			}
+		}
+
+	}
+
+	private void registerCursorFunctions(CsdlEntityContainer schemaContainer, CsdlSchema schema, String cursor)
+			throws ODataException {
+
+		List<CsdlFunction> f =  getFunctions(new FullQualifiedName(schema.getNamespace(), cursor));
+		for(CsdlFunction next : f){
+			if(next.getName().equalsIgnoreCase(cursor)){
+				schema.getFunctions().add(next);	
+				FullQualifiedName containerName = new FullQualifiedName("SQLODataService",schema.getNamespace());
+				schemaContainer.getFunctionImports().add(getFunctionImport(containerName,cursor));
+				FullQualifiedName cursorType = new FullQualifiedName(schema.getNamespace(),cursor);
+				schema.getEntityTypes().add(getEntityType(cursorType));
+			}
+		}
 	}
 
 	private void addBindings(FullQualifiedName entityTypeName, CsdlEntitySet entitySet)
@@ -282,6 +313,29 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 	@Override
 	public List<CsdlFunction> getFunctions(FullQualifiedName functionName) throws ODataException {
 
+		List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
+		List<CsdlParameter> parameters = new ArrayList<>();
+
+		FunctionCommand command  = javaFunctions.get(functionName.getName());
+
+		if( command != null ){
+			for( Entry<String, Class<?>> cmdParam : command.parameterTypes().entrySet() ){
+				CsdlParameter parameter = new CsdlParameter();		
+				parameter.setName(cmdParam.getKey());			
+				parameter.setType(TypeMap.toODataType(cmdParam.getValue()).getFullQualifiedName());			
+				parameters.add(parameter);
+			}
+
+			final CsdlReturnType returnType = new CsdlReturnType();				
+			returnType.setType(TypeMap.toODataType(command.getReturnType()).getFullQualifiedName());
+			final CsdlFunction function = new CsdlFunction();
+			function.setName(functionName.getName())
+			.setParameters(parameters)
+			.setReturnType(returnType);		
+			functions.add(function);
+			return functions;
+		}
+
 		if(cursors == null || cursors.isEmpty()){
 			return null;
 		}
@@ -290,17 +344,15 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 			return null;
 		}
 
-		List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
-		List<CsdlParameter> parameters = new ArrayList<>();
 
 		if(cursor.getVariables() != null){
-		for( ColumnDefinition param : cursor.getVariables()){
-			CsdlParameter parameter = new CsdlParameter();		
-			parameter.setName(param.getColumnName());		
-			TypeMap jdbcType = TypeMap.valueOf(param.getColDataType().getDataType().toUpperCase());
-			parameter.setType(jdbcType.getODataKind().getFullQualifiedName());			
-			parameters.add(parameter);
-		}
+			for( ColumnDefinition param : cursor.getVariables()){
+				CsdlParameter parameter = new CsdlParameter();		
+				parameter.setName(param.getColumnName());		
+				TypeMap jdbcType = TypeMap.valueOf(param.getColDataType().getDataType().toUpperCase());
+				parameter.setType(jdbcType.getODataKind().getFullQualifiedName());			
+				parameters.add(parameter);
+			}
 		}
 
 		final CsdlReturnType returnType = new CsdlReturnType();
@@ -334,6 +386,10 @@ public class SQLEdmProvider extends CsdlAbstractEdmProvider {
 		this.cursors = cursors;
 	}
 
-	
+	public void setFunctions(Map<String, FunctionCommand> functions) {
+		this.javaFunctions = functions;
+	}
+
+
 
 }

@@ -1,4 +1,4 @@
-package com.github.sql.analytic.odata;
+package com.github.sql.analytic.odata.ser;
 
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -15,6 +15,8 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerStreamResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+
+import com.github.sql.analytic.odata.ResultSetIterator;
 
 public class SerializeEntityCollectionCommand {
 	
@@ -39,7 +41,7 @@ public class SerializeEntityCollectionCommand {
 		this.metadata = metadata;
 	}
 	
-	protected void serialize(ResultSetIterator iterator) throws SerializerException, ODataApplicationException {
+	public void serialize(ResultSetIterator iterator) throws SerializerException, ODataApplicationException {
 
 		ContextURL contextUrl = ContextURL.with().
 				entitySetOrSingletonOrType(entityType.getName()).selectList(getSelectList()).			

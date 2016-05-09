@@ -1,4 +1,4 @@
-package com.github.sql.analytic.odata;
+package com.github.sql.analytic.odata.cmd;
 
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -17,6 +17,7 @@ import com.github.sql.analytic.expression.NamedParameter;
 import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.operators.conditional.AndExpression;
 import com.github.sql.analytic.expression.operators.relational.EqualsTo;
+import com.github.sql.analytic.odata.ResultSetIterator;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.session.SQLSession;
@@ -31,7 +32,7 @@ public class ExpandPropertyCommand extends ReadCommand {
 	private Map<String, Object> statementParams = new HashMap<String, Object>();
 	private Entity entity;
 
-	ExpandPropertyCommand(Entity entity, EdmNavigationProperty property, ExpandItem expandItem) {
+	public ExpandPropertyCommand(Entity entity, EdmNavigationProperty property, ExpandItem expandItem) {
 		this.property = property;
 		this.expandItem = expandItem;		
 		this.entity = entity;

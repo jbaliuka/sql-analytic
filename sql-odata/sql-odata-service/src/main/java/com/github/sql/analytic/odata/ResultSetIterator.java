@@ -17,9 +17,10 @@ import org.apache.olingo.server.api.ODataContentWriteErrorCallback;
 import org.apache.olingo.server.api.ODataContentWriteErrorContext;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 
+import com.github.sql.analytic.odata.cmd.ExpandCommad;
 import com.github.sql.analytic.session.SQLSession;
 
-final class ResultSetIterator extends EntityIterator implements ODataContentWriteErrorCallback{
+public class ResultSetIterator extends EntityIterator implements ODataContentWriteErrorCallback{
 
 	private final ResultSet rs;
 	private final Set<String> projection;
@@ -27,7 +28,7 @@ final class ResultSetIterator extends EntityIterator implements ODataContentWrit
 	private ExpandOption expandOption;
 	private SQLSession session;
 	
-	ResultSetIterator(SQLSession session,ResultSet rs, EdmEntityType type, ExpandOption expandOption) throws SQLException {
+	public ResultSetIterator(SQLSession session,ResultSet rs, EdmEntityType type, ExpandOption expandOption) throws SQLException {
 		this.session = session;
 		this.expandOption = expandOption;
 		this.rs = rs;

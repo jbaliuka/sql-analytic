@@ -38,6 +38,8 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 
+import com.github.sql.analytic.odata.cmd.ReadEntityCollectionCommand;
+import com.github.sql.analytic.odata.ser.SerializeEntityCommand;
 import com.github.sql.analytic.session.SQLSession;
 
 public class SQLEntityProcessor implements EntityProcessor {

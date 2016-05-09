@@ -1,4 +1,4 @@
-package com.github.sql.analytic.odata;
+package com.github.sql.analytic.odata.cmd;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,6 +17,7 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceFunction;
 
+import com.github.sql.analytic.odata.ResultSetIterator;
 import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.SQLStatement;

@@ -1,4 +1,4 @@
-package com.github.sql.analytic.odata;
+package com.github.sql.analytic.odata.cmd;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +25,7 @@ import com.github.sql.analytic.expression.NamedParameter;
 import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.operators.conditional.AndExpression;
 import com.github.sql.analytic.expression.operators.relational.EqualsTo;
+import com.github.sql.analytic.odata.ResultSetIterator;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.session.SQLSession;

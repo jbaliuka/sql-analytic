@@ -1,4 +1,4 @@
-package com.github.sql.analytic.odata;
+package com.github.sql.analytic.odata.ser;
 
 import java.util.Locale;
 
@@ -15,6 +15,8 @@ import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 
+import com.github.sql.analytic.odata.ResultSetIterator;
+
 public class SerializeEntityCommand extends SerializeEntityCollectionCommand {
 
 	public SerializeEntityCommand(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType contentType) {
@@ -22,7 +24,7 @@ public class SerializeEntityCommand extends SerializeEntityCollectionCommand {
 	}
 
 	@Override
-	protected void serialize(ResultSetIterator iterator) throws SerializerException, ODataApplicationException {
+	public void serialize(ResultSetIterator iterator) throws SerializerException, ODataApplicationException {
 
 		try{
 			if(!iterator.hasNext()){

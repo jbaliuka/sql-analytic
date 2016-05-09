@@ -1,4 +1,4 @@
-package com.github.sql.analytic.odata;
+package com.github.sql.analytic.odata.cmd;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +22,9 @@ import com.github.sql.analytic.expression.BinaryExpression;
 import com.github.sql.analytic.expression.Parenthesis;
 import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.operators.conditional.AndExpression;
+import com.github.sql.analytic.odata.EntityData;
+import com.github.sql.analytic.odata.FilterExpressionVisitor;
+import com.github.sql.analytic.odata.ResultSetIterator;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.session.SQLSession;
