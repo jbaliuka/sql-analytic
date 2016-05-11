@@ -248,7 +248,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |  < K_CURSOR: "CURSOR" >
 |  < K_DECLARE: "DECLARE" >
 |  < K_ENABLE: "ENABLE" >
-|  < K_ENABLE: "DISABLE" >
+|  < K_DISABLE: "DISABLE" >
 }
 
 
