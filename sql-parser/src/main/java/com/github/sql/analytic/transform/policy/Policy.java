@@ -33,6 +33,23 @@ public class Policy extends StatementTransform {
 		this.sessionContext = sessionContext;
 	}
 
+
+	public void enablePolicy(String name){
+		for(CreatePolicy policy : policyList){
+			if(policy.getName().equalsIgnoreCase(name)){
+				policy.setEnabled(true);
+			}
+		}
+	}
+
+	public void disablePolicy(String name){
+		for(CreatePolicy policy : policyList){
+			if(policy.getName().equalsIgnoreCase(name)){
+				policy.setEnabled(false);
+			}
+		}
+	}
+
 	public List<CreatePolicy> allTablePolicies(Table table){
 
 		List<CreatePolicy> newPolicyList = new ArrayList<CreatePolicy>();
@@ -89,7 +106,7 @@ public class Policy extends StatementTransform {
 
 	private  boolean match(Table table, CreatePolicy policy) {
 
-		if(table.getName().equalsIgnoreCase(policy.getTable().getName())){			
+		if(policy.isEnabled() && table.getName().equalsIgnoreCase(policy.getTable().getName())){			
 			if(table.getSchemaName() == policy.getTable().getSchemaName()){
 				return true; 
 			}
@@ -109,11 +126,13 @@ public class Policy extends StatementTransform {
 	}
 
 	public boolean applicableFor(CreatePolicy policy,String action) {
-		if(policy.getActions() == null ){
-			return true;
-		}
-		for( String next : policy.getActions()){
-			return action.equalsIgnoreCase(next) ||	"ALL".equalsIgnoreCase(next);
+		if(policy.isEnabled()){
+			if(policy.getActions() == null ){
+				return true;
+			}
+			for( String next : policy.getActions()){
+				return action.equalsIgnoreCase(next) ||	"ALL".equalsIgnoreCase(next);
+			}
 		}
 		return false;
 	}

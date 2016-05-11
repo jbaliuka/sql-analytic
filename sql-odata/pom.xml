@@ -24,7 +24,7 @@
 	<modules>
 		<module>sql-odata-web</module>
 		<module>sql-odata-service</module>
-		<module>sql-odate-test-data</module>
+		<module>sql-odate-test-data</module>		
 	</modules>
 
 
@@ -91,10 +91,10 @@
 				<artifactId>sql-odate-test-data</artifactId>
 			</dependency>
 			<dependency>
-		    <groupId>sql-analytic</groupId>
-		 	<artifactId>sql-dialect-h2</artifactId>
-		 	<version>${project.version}</version>
-		</dependency>
+				<groupId>sql-analytic</groupId>
+				<artifactId>sql-dialect-h2</artifactId>
+				<version>${project.version}</version>
+			</dependency>			
 		</dependencies>
 	</dependencyManagement>
 </project>

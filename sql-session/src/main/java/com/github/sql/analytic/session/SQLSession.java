@@ -51,6 +51,13 @@ public class SQLSession implements Connection{
 		return new HashMap<>();
 	}
 
+	public void enablePolicy(String name){
+		transform.enablePolicy(name);
+	}
+
+	public void disablePolicy(String name){
+		transform.disablePolicy(name);
+	}
 
 	public DeparsedSQL transform(String sql) throws SQLException{
 
@@ -60,7 +67,7 @@ public class SQLSession implements Connection{
 		}
 
 		CCJSqlParserManager parserManager = new CCJSqlParserManager();			
-			
+
 		try {
 
 			com.github.sql.analytic.statement.SQLStatement stmt = parserManager.transform(new StringReader(sql), transform);
@@ -78,7 +85,7 @@ public class SQLSession implements Connection{
 	}
 
 	public PreparedStatement create(SQLStatement stmt,Map<String,Object> statementParams)throws SQLException{
-		
+
 		stmt = transform.trasform(stmt);
 		StringBuffer buffer = new StringBuffer();
 		ParamsDeparser deparser = createDeparser(buffer);

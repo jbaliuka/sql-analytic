@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.security.Timestamp;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Types;
@@ -38,8 +40,8 @@ public enum TypeMap {
 	DISTINCT(Types.DISTINCT,EdmPrimitiveTypeKind.Binary,byte[].class),
 	STRUCT(Types.STRUCT,EdmPrimitiveTypeKind.Binary,null),
 	ARRAY(Types.ARRAY,EdmPrimitiveTypeKind.Binary,null),
-	BLOB(Types.BLOB,EdmPrimitiveTypeKind.Stream,InputStream.class),
-	CLOB(Types.CLOB,EdmPrimitiveTypeKind.String,null),
+	BLOB(Types.BLOB,EdmPrimitiveTypeKind.String,Blob.class),
+	CLOB(Types.CLOB,EdmPrimitiveTypeKind.String,Clob.class),
 	REF(Types.REF,EdmPrimitiveTypeKind.Binary,null),
 	DATALINK(Types.DATALINK,EdmPrimitiveTypeKind.Stream,null),
 	BOOLEAN(Types.BOOLEAN,EdmPrimitiveTypeKind.Boolean,Boolean.TYPE),

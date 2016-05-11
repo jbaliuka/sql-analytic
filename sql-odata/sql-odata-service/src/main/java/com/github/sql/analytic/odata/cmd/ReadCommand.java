@@ -37,7 +37,7 @@ import com.github.sql.analytic.statement.select.SelectListItem;
 public abstract class ReadCommand {
 
 	private Map<String, Object> statementParams = new HashMap<>();
-	
+
 	private PlainSelect select = new PlainSelect().setSelectItems(new ArrayList<SelectListItem>());
 
 	public abstract ResultSetIterator execute(SQLSession connection) throws ODataApplicationException ;
@@ -130,11 +130,12 @@ public abstract class ReadCommand {
 
 
 	protected void processUriInfo(UriInfoResource uriInfo,EdmEntityType entityType,String alias) throws ODataApplicationException {
-
-		appendFilter(alias,uriInfo.getFilterOption());
-		appendProjection(entityType,alias, uriInfo.getSelectOption());
-		appendLimit(uriInfo.getTopOption(),uriInfo.getSkipOption());
-		appendOrdering(alias,uriInfo.getOrderByOption());
+		
+			appendFilter(alias, uriInfo == null ? null : uriInfo.getFilterOption());		
+			appendProjection(entityType,alias, uriInfo == null ? null : uriInfo.getSelectOption());
+			appendLimit(uriInfo == null ? null : uriInfo.getTopOption(),uriInfo == null ? null : uriInfo.getSkipOption());
+			appendOrdering(alias, uriInfo == null ? null : uriInfo.getOrderByOption());
+		
 
 	}
 

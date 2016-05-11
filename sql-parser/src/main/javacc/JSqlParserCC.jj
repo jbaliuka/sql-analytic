@@ -247,6 +247,8 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_POLICY: "POLICY" >
 |  < K_CURSOR: "CURSOR" >
 |  < K_DECLARE: "DECLARE" >
+|  < K_ENABLE: "ENABLE" >
+|  < K_ENABLE: "DISABLE" >
 }
 
 
@@ -360,6 +362,9 @@ CreatePolicy CreatePolicy():
   ]
   [<K_USING> "(" expression = SQLExpression() ")" { policy.setUsing(expression); } ]
   [<K_WITH> <K_CHECK> "(" expression = SQLExpression() ")"{ policy.setCheck(expression); }]
+  [ <K_ENABLE>  {
+    policy.setEnabled(true);  } | <K_DISABLE >  {
+    policy.setEnabled(false);  } ]
   {
     policy.setTable(table);
     if(columns.size() > 0){

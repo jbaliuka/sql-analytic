@@ -17,6 +17,7 @@ public class CreatePolicy implements SQLStatement{
 	private List<String> roles;
 	private SQLExpression using;
 	private SQLExpression check;
+	private boolean enabled = true;
 
 	public void accept(StatementVisitor statementVisitor) {
 		statementVisitor.visit(this);
@@ -85,6 +86,14 @@ public class CreatePolicy implements SQLStatement{
 	public CreatePolicy setActions(List<String> actions) {
 		this.actions = actions;
 		return this;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 
