@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>SQLODataService UI</title>	
+		<script type="text/javascript" src="js/metadata.js"></script>	
+	</head>
+	<body>
+	<script type="text/javascript">
+	
+	  new SQLODataService("http://localhost:8080/sql-odata-web/SQLODataService.svc", function(metadata){
+		  document.getElementById("metadata").innerHTML = JSON.stringify(metadata);
+	  });
+	 
+	</script>
+	<div id="metadata">
+	</div>
+	</body>
+</html>
