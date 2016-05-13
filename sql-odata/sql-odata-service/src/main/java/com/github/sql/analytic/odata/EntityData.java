@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSet;
@@ -99,13 +101,13 @@ public class EntityData {
 			for(int i = 0; i< key.size(); i++ ){
 				builder.append(key.get(i).getName());
 				builder.append("=");
-				builder.append(rs.getObject(key.get(i).getName()));
+				builder.append(rs.getObject(key.get(i).getName()));				
 				if( i < key.size() - 1 ){
 					builder.append(",");
 				}
 			}
-			return new URI(builder.append(")").toString());
-		} catch (URISyntaxException e) {
+			return new URI(URLEncoder.encode(builder.append(")").toString(),"UTF-8"));
+		} catch (URISyntaxException | UnsupportedEncodingException e) {
 			throw new ODataRuntimeException("Unable to create id for entity: " + name, e);
 		}
 	}
