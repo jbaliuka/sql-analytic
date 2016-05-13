@@ -1,0 +1,12 @@
+#menu {
+ float: left;
+ overflow: auto;
+ position: relative;
+ width:20%
+}
+#dataTable {
+ float : right;
+ overflow: auto; 
+ position: relative;
+ width:80%
+}

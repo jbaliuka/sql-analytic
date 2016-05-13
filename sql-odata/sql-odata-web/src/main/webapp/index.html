@@ -3,17 +3,51 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title>SQLODataService UI</title>	
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<script type="text/javascript" src="js/util.js"></script>
 		<script type="text/javascript" src="js/metadata.js"></script>	
+		<script type="text/javascript" src="js/service.js"></script>
 	</head>
 	<body>
-	<script type="text/javascript">
-	
-	  new SQLODataService("http://localhost:8080/sql-odata-web/SQLODataService.svc", function(metadata){
-		  document.getElementById("metadata").innerHTML = JSON.stringify(metadata);
-	  });
-	 
+	<script type="text/javascript" id="buildMenu">	
+	  window.$metadata = new ServiceMetadata("http://localhost:8080/sql-odata-web/SQLODataService.svc", function(metadata){
+		  var list = "<ul>";
+		  for( e in metadata.entitySets){
+			  var handler = "buildDataTable('{0}')".format(e);
+			  list +=  "<li><a href=\"#\" onClick=\"{0}\">{1}</a></li>".format(handler,e);
+		  }
+		  list += "</ul>";
+		  
+		  var menu = document.getElementById("menu"); 
+		  menu.innerHTML = list;
+		  window.$service = new Service($metadata);
+	  });	 
 	</script>
-	<div id="metadata">
+	<script type="text/javascript" id="buildDataTable">
+	   function buildDataTable(eSetName){
+		   
+		   $service.getEntitySet(eSetName,function(data,entityType){
+			   var dataTable = "<table><tr>"
+			   for( p in entityType.properties){
+				   dataTable += "<th>{0}</th>".format(p);
+			   }
+			   dataTable += "</tr>";
+			   for( i in data.value){
+				   var row = data.value[i];
+				   dataTable += "<tr>";
+				   for(col in row){
+				     dataTable += "<td>{0}</td>".format(row[col]);
+			       }
+				   dataTable += "</tr>";
+			   }
+			   dataTable += "</table>";
+			   document.getElementById("dataTable").innerHTML = dataTable;
+		   });
+	   }	 
+	</script>
+	<div id="menu">
+	</div>
+	<div id="dataTable">
 	</div>
 	</body>
 </html>
