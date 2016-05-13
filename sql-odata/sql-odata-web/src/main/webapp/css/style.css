@@ -30,8 +30,7 @@ body {
 	position: relative;
 	width:80%
 	display:inline-block;
-	margin: auto;
-	padding-left: 10px;
+	margin-left: 10px;	
 }
 .datagrid table { 
  	text-align: left;  

@@ -48,10 +48,20 @@ function ServiceMetadata(url, readyCallback){
 					var propertyName = propertyNode.attributes["Name"].value;  
 					entityType.properties[propertyName] = new Property(propertyName,
 							propertyNode.attributes["Type"].value);
+				}else if (propertyNode.localName == "Key"){
+					buildTypeKeys(entityType,propertyNode.childNodes);
 				}
 			}
 		}
 
+	}
+	
+	function buildTypeKeys(entityType,keys){
+		entityType.keys = [];
+		for(var i = 0; i < keys.length; i++ ){
+			var name = keys[i].attributes["Name"].value;
+			entityType.keys.push(name);	
+		}
 	}
 
 	function buildEntitySets(xmlDoc){
