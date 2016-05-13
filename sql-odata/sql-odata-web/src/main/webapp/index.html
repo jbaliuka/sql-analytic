@@ -47,7 +47,7 @@
 				}else {
 					entities = data.value;
 				}
-				var dataTable = "<table><thead><tr>";
+				var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table><thead><tr>".format(eSetName);
 				var colCount = 0;
 				for (p in entityType.properties) {
 					dataTable += "<th>{0}</th>".format(p);
@@ -82,33 +82,41 @@
 				document.getElementById("dataTable").innerHTML = dataTable;
 			});
 		}
+		function buildEntityTable(eSetName) {			
+			$service.getEntitySet(eSetName,$queryOptions, function(data, entityType) {				
+				var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table><thead><tr>".format(eSetName);
+				dataTable += "<th>COLUMN</th><th>VALUE</th>";
+				dataTable += "</thead></tr><tbody>";
+				for(var prop in entityType.properties){
+					dataTable += "<tr><td>{0}</td><td>{1}</td></tr>".format(prop,data[prop]);	
+				}
+				dataTable += "</tbody>";
+				dataTable += "</table>";
+				document.getElementById("dataTable").innerHTML = dataTable;
+			});
+		}
 	</script>
-	<script type="text/javascript" id="nextPage">
-	 
+	<script type="text/javascript" id="nextPage">	 
 	   function nextPage(eSetName,count){
 		   if(count == $queryOptions.$top){
 		    $queryOptions.$skip = $queryOptions.$skip + $queryOptions.$top;
 		   }	      
 		   buildDataTable(eSetName);
-	   }
-	 
+	   }	 
 	</script>
-	<script type="text/javascript" id="previousPage">
-	 
+	<script type="text/javascript" id="previousPage">	 
 	   function previousPage(eSetName){
 		   var skip = $queryOptions.$skip - $queryOptions.$top;
 		   $queryOptions.$skip = skip < 0 ? 0 : skip;
 		   buildDataTable(eSetName);
-	   }
-	 
+	   }	 
 	</script>
 	<script type="text/javascript" id="selectRow">
 		function selectRow(eSetName,key){
 			$queryOptions.key = key; 
-			buildDataTable(eSetName);
+			buildEntityTable(eSetName);
 		}
-	</script>
-	
+	</script>	
 	<script type="text/template" id="dataTableFoot">
 	<tfoot>
 		<tr>
@@ -122,7 +130,7 @@
 		</tr>
 	</tfoot>
 	</script>
-
+	<div class="header"><h1>SQLOdataService</h1></div>
 	<div id="menu"></div>
 	<div id="dataTable" class="datagrid"></div>
 

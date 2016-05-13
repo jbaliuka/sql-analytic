@@ -1,6 +1,8 @@
 
 body {
 	width:10024px;
+	font: normal 12px/150% Arial, Helvetica, sans-serif;
+	background: #E1EEF4; 
 }
 #menu {
 	float: left;
@@ -8,8 +10,7 @@ body {
 	position: relative;
 	width:20%
 	display:inline-block;
-	margin: auto;
-	font: normal 12px/150% Arial, Helvetica, sans-serif;
+	margin: auto;	
 	background-color:#006699; 
 	color:#FFFFFF; 
 	font-size: 15px; 
@@ -22,6 +23,14 @@ body {
 }
 #menu  a:visited {
 	color: #FFFFFF;
+}
+.header { 
+	color: #00496B; 
+	background: #E1EEF4;
+	padding: 10px
+}
+.header h2 {
+	margin:0
 }
 
 #dataTable {
