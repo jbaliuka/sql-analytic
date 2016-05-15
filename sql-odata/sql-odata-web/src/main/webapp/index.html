@@ -73,22 +73,25 @@
 					}
 					dataTable += "</tr>";
 				}
+				for(var j = 1; j < $queryOptions.$top - i; j++ ){
+					dataTable += "<tr><td colspan=\"{0}\">&nbsp;</td></tr>".format(entityType.properties.lenght);
+				}
 				dataTable += "</tbody>";
 				dataTable += document.getElementById("dataTableFoot").
-				innerHTML.
-				format(colCount,eSetName,++i) ;
-				
+				innerHTML.format(colCount,eSetName,++i);				
 				dataTable += "</table>";
 				document.getElementById("dataTable").innerHTML = dataTable;
 			});
 		}
 		function buildEntityTable(eSetName) {			
 			$service.getEntitySet(eSetName,$queryOptions, function(data, entityType) {				
-				var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table><thead><tr>".format(eSetName);
-				dataTable += "<th>COLUMN</th><th>VALUE</th>";
-				dataTable += "</thead></tr><tbody>";
+				var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table>".format(eSetName);				
+				dataTable += "<tbody>";
 				for(var prop in entityType.properties){
 					dataTable += "<tr><td>{0}</td><td>{1}</td></tr>".format(prop,data[prop]);	
+				}
+				for(var nav in entityType.navProperties){
+					dataTable += "<tr><td>{0}</td><td>{1}</td></tr>".format(nav,entityType.navProperties[nav].type);
 				}
 				dataTable += "</tbody>";
 				dataTable += "</table>";
@@ -130,7 +133,7 @@
 		</tr>
 	</tfoot>
 	</script>
-	<div class="header"><h1>SQLOdataService</h1></div>
+	<div class="header"><h1>Data Service</h1></div>
 	<div id="menu"></div>
 	<div id="dataTable" class="datagrid"></div>
 

@@ -16,8 +16,14 @@ body {
 	font-size: 15px; 
 	font-weight: bold; 
 	border-left: 1px solid #0070A8; 
-	padding-right:10px; 
+	padding-right:10px;	
+	
 }
+#menu ul {
+ list-style-type: none;
+ padding-left:10px;
+} 
+
 #menu  a:link {
 	color: #FFFFFF;
 }
@@ -67,16 +73,27 @@ body {
 	font-size: 12px;
 	font-weight: normal; 
 }
-.datagrid table tbody .alt td { 
-background: #E1EEF4; 
-	color: #00496B; 
+.datagrid table tbody tr:hover{ 
+  background: #0099EE; 
 }
+.datagrid table tbody .alt:hover  {
+  background: #0099EE; 
+}
+
+
+
+.datagrid table tbody .alt { 
+  background: #E1EEF4; 
+  color: #00496B; 
+}
+
+
 .datagrid table tbody td:first-child{ border-left: none; }
 .datagrid table tbody tr:last-child td { border-bottom: none; }
-.datagrid table tfoot td div { border-top: 1px solid #006699;background: #E1EEF4;} 
+.datagrid table tfoot td div { border-top: 1px solid #006699; background: #E1EEF4;} 
 .datagrid table tfoot td { padding: 0; font-size: 12px } 
 .datagrid table tfoot td div{ padding: 2px; }
-.datagrid table tfoot td ul { margin: 0; padding:0; list-style: none; text-align: right; }
+.datagrid table tfoot td ul { margin: 0; padding:0; list-style: none; text-align: left; }
 .datagrid table tfoot  li { display: inline; }
 .datagrid table tfoot li a { 
 	text-decoration: none; 
@@ -85,7 +102,7 @@ background: #E1EEF4;
 	margin: 1px;
 	color: #FFFFFF;
 	border: 1px solid #006699;
-	-border-radius: 3px; 
+	border-radius: 3px; 
  	background-color:#006699; 
  }
  .datagrid table tfoot ul.active, .datagrid table tfoot ul a:hover { 

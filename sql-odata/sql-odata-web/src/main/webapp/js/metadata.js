@@ -50,10 +50,24 @@ function ServiceMetadata(url, readyCallback){
 							propertyNode.attributes["Type"].value);
 				}else if (propertyNode.localName == "Key"){
 					buildTypeKeys(entityType,propertyNode.childNodes);
+				}else if ( propertyNode.localName == "NavigationProperty"){
+					buildNavigationProperty(entityType,propertyNode);
 				}
 			}
 		}
 
+	}
+	
+	function buildNavigationProperty(entityType,propertyNode){		
+		var propertyName = propertyNode.attributes["Name"].value;
+		var propertyType = propertyNode.attributes["Type"].value;
+		entityType.navProperties = {};
+		if(propertyType.startsWith("Collection")){
+			propertyType = propertyType.split("(")[1].split(")")[0];
+			entityType.navProperties[propertyName] = new Property(propertyName,propertyType);
+		}
+		
+		
 	}
 	
 	function buildTypeKeys(entityType,keys){
