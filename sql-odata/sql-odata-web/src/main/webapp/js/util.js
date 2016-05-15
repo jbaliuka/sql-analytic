@@ -39,34 +39,49 @@ function UriInfo(uri){
 			uriInfo.server = pathFragments[2];
 			path =  pathFragments.slice(3);
 		}
-		uriInfo.pathInfo = {};
-		for(var i = 0; i < path.length; i++){
+		uriInfo.pathInfo = [];
+		var start = 0;
+		if(path[0] == "ui"){
+			uriInfo.contextPath = "";
+			start = 1;
+			uriInfo.servletPath = "ui";
+		}else {
+			uriInfo.contextPath = path[0];
+			start = 2;
+		}
+		for(var i = start; i < path.length; i++){
 			var pathFragments = path[i].split("(");
-			var keys = {};
-			uriInfo.pathInfo[pathFragments[0]] = keys;			
+			var keys = [];
+			uriInfo.pathInfo.push({"name": pathFragments[0],"keys" : keys });			
 			if(pathFragments.length == 2){
 				var keysFragments = pathFragments[1].split(")");
 				keysFragments = keysFragments[0].split(",");
 				for(var j = 0; j < keysFragments.length; j++){
 					var key = keysFragments[j].split("=");
-					keys[key[0]] = key[1];
+					keys.push({"name": key[0],"value":key[1]});
 				}
 			}
 		}
 
 	}
-	
+
 	this.toUri = function(){
-		var uri = uriInfo.scheme + "://" + uriInfo.server + (uriInfo.port === undefined ? "/" : ":" + uriInfo.port + "/");
-		for(var item in uriInfo.pathInfo){
-			uri += item;
+		var uri = uriInfo.scheme + "://" + uriInfo.server + (uriInfo.port === undefined ? "/" : ":" + uriInfo.port);
+		var servletPath = uriInfo.servletPath === undefined ? "" : "/" + uriInfo.servletPath;
+		if(uriInfo.contextPath == ""){
+			uri += servletPath;
+	     }else {
+	    	 uri += "/" + uriInfo.contextPath +  servletPath;
+	     }
+		for(var i = 0; i < uriInfo.pathInfo.length; i++){
+			uri += "/" + uriInfo.pathInfo[i].name;
 			var keys = [];
-			var pathInfo = uriInfo.pathInfo[item];
-			for(var key in pathInfo){
-				keys.push(key + "=" + pathInfo[key]);
+			var uriKeys = uriInfo.pathInfo[i].keys;
+			for(var j = 0; j < uriKeys.length; j++){
+				keys.push(uriKeys[j].name + "=" + uriKeys[j].value);
 			}
 			if(keys.length > 0){
-				uri += "(" + keys.join() + ")/"; 	
+				uri += "(" + keys.join() + ")"; 	
 			}
 		}
 		var params = [];
@@ -80,5 +95,4 @@ function UriInfo(uri){
 	}
 
 }
-
 
