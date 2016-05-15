@@ -7,135 +7,34 @@
 <script type="text/javascript" src="js/util.js"></script>
 <script type="text/javascript" src="js/metadata.js"></script>
 <script type="text/javascript" src="js/service.js"></script>
+<script type="text/javascript" src="js/ui.js"></script>
 </head>
 <body>
 	<script type="text/javascript" id="buildMenu">
-			function resetOptions(){
-			    window.$queryOptions = {
-			    	$top:20,	
-			    	$skip:0,
-			    	$select:"*"
-			    };
-			}
-			resetOptions();
-			window.$metadata = new ServiceMetadata(
+		window.$metadata = new ServiceMetadata(
 				"http://localhost:8080/sql-odata-web/SQLODataService.svc",
-				function(metadata) {
-					var list = "<ul>";
-					for (e in metadata.entitySets) {
-						var handler = "selectEntitySet('{0}')".format(e);
-						list += "<li><a href=\"#\" onClick=\"{0}\">{1}</a></li>"
-								.format(handler, e);
-					}
-					list += "</ul>";
-					var menu = document.getElementById("menu");
-					menu.innerHTML = list;
-					window.$service = new Service($metadata);
-				});
+				metadataCallback);
 	</script>
-	<script type="text/javascript" id="buildDataTable">
-	   function selectEntitySet(eSetName){
-		   resetOptions();
-		   buildDataTable(eSetName)
-	   }
-	
-		function buildDataTable(eSetName) {			
-			$service.getEntitySet(eSetName,$queryOptions, function(data, entityType) {
-				var entities;
-				if(data.value === undefined){					
-					entities = new Array(data);
-				}else {
-					entities = data.value;
-				}
-				var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table><thead><tr>".format(eSetName);
-				var colCount = 0;
-				for (p in entityType.properties) {
-					dataTable += "<th>{0}</th>".format(p);
-					colCount++;
-				}
-				dataTable += "</thead></tr><tbody>";
-				for (var i in entities) {
-					var row = entities[i];
-					var key = {};
-					for(var k in entityType.keys){
-						key[entityType.keys[k]] = row[entityType.keys[k]];  
-					}
-					var keyJson = JSON.stringify(key).replace(/["]/g,"&quot;");
-					var selectRow = "onClick=\"selectRow('{0}',{1})\"".format(eSetName,keyJson);
-					
-					if (i % 2 == 1) {
-						dataTable += "<tr {0}>".format(selectRow);
-					} else {
-						dataTable += "<tr class=\"alt\" {0}>".format(selectRow);
-					}
-					for (col in entityType.properties) {
-						dataTable += "<td>{0}</td>".format(row[col]);
-					}
-					dataTable += "</tr>";
-				}
-				for(var j = 1; j < $queryOptions.$top - i; j++ ){
-					dataTable += "<tr><td colspan=\"{0}\">&nbsp;</td></tr>".format(entityType.properties.lenght);
-				}
-				dataTable += "</tbody>";
-				dataTable += document.getElementById("dataTableFoot").
-				innerHTML.format(colCount,eSetName,++i);				
-				dataTable += "</table>";
-				document.getElementById("dataTable").innerHTML = dataTable;
-			});
-		}
-		function buildEntityTable(eSetName) {			
-			$service.getEntitySet(eSetName,$queryOptions, function(data, entityType) {				
-				var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table>".format(eSetName);				
-				dataTable += "<tbody>";
-				for(var prop in entityType.properties){
-					dataTable += "<tr><td>{0}</td><td>{1}</td></tr>".format(prop,data[prop]);	
-				}
-				for(var nav in entityType.navProperties){
-					dataTable += "<tr><td>{0}</td><td>{1}</td></tr>".format(nav,entityType.navProperties[nav].type);
-				}
-				dataTable += "</tbody>";
-				dataTable += "</table>";
-				document.getElementById("dataTable").innerHTML = dataTable;
-			});
-		}
-	</script>
-	<script type="text/javascript" id="nextPage">	 
-	   function nextPage(eSetName,count){
-		   if(count == $queryOptions.$top){
-		    $queryOptions.$skip = $queryOptions.$skip + $queryOptions.$top;
-		   }	      
-		   buildDataTable(eSetName);
-	   }	 
-	</script>
-	<script type="text/javascript" id="previousPage">	 
-	   function previousPage(eSetName){
-		   var skip = $queryOptions.$skip - $queryOptions.$top;
-		   $queryOptions.$skip = skip < 0 ? 0 : skip;
-		   buildDataTable(eSetName);
-	   }	 
-	</script>
-	<script type="text/javascript" id="selectRow">
-		function selectRow(eSetName,key){
-			$queryOptions.key = key; 
-			buildEntityTable(eSetName);
-		}
-	</script>	
+
 	<script type="text/template" id="dataTableFoot">
 	<tfoot>
 		<tr>
 			<td colspan="{0}">
 				<div id="paging">
 					<ul>
-						<li><a href="#" onClick="previousPage('{1}')"><span>Previous</span></a></li>						
-						<li><a href="#" onClick="nextPage('{1}',{2})" ><span>Next</span></a></li>
+						<li><a id="previus" href="{1}" >Previous</a></li>						
+						<li><a id="next" href="{2}">Next</a></li>
 					</ul>
 				</div>
 		</tr>
 	</tfoot>
 	</script>
-	<div class="header"><h1>Data Service</h1></div>
+	<div class="header">
+		<h1>Data Service</h1>
+	</div>
 	<div id="menu"></div>
 	<div id="dataTable" class="datagrid"></div>
 
+	
 </body>
 </html>

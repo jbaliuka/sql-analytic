@@ -19,11 +19,25 @@
 		<servlet-class>com.github.sql.analytic.odata.web.test.TestSQLODataServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+	
+	<servlet>
+		<servlet-name>UiServlet</servlet-name>
+		<servlet-class>com.github.sql.analytic.odata.web.test.TestUiServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	
+	
 
 	<servlet-mapping>
 		<servlet-name>SQLODataServlet</servlet-name>
 		<url-pattern>/SQLODataService.svc/*</url-pattern>
 	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>UiServlet</servlet-name>
+		<url-pattern>/ui/*</url-pattern>
+	</servlet-mapping>
+	
 
 	<mime-mapping>
 		<extension>json</extension>

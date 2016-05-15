@@ -17,6 +17,7 @@ function ServiceMetadata(url, readyCallback){
 		var xmlDoc = xml.responseXML;
 		buildSchemas(xmlDoc);
 		buildEntitySets(xmlDoc);
+		window.$service = new Service($metadata);
 		readyCallback($metadata);
 	}
 
