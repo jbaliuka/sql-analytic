@@ -2,9 +2,7 @@ package com.github.sql.analytic.test;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.parser.CCJSqlParserManager;
@@ -75,6 +73,11 @@ public class TestUtil {
 			@Override
 			public Object getParameter(String name) {
 				
+				return null;
+			}
+
+			@Override
+			public String getDefaultSchema() {				
 				return null;
 			}
 

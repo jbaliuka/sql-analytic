@@ -3,6 +3,7 @@ package com.github.sql.analytic.util.deparser;
 import java.util.Iterator;
 
 import com.github.sql.analytic.schema.Column;
+import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.StatementVisitor;
 import com.github.sql.analytic.statement.create.table.CreateTable;
 import com.github.sql.analytic.statement.create.view.CreateView;
@@ -11,6 +12,7 @@ import com.github.sql.analytic.statement.drop.Drop;
 import com.github.sql.analytic.statement.insert.Insert;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 import com.github.sql.analytic.statement.replace.Replace;
+import com.github.sql.analytic.statement.select.PlainSelect;
 import com.github.sql.analytic.statement.select.Select;
 import com.github.sql.analytic.statement.select.WithItem;
 import com.github.sql.analytic.statement.truncate.Truncate;
@@ -76,10 +78,19 @@ public class StatementDeParser implements StatementVisitor {
 
 		selectDeParser.setExpressionVisitor(expressionDeParser);
 		if (select.getWithItemsList() != null && !select.getWithItemsList().isEmpty()) {
-			buffer.append("WITH ");
-			for (Iterator iter = select.getWithItemsList().iterator(); iter.hasNext();) {
-				WithItem withItem = (WithItem)iter.next();
-				buffer.append(withItem);
+			buffer.append("WITH ");			
+			for (Iterator<WithItem> iter = select.getWithItemsList().iterator(); iter.hasNext();) {
+				WithItem withItem = iter.next();
+				buffer.append(withItem.getName());
+				if(withItem.getWithItemList() != null){
+					buffer.append("(");					
+					buffer.append(PlainSelect.getStringList(withItem.getWithItemList(),true,false));					
+					buffer.append(")");
+				}
+				buffer.append(" AS (");							
+				withItem.getSelectBody().accept(selectDeParser);
+				buffer.append(" )");
+
 				if (iter.hasNext()){
 					buffer.append(",");
 				}
@@ -128,7 +139,7 @@ public class StatementDeParser implements StatementVisitor {
 
 		buffer.append("CREATE POLICY ").
 		append(policy.getName()).append(" ON ").append(policy.getTable());
-		
+
 		if(policy.getColumns() != null){
 			buffer.append("(");
 			int i = 0;
@@ -140,9 +151,15 @@ public class StatementDeParser implements StatementVisitor {
 			}
 			buffer.append(")");
 		}
-		
-		if(policy.getAction() != null){
-			buffer.append(" FOR ").append(policy.getAction());	
+
+		if(policy.getActions() != null){
+			buffer.append(" FOR ");
+			for(Iterator<String> it = policy.getActions().iterator(); it.hasNext();  ){
+				buffer.append(it.next());
+				if(it.hasNext()){
+					buffer.append(",");	
+				}
+			}
 		}		
 		if( policy.getRoles() != null ){
 			buffer.append(" TO ");
@@ -164,11 +181,16 @@ public class StatementDeParser implements StatementVisitor {
 			buffer.append(policy.getCheck());
 			buffer.append(")");
 		}
-		
-		
+
+
 
 	}
 
+	@Override
+	public void visit(Cursor cursor) {
+		// TODO Auto-generated method stub
+	}
 
+	
 
 }

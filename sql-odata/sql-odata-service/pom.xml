@@ -30,6 +30,11 @@
 			<groupId>sql-analytic</groupId>
 			<artifactId>sql-analytic-session</artifactId>
 		</dependency>
+		<dependency>
+		    <groupId>sql-analytic</groupId>
+		 	<artifactId>sql-dialect-h2</artifactId>
+		 	<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>

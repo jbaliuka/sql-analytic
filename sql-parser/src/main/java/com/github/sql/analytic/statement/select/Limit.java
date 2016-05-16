@@ -11,6 +11,14 @@ public class Limit {
 	private boolean offsetJdbcParameter = false;
 	private boolean limitAll;
 	
+	public Limit(int i, int j) {
+		rowCount = i;
+		offset = j;
+	}
+
+	public Limit() {		
+	}
+
 	public long getOffset() {
 		return offset;
 	}
@@ -19,12 +27,14 @@ public class Limit {
 		return rowCount;
 	}
 
-	public void setOffset(long l) {
+	public Limit setOffset(long l) {
 		offset = l;
+		return this;
 	}
 
-	public void setRowCount(long l) {
+	public Limit setRowCount(long l) {
 		rowCount = l;
+		return this;
 	}
 
 	public boolean isOffsetJdbcParameter() {

@@ -10,6 +10,6 @@
   	<dependency>
   		<groupId>sql-analytic</groupId>
   		<artifactId>sql-analytic-parser</artifactId>
-  	</dependency>
+  	</dependency>  	
   </dependencies>
 </project>

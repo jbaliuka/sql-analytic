@@ -54,6 +54,7 @@ import org.junit.Test;
 
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
+import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 
 public class SQLODataServletTest {
@@ -73,10 +74,9 @@ public class SQLODataServletTest {
 		XMLMetadata body = res.getBody();
 
 		Map<String, CsdlSchema> shemas = body.getSchemaByNsOrAlias();
-		assertTrue(shemas.size() == 2);
+		assertTrue(shemas.size() == 1);
 		assertTrue(shemas.containsKey("PUBLIC"));
-		assertTrue(shemas.containsKey("INFORMATION_SCHEMA"));
-
+		
 		CsdlSchema publicSchema = shemas.get("PUBLIC");
 
 		CsdlEntityType customers = publicSchema.getEntityType("CUSTOMERS");
@@ -100,9 +100,21 @@ public class SQLODataServletTest {
 	}
 	
 	@Test
+	public void testExpandEntityReq() throws URISyntaxException {
+		URI uri = new URI(serviceRoot + "CUSTOMERS(3)?$expand=FK_ORDERS_CUSTOMERS");
+		ODataEntityRequest<ClientEntity> req =
+				client.getRetrieveRequestFactory().getEntityRequest(uri);
+		ODataRetrieveResponse<ClientEntity> res = req.execute();
+		ClientEntity entity = res.getBody();		
+		ClientProperty expanded = entity.getProperty("FK_ORDERS_CUSTOMERS");
+		assertTrue(expanded.getCollectionValue().size() > 1);
+
+	}
+	
+	@Test
 	public void testNavEntityReq() throws URISyntaxException {
 		
-		URI uri = new URI(serviceRoot + "CUSTOMERS(3)/FK_ORDERS_CUSTOMERS");		
+		URI uri = new URI(serviceRoot + "CUSTOMERS(3)/FK_ORDERS_CUSTOMERS?$format=xml");		
 		ODataEntitySetRequest<ClientEntitySet> req =
 				client.getRetrieveRequestFactory().getEntitySetRequest(uri);
 		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
@@ -165,6 +177,43 @@ public class SQLODataServletTest {
 		assertFalse( entity.getEntities().isEmpty() );
 
 	}
+	
+	@Test
+	public void testFunctionReq() throws URISyntaxException {
+		
+		URI uri = new URI(serviceRoot + "myCustomers(date=2010-02-26)");
+		
+		ODataEntitySetRequest<ClientEntitySet> req =
+				client.getRetrieveRequestFactory().getEntitySetRequest(uri);
+		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
+		ClientEntitySet entity = res.getBody();		
+		assertFalse( entity.getEntities().isEmpty() );
+
+	}
+	
+	@Test
+	public void testTopReq() throws URISyntaxException {
+		
+		URI uri = new URI(serviceRoot + "CUSTOMERS?$top=1");
+		ODataEntitySetRequest<ClientEntitySet> req =
+				client.getRetrieveRequestFactory().getEntitySetRequest(uri);
+		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
+		ClientEntitySet entity = res.getBody();		
+		assertTrue( entity.getEntities().size() == 1 );
+
+	}
+	
+	@Test
+	public void testFilterReq() throws URISyntaxException {
+		
+		URI uri = new URI(serviceRoot + "CUSTOMERS?$filter=contains(LAST_NAME,%27Andersen%27)");
+		ODataEntitySetRequest<ClientEntitySet> req =
+				client.getRetrieveRequestFactory().getEntitySetRequest(uri);		
+		ODataRetrieveResponse<ClientEntitySet> res = req.execute();
+		ClientEntitySet entity = res.getBody();		
+		assertTrue( entity.getEntities().size() == 1 );
+
+	}
 
 	@Test
 	public void testServiceReq() {
@@ -217,6 +266,15 @@ public class SQLODataServletTest {
 			protected DataSource getDatasource() {
 
 				return datasource;
+			}
+
+			@Override
+			protected Map<String, Cursor> getCursors() {				
+				try {
+					return Loader.getCursors();
+				} catch (IOException | JSQLParserException e) {
+					throw new AssertionError(e);
+				}
 			}
 
 		};		

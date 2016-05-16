@@ -3,9 +3,11 @@ package com.github.sql.analytic.odata.web.test;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -16,6 +18,7 @@ import javax.sql.DataSource;
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
 import com.github.sql.analytic.odata.web.SQLODataServlet;
+import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
 
 public class TestSQLODataServlet extends SQLODataServlet {
@@ -24,8 +27,6 @@ public class TestSQLODataServlet extends SQLODataServlet {
 	private static final long serialVersionUID = 1L;
 
 	static final String url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
-
-	
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {		
@@ -43,7 +44,14 @@ public class TestSQLODataServlet extends SQLODataServlet {
 
 	}
 
-
+	@Override
+	protected Map<String,Cursor> getCursors() {		
+		try {
+			return Loader.getCursors();
+		} catch (IOException | JSQLParserException e) {
+			throw new AssertionError(e);
+		}
+	}
 
 	@Override
 	protected List<CreatePolicy> getPolicy() {		
@@ -54,13 +62,10 @@ public class TestSQLODataServlet extends SQLODataServlet {
 		}
 	}
 
-
-
 	@Override
 	protected DataSource getDatasource() {		
 		return new H2Datasource();
 	}
-
 
 }
 
@@ -115,8 +120,7 @@ class H2Datasource implements DataSource {
 
 	@Override
 	public Connection getConnection() throws SQLException {
-
-		return  new org.h2.Driver().connect(TestSQLODataServlet.url, new Properties());
+		return  DriverManager.getConnection(TestSQLODataServlet.url, new Properties());
 	}
 }
 

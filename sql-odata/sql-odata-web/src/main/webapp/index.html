@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>SQLODataService UI</title>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<script type="text/javascript" src="js/util.js"></script>
+<script type="text/javascript" src="js/metadata.js"></script>
+<script type="text/javascript" src="js/service.js"></script>
+<script type="text/javascript" src="js/ui.js"></script>
+</head>
+<body>
+	<script type="text/javascript" id="buildMenu">
+		window.$metadata = new ServiceMetadata(
+				"http://localhost:8080/sql-odata-web/SQLODataService.svc",
+				metadataCallback);
+	</script>
+
+	<script type="text/template" id="dataTableFoot">
+	<tfoot>
+		<tr>
+			<td colspan="{0}">
+				<div id="paging">
+					<ul>
+						<li><a id="previus" href="{1}" >Previous</a></li>						
+						<li><a id="next" href="{2}">Next</a></li>
+					</ul>
+				</div>
+		</tr>
+	</tfoot>
+	</script>
+	<div class="header">
+		<h1>Data Service</h1>
+	</div>
+	<div id="menu"></div>
+	<div id="dataTable" class="datagrid"></div>
+
+	
+</body>
+</html>

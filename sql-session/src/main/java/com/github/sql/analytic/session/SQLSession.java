@@ -35,6 +35,7 @@ public class SQLSession implements Connection{
 	private SessionContext context;
 	private List<CreatePolicy> policy;
 	private Map<String, DeparsedSQL> sqlCache = createCache();
+	private Policy transform;
 
 
 	public SQLSession(SessionContext context, Connection connection, List<CreatePolicy> policy) {
@@ -42,6 +43,7 @@ public class SQLSession implements Connection{
 		this.connection = connection;		
 		this.policy = policy;
 		this.context = context;
+		this.transform = createPolicy();
 	}
 
 
@@ -49,6 +51,13 @@ public class SQLSession implements Connection{
 		return new HashMap<>();
 	}
 
+	public void enablePolicy(String name){
+		transform.enablePolicy(name);
+	}
+
+	public void disablePolicy(String name){
+		transform.disablePolicy(name);
+	}
 
 	public DeparsedSQL transform(String sql) throws SQLException{
 
@@ -57,8 +66,8 @@ public class SQLSession implements Connection{
 			return cached;
 		}
 
-		CCJSqlParserManager parserManager = new CCJSqlParserManager();				
-		Policy transform = createPolicy();		
+		CCJSqlParserManager parserManager = new CCJSqlParserManager();			
+
 		try {
 
 			com.github.sql.analytic.statement.SQLStatement stmt = parserManager.transform(new StringReader(sql), transform);
@@ -77,7 +86,6 @@ public class SQLSession implements Connection{
 
 	public PreparedStatement create(SQLStatement stmt,Map<String,Object> statementParams)throws SQLException{
 
-		Policy transform = createPolicy();
 		stmt = transform.trasform(stmt);
 		StringBuffer buffer = new StringBuffer();
 		ParamsDeparser deparser = createDeparser(buffer);
@@ -91,8 +99,7 @@ public class SQLSession implements Connection{
 		return  new Policy(policy, context);
 	}
 
-	protected ParamsDeparser createDeparser(StringBuffer buffer) {
-
+	public ParamsDeparser createDeparser(StringBuffer buffer) {
 		return new ParamsDeparser(buffer);
 	} 
 
@@ -157,7 +164,7 @@ public class SQLSession implements Connection{
 	}
 
 	public DatabaseMetaData getMetaData() throws SQLException {
-		return connection.getMetaData();
+		return new PolicyAwareMetadata(this, connection.getMetaData());
 	}
 
 	public void setReadOnly(boolean readOnly) throws SQLException {

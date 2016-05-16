@@ -95,7 +95,7 @@ public class InsertPolicy extends InsertTransform {
 	}
 	
 	protected void chechColumnsPolicy(){
-		List<CreatePolicy> list = policyTransform.findTablePolicies("INSERT", getTable());
+		List<CreatePolicy> list = policyTransform.currentPolicies("INSERT", getTable());
 		for( NewValue value : values ){
 			boolean auth = false;
 			for(CreatePolicy p : list ){

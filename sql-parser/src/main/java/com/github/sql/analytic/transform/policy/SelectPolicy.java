@@ -34,8 +34,7 @@ public class SelectPolicy extends SelectTransform {
 	public SelectPolicy(String action,List<NewValue> newValues,Policy statementTransform) {
 		super(statementTransform);
 		this.statementTransform = statementTransform;
-		this.action = action;
-		
+		this.action = action;		
 		this.newValues = newValues;
 		
 	}
@@ -113,7 +112,7 @@ public class SelectPolicy extends SelectTransform {
 
 		if(statementTransform.isCheckColumns()){
 			for(SelectListItem item : list){			
-				item.accept(new ColumnsPolicy(this));
+				item.accept(new ColumnsPolicy(this,action));
 			}
 		}
 
@@ -160,7 +159,7 @@ public class SelectPolicy extends SelectTransform {
 
 	protected SQLExpression getCheckFilter(SQLExpression filter) {
 		
-		List<CreatePolicy> list = statementTransform.findTablePolicies(action, toTable);
+		List<CreatePolicy> list = statementTransform.currentPolicies(action, toTable);
 		SQLExpression checkFilter = null;		
 		for(CreatePolicy policy: list){				
 			if(policy.getCheck() != null){
@@ -194,7 +193,7 @@ public class SelectPolicy extends SelectTransform {
 	private SQLExpression getUsingFilter(Table table) {
 
 		SQLExpression filter = null;
-		List<CreatePolicy> list = statementTransform.findTablePolicies(action, table);		
+		List<CreatePolicy> list = statementTransform.currentPolicies(action, table);		
 		
 			for(CreatePolicy policy: list){
 				if(policy.getUsing() != null){

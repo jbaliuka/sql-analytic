@@ -15,37 +15,64 @@
 	<packaging>war</packaging>
 	<name>sql-odata-web</name>
 
-
-
 	<build>
 		<finalName>${project.name}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<inherited>true</inherited>				
+				<inherited>true</inherited>
+				<configuration>
+
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.1</version>
+				<executions>
+					<execution>
+						<id>tomcat-run</id>
+						<goals>
+							<goal>exec-war-only</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<warRunDependencies>
+								<warRunDependency>
+									<dependency>
+										<groupId>sql-analytic</groupId>
+										<artifactId>sql-odata-parent</artifactId>
+										<version>${project.version}</version>
+										<type>war</type>
+									</dependency>
+								</warRunDependency>
+							</warRunDependencies>
+							<enableNaming>true</enableNaming>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
 
-
-
-	<dependencies>
+	<dependencies>		
 		<dependency>
 			<groupId>sql-analytic</groupId>
 			<artifactId>sql-odata-service</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>sql-analytic</groupId>
-			<artifactId>sql-odate-test-data</artifactId>			
+			<artifactId>sql-odate-test-data</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>sql-analytic</groupId>
+			<artifactId>sql-dialect-h2</artifactId>			
+		</dependency>
 	</dependencies>
-
-
-
 
 </project>

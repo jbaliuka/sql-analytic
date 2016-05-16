@@ -19,7 +19,7 @@ public class Policy extends StatementTransform {
 	private List<CreatePolicy> policyList;
 	private SessionContext sessionContext;
 	private Set<Table> tables = new HashSet<Table>();
-	private List<WithItem> withItems = new ArrayList<WithItem>();
+	private List<WithItem> withItems = new ArrayList<WithItem>();	
 	private boolean checkColumns;
 
 	public boolean isCheckColumns() {
@@ -34,14 +34,50 @@ public class Policy extends StatementTransform {
 	}
 
 
-	public List<CreatePolicy> findTablePolicies(String action,Table table) {
+	public void enablePolicy(String name){
+		for(CreatePolicy policy : policyList){
+			if(policy.getName().equalsIgnoreCase(name)){
+				policy.setEnabled(true);
+			}
+		}
+	}
+
+	public void disablePolicy(String name){
+		for(CreatePolicy policy : policyList){
+			if(policy.getName().equalsIgnoreCase(name)){
+				policy.setEnabled(false);
+			}
+		}
+	}
+
+	public List<CreatePolicy> allTablePolicies(Table table){
+
+		List<CreatePolicy> newPolicyList = new ArrayList<CreatePolicy>();
+		for(CreatePolicy policy : policyList){							
+			if(match(table, policy)){		
+				if(policy.getRoles() != null){
+					for(String role: policy.getRoles()){
+						if(getSessionContext().isUserInRole(role)){								
+							newPolicyList.add(policy);								
+						}
+					}
+				}else {						
+					newPolicyList.add(policy);
+				}
+			}
+		}		
+		return newPolicyList;
+
+	}
+
+	public List<CreatePolicy> currentPolicies(String action,Table table) {
 
 		List<CreatePolicy> allPolicies = policyList;
 		List<CreatePolicy> newPolicyList = new ArrayList<CreatePolicy>();
 
 		for(CreatePolicy policy : allPolicies){
 			if( applicableFor(policy,action)){				
-				if(table.getWholeTableName().equalsIgnoreCase(policy.getTable().getWholeTableName())){		
+				if(match(table, policy)){		
 					if(policy.getRoles() != null){
 						for(String role: policy.getRoles()){
 							if(getSessionContext().isUserInRole(role)){
@@ -60,14 +96,45 @@ public class Policy extends StatementTransform {
 		if(newPolicyList.isEmpty()){
 			throw new PolicyException(String.format("Unable to find policy list for %s on %s ", table, action)); 
 		}
-		
+
 		return newPolicyList;
 	}
 
-	private boolean applicableFor(CreatePolicy policy,String actiony) {
+	public boolean hasPolicy(Table table){		
+		return allTablePolicies(table).size() > 0;
+	}
 
-		return policy.getAction() == null || actiony.equalsIgnoreCase(policy.getAction()) ||
-				"ALL".equalsIgnoreCase(policy.getAction());
+	private  boolean match(Table table, CreatePolicy policy) {
+
+		if(policy.isEnabled() && table.getName().equalsIgnoreCase(policy.getTable().getName())){			
+			if(table.getSchemaName() == policy.getTable().getSchemaName()){
+				return true; 
+			}
+			String tableSchema = table.getSchemaName() == null ? sessionContext.getDefaultSchema() : table.getSchemaName();
+			String policySchema =  policy.getTable().getSchemaName() == null ? sessionContext.getDefaultSchema() : policy.getTable().getSchemaName();
+			if(tableSchema != null){
+				return tableSchema.equalsIgnoreCase(policySchema);
+			}else {
+				return false;
+			}
+		}else {
+			return false;
+		}
+
+
+
+	}
+
+	public boolean applicableFor(CreatePolicy policy,String action) {
+		if(policy.isEnabled()){
+			if(policy.getActions() == null ){
+				return true;
+			}
+			for( String next : policy.getActions()){
+				return action.equalsIgnoreCase(next) ||	"ALL".equalsIgnoreCase(next);
+			}
+		}
+		return false;
 	}
 
 
@@ -81,19 +148,19 @@ public class Policy extends StatementTransform {
 	protected DeleteTransform createDeleteTransform() {		 
 		return new DeletePolicy(this);
 	}
-	
+
 	@Override
 	protected UpdateTransform createUpdateTransform() {		
 		return new UpdatePolicy(this);
 	}
-	
-	 protected InsertTransform createInsertTransform() {
-		 
-		 return new InsertPolicy(this);
-		 
-	 };
-		
-	
+
+	protected InsertTransform createInsertTransform() {
+
+		return new InsertPolicy(this);
+
+	};
+
+
 
 	public List<CreatePolicy> getPolicyList() {
 		return policyList;

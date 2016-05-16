@@ -38,6 +38,8 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 
+import com.github.sql.analytic.odata.cmd.ReadEntityCollectionCommand;
+import com.github.sql.analytic.odata.ser.SerializeEntityCommand;
 import com.github.sql.analytic.session.SQLSession;
 
 public class SQLEntityProcessor implements EntityProcessor {
@@ -61,13 +63,12 @@ public class SQLEntityProcessor implements EntityProcessor {
 	public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat)
 			throws ODataApplicationException, ODataLibraryException {
 		
-		ReadEntityCommand command = new ReadEntityCommand(request, response, uriInfo, responseFormat);
-		command.init(odata, serviceMetadata);		
-		try {
-			command.execute(session);
-		} catch (EdmPrimitiveTypeException e) {
-			throw command.internalError(e);
-		}
+		ReadEntityCollectionCommand command = new ReadEntityCollectionCommand(uriInfo);			
+		ResultSetIterator iterator = command.execute(session);
+		SerializeEntityCommand ser = new SerializeEntityCommand(request, response, uriInfo, responseFormat);
+		ser.init(odata,serviceMetadata);
+		ser.setEntityType(command.getEntityType());
+		ser.serialize(iterator);
 		
 	}
 

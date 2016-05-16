@@ -4,9 +4,7 @@ import java.io.StringReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.github.sql.analytic.parser.CCJSqlParserManager;
 import com.github.sql.analytic.statement.SQLStatement;
@@ -36,6 +34,11 @@ public class ParamsDeparserTest extends TestCase {
 			@Override
 			public String getCurrentUser() {				
 				return "testUser";
+			}
+
+			@Override
+			public String getDefaultSchema() {			
+				return null;
 			}
 		};
 		List<CreatePolicy> policyList = new ArrayList<>();

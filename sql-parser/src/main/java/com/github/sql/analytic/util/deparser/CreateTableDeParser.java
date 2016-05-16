@@ -22,12 +22,11 @@ public class CreateTableDeParser {
 		this.buffer = buffer;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void deParse(CreateTable createTable) {
 		buffer.append("CREATE TABLE ").append(createTable.getTable().getWholeTableName());
 		if (createTable.getColumnDefinitions() != null) {
 			buffer.append(" { ");
-			for (Iterator iter = createTable.getColumnDefinitions().iterator(); iter.hasNext();) {
+			for (Iterator<ColumnDefinition> iter = createTable.getColumnDefinitions().iterator(); iter.hasNext();) {
 				ColumnDefinition columnDefinition = (ColumnDefinition) iter.next();
 				buffer.append(columnDefinition.getColumnName());
 				buffer.append(" ");

@@ -106,6 +106,7 @@ import com.github.sql.analytic.expression.operators.relational.NotEqualsTo;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.SQLStatement;
+import com.github.sql.analytic.statement.Cursor;
 import com.github.sql.analytic.statement.create.table.ColDataType;
 import com.github.sql.analytic.statement.create.table.ColumnDefinition;
 import com.github.sql.analytic.statement.create.table.CreateTable;
@@ -244,6 +245,10 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_CHECK: "CHECK">
 |   <K_TO: "TO" >
 |   <K_POLICY: "POLICY" >
+|  < K_CURSOR: "CURSOR" >
+|  < K_DECLARE: "DECLARE" >
+|  < K_ENABLE: "ENABLE" >
+|  < K_DISABLE: "DISABLE" >
 }
 
 
@@ -293,12 +298,13 @@ SQLStatement Statement() :
     |
     LOOKAHEAD(3) stm = Replace()
     |
-     (<K_CREATE> [<K_OR> <K_REPLACE>] stm = Create())    
+     [<K_CREATE> [<K_OR> <K_REPLACE>]] stm = Create()    
     |
     stm = Drop()
     |
     stm = Truncate()
-  	
+    | LOOKAHEAD(2) <K_DECLARE>  stm = DeclareCursor()
+    
     )
     [";"]
     <EOF>
@@ -331,15 +337,24 @@ CreatePolicy CreatePolicy():
   List<String> roles = new ArrayList<String>();
   Token token;
   SQLExpression expression;
-  Table table;}{
+  Table table;
+  List actions  = new ArrayList();}{
   token = <S_IDENTIFIER>  {
     policy.setName(token.image);  }
   <K_ON> table = Table() [ "(" column = Column() {columns.add(column);} ("," column = Column() {columns.add(column);})* ")" ] 
   [LOOKAHEAD(2) <K_FOR>
   (
-    token = <K_ALL> | token = <K_SELECT> | token = <K_INSERT> | token = <K_UPDATE> | token = <K_DELETE>
-  )  {
-    policy.setAction(token.image);  }
+    (      token =  <K_ALL> |token = < K_SELECT > | token = < K_UPDATE > | token = < K_DELETE > | token = < K_INSERT >
+    )
+          {
+      actions.add(token.image);    }
+    ( ","
+    (      token =  <K_ALL> | token = < K_SELECT > | token = < K_UPDATE > | token = < K_DELETE > | token = < K_INSERT >
+    ) 
+    {
+      actions.add(token.image);
+    }    )*
+  )  
   ]
   [
   	<K_TO> token = <S_IDENTIFIER >	{ roles.add(token.image); }
@@ -347,12 +362,17 @@ CreatePolicy CreatePolicy():
   ]
   [<K_USING> "(" expression = SQLExpression() ")" { policy.setUsing(expression); } ]
   [<K_WITH> <K_CHECK> "(" expression = SQLExpression() ")"{ policy.setCheck(expression); }]
+  [ <K_ENABLE>  {
+    policy.setEnabled(true);  } | <K_DISABLE >  {
+    policy.setEnabled(false);  } ]
   {
     policy.setTable(table);
     if(columns.size() > 0){
       policy.setColumns(columns);    }
     if(roles.size() > 0)    {
       policy.setRoles(roles);    }
+    if(actions.size() > 0)    {
+      policy.setActions(actions);    }
     return policy;  }}
 
 Update Update():
@@ -1761,6 +1781,68 @@ CreateView CreateView():
 		}
 
 }
+
+
+Cursor DeclareCursor():
+{
+  Cursor cursor = new Cursor();
+  Token name = null;
+  ColDataType colDataType = null;
+  ColumnDefinition coldef = null;
+  ArrayList columnDefinitions = new ArrayList();
+  Select select = null;  
+  ArrayList variableDefinitions = new ArrayList();
+  cursor.setVariables(variableDefinitions);}
+{
+
+
+   [ name = <S_IDENTIFIER> colDataType = ColDataType()
+   {
+     ColumnDefinition varDef = new ColumnDefinition();
+     varDef.setColumnName(name.image);
+     varDef.setColDataType(colDataType);
+     variableDefinitions.add(varDef);
+   } (
+     name = <S_IDENTIFIER> colDataType = ColDataType()
+   {
+     varDef = new ColumnDefinition();
+     varDef.setColumnName(name.image);
+     varDef.setColDataType(colDataType);
+     variableDefinitions.add(varDef);
+   }
+     )*
+   ]
+   <K_CURSOR>
+   name = <S_IDENTIFIER>  {
+    cursor.setName(name.image);  }
+
+  "("
+
+        name = <S_IDENTIFIER>
+		colDataType = ColDataType()
+		{
+		  coldef = new ColumnDefinition();
+		  coldef.setColumnName(name.image);
+		  coldef.setColDataType(colDataType);
+		  columnDefinitions.add(coldef);		}
+
+		( ","
+
+        name = <S_IDENTIFIER>
+		colDataType = ColDataType()
+		{
+		  coldef = new ColumnDefinition();
+			coldef.setColumnName(name.image);
+			coldef.setColDataType(colDataType);
+			columnDefinitions.add(coldef);
+		}
+		 		)*
+
+   ")" <K_AS> select = Select()   {
+      cursor.setSelect(select);   }
+{  cursor.setColumnDefinitions(columnDefinitions);
+  return cursor;
+}}
 
 CreateTable CreateTable():
 {

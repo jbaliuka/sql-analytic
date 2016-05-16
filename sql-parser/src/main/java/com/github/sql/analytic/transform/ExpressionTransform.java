@@ -267,8 +267,10 @@ public class ExpressionTransform implements ExpressionVisitor {
 		Column newColumn = new Column();
 		expression = newColumn;
 		newColumn.setColumnName(tableColumn.getColumnName());
-		Table table = new Table(tableColumn.getTable().getSchemaName(),tableColumn.getTable().getName());		
-		newColumn.setTable(table);
+		if(tableColumn.getTable() != null && tableColumn.getTable().getName() != null){
+			Table table = new Table(tableColumn.getTable().getSchemaName(),tableColumn.getTable().getName());		
+			newColumn.setTable(table);
+		}
 
 	}
 
@@ -292,7 +294,7 @@ public class ExpressionTransform implements ExpressionVisitor {
 		}
 
 		newFunction.setParameters(newList);
-		
+
 		if(function.getAnalyticCause() != null){
 			newFunction.setAnalyticClause((AnalyticClause) statementTransform.transform(function.getAnalyticCause()));
 			newFunction.getAnalyticCause().setFunction(newFunction);
@@ -305,7 +307,7 @@ public class ExpressionTransform implements ExpressionVisitor {
 
 		ExpressionList newList = new ExpressionList();	
 		newList.setExpressions(new ArrayList<SQLExpression>());
-		
+
 		for ( SQLExpression next :  expressionList.getExpressions()) {
 			newList.getExpressions().add(statementTransform.transform(next));
 		}
@@ -392,7 +394,7 @@ public class ExpressionTransform implements ExpressionVisitor {
 		for(SQLExpression next : groupingExpression.getExpressions()){
 			newExpression.getExpressions().add(next);
 		}
-			
+
 	}
 
 	public void visit(AnalyticClause analyticClause) {
@@ -400,7 +402,7 @@ public class ExpressionTransform implements ExpressionVisitor {
 		AnalyticClause newClause = new AnalyticClause();
 		setExpression(newClause);	
 		if(analyticClause.getQueryPartitionClause() != null){
-		   newClause.setQueryPartitionClause((QueryPartitionClause)statementTransform.transform(analyticClause.getQueryPartitionClause()));
+			newClause.setQueryPartitionClause((QueryPartitionClause)statementTransform.transform(analyticClause.getQueryPartitionClause()));
 		}
 		if(analyticClause.getOrderByClause() != null){
 			OrderByClause orderBy = new OrderByClause();

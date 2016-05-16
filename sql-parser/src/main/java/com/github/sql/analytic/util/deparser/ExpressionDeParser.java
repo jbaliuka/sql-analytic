@@ -11,7 +11,6 @@ import com.github.sql.analytic.expression.CaseExpression;
 import com.github.sql.analytic.expression.CastExpression;
 import com.github.sql.analytic.expression.DateValue;
 import com.github.sql.analytic.expression.DoubleValue;
-import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
 import com.github.sql.analytic.expression.Function;
 import com.github.sql.analytic.expression.GroupingExpression;
@@ -20,9 +19,9 @@ import com.github.sql.analytic.expression.JdbcParameter;
 import com.github.sql.analytic.expression.LongValue;
 import com.github.sql.analytic.expression.NamedParameter;
 import com.github.sql.analytic.expression.NullValue;
-import com.github.sql.analytic.expression.OrderByClause;
 import com.github.sql.analytic.expression.Parenthesis;
 import com.github.sql.analytic.expression.QueryPartitionClause;
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.StringValue;
 import com.github.sql.analytic.expression.TimeValue;
 import com.github.sql.analytic.expression.TimestampValue;
@@ -263,9 +262,11 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 	}
 
 	public void visit(Column tableColumn) {
-		String tableName = tableColumn.getTable().getWholeTableName();
-		if (tableName != null) {
-			buffer.append(tableName).append(".");
+		if( tableColumn.getTable() != null){
+			String tableName = tableColumn.getTable().getWholeTableName();
+			if (tableName != null) {
+				buffer.append(tableName).append(".");
+			}
 		}
 
 		buffer.append(tableColumn.getColumnName());
@@ -294,10 +295,9 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	public void visit(ExpressionList expressionList) {
 		buffer.append("(");
-		for (Iterator iter = expressionList.getExpressions().iterator(); iter.hasNext();) {
+		for (Iterator<SQLExpression> iter = expressionList.getExpressions().iterator(); iter.hasNext();) {
 			SQLExpression expression = (SQLExpression) iter.next();
 			expression.accept(this);
 			if (iter.hasNext()){
@@ -326,7 +326,6 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 		buffer.append("{t '").append(timeValue.getValue().toString()).append("'}");
 	}
 
-	@SuppressWarnings("unchecked")
 	public void visit(CaseExpression caseExpression) {
 		buffer.append("CASE ");
 		SQLExpression switchExp = caseExpression.getSwitchExpression();
@@ -334,7 +333,7 @@ public class ExpressionDeParser implements ExpressionVisitor, ItemsListVisitor {
 			switchExp.accept(this);
 		}
 
-		List clauses = caseExpression.getWhenClauses();
+		List<WhenClause> clauses = caseExpression.getWhenClauses();
 		for (Object clause : clauses) {
 			SQLExpression exp = (SQLExpression) clause;
 			exp.accept(this);

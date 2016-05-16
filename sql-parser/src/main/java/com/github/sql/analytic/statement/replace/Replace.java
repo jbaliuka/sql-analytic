@@ -24,7 +24,9 @@ package com.github.sql.analytic.statement.replace;
 
 import java.util.List;
 
+import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.operators.relational.ItemsList;
+import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.SQLStatement;
 import com.github.sql.analytic.statement.StatementVisitor;
@@ -37,11 +39,9 @@ import com.github.sql.analytic.statement.select.PlainSelect;
 
 public class Replace implements SQLStatement {
 	private Table table;
-	@SuppressWarnings("unchecked")
-	private List columns;
+	private List<Column> columns;
 	private ItemsList itemsList;
-	@SuppressWarnings("unchecked")
-	private List expressions;
+	private List<SQLExpression> expressions;
 	private boolean useValues = true;
 
 	public void accept(StatementVisitor statementVisitor) {
@@ -60,8 +60,7 @@ public class Replace implements SQLStatement {
 	 * A list of {@link com.github.sql.analytic.schema.Column}s either from a "REPLACE mytab (col1, col2) [...]" or a "REPLACE mytab SET col1=exp1, col2=exp2". 
 	 * @return a list of {@link com.github.sql.analytic.schema.Column}s
 	 */
-	@SuppressWarnings("unchecked")
-	public List getColumns() {
+	public List<Column> getColumns() {
 		return columns;
 	}
 
@@ -75,8 +74,7 @@ public class Replace implements SQLStatement {
 	}
 
 
-	@SuppressWarnings("unchecked")
-	public void setColumns(List list) {
+	public void setColumns(List<Column> list) {
 		columns = list;
 	}
 
@@ -88,13 +86,11 @@ public class Replace implements SQLStatement {
 	 * A list of {@link com.github.sql.analytic.expression.SQLExpression}s (from a "REPLACE mytab SET col1=exp1, col2=exp2"). <br>
 	 * it is null in case of a "REPLACE mytab (col1, col2) [...]"  
 	 */
-	@SuppressWarnings("unchecked")
-	public List getExpressions() {
+	public List<SQLExpression> getExpressions() {
 		return expressions;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void setExpressions(List list) {
+	public void setExpressions(List<SQLExpression> list) {
 		expressions = list;
 	}
 

@@ -110,6 +110,11 @@ public class H2SessionTest extends TestCase {
 			return parameters.get(name);
 		}
 
+		@Override
+		public String getDefaultSchema() {		
+			return null;
+		}
+
 	};
 
 }

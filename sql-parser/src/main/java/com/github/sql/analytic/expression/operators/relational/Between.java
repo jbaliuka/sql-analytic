@@ -22,9 +22,8 @@
  
 package com.github.sql.analytic.expression.operators.relational;
 
-import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.ExpressionVisitor;
-import com.github.sql.analytic.statement.StatementVisitor;
+import com.github.sql.analytic.expression.SQLExpression;
 
 
 /**

@@ -47,7 +47,7 @@ public interface StatementVisitor {
 	public void visit(CreateTable createTable);
 	public void visit(CreateView createView);
 	public void visit(CreatePolicy policy);
-	
+	public void visit(Cursor cursor);
 	
 
 }

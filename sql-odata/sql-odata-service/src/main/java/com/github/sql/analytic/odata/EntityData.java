@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSet;
@@ -19,7 +21,6 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmElement;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmKeyPropertyRef;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
@@ -46,14 +47,14 @@ public class EntityData {
 		return false;
 	}
 
-	public static Entity createEntity(EdmEntitySet edmEntitySet, Set<String> projection, ResultSet rs) throws SQLException, IOException {
+	public static Entity createEntity(EdmEntityType edmEntityType, Set<String> projection, ResultSet rs) throws SQLException, IOException {
 
-		EdmEntityType edmEntityType = edmEntitySet.getEntityType();
+		
 		Entity entity = new Entity();
 		entity.setType(edmEntityType.getFullQualifiedName().toString());
 
 		for( String name : edmEntityType.getPropertyNames()){	
-			if(projection == null || projection.contains(name)){
+			if(projection == null || projection.contains(name.toUpperCase())){
 				EdmElement prop = edmEntityType.getProperty(name);
 				entity.addProperty( new Property(null,prop.getName(),ValueType.PRIMITIVE,toPrimitive(rs, prop)));
 			}
@@ -63,7 +64,7 @@ public class EntityData {
 				entity.addProperty( new Property(null,ref.getName(),ValueType.PRIMITIVE,rs.getObject(ref.getName())));
 			}
 		}		
-		entity.setId(createId(edmEntitySet.getName(),rs,edmEntityType));
+		entity.setId(createId(edmEntityType.getName(),rs,edmEntityType));
 		return entity;
 	}
 
@@ -101,13 +102,13 @@ public class EntityData {
 			for(int i = 0; i< key.size(); i++ ){
 				builder.append(key.get(i).getName());
 				builder.append("=");
-				builder.append(rs.getObject(key.get(i).getName()));
+				builder.append(rs.getObject(key.get(i).getName()));				
 				if( i < key.size() - 1 ){
 					builder.append(",");
 				}
 			}
-			return new URI(builder.append(")").toString());
-		} catch (URISyntaxException e) {
+			return new URI(URLEncoder.encode(builder.append(")").toString(),"UTF-8"));
+		} catch (URISyntaxException | UnsupportedEncodingException e) {
 			throw new ODataRuntimeException("Unable to create id for entity: " + name, e);
 		}
 	}
