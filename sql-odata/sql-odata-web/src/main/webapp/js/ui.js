@@ -1,31 +1,29 @@
 window.addEventListener('popstate', function(event) {	   	
-	var uriInfo = new UriInfo(event.state);
-	uriInfo.servletPath = "SQLODataService.svc";;			      	
+	var uriInfo = new UriInfo(event.state);				      	
 	buildDataTable(uriInfo);		
- });
+});
 
 function eSetHandler(event) {
 	var href = event.target.getAttribute('href');			      	
-	var uriInfo = new UriInfo(href);
-	uriInfo.servletPath = "ui";			      	
-	buildDataTable(new UriInfo(href));
-	history.pushState(href, null, uriInfo.toUri());
+	var uriInfo = new UriInfo(href);	     	
+	buildDataTable(uriInfo);
+	history.pushState(href, null, uriInfo.toUIUri());
 	return event.preventDefault();
 }
 
 function metadataCallback(metadata) {
-	
+
 	var locationInfo = new  UriInfo(location.href);
 	var list = "<ul>";
 	for (var e in metadata.entitySets) {						
 		var uriInfo = new UriInfo(locationInfo.scheme + "://" +
 				locationInfo.server + ":" + locationInfo.port + "/" + 
-				locationInfo.contextPath + "/" + e);
-		uriInfo.servletPath = "SQLODataService.svc";		
+				locationInfo.contextPath + "/" + e);		
+				
 		uriInfo.parameters.$top = 20;
 		uriInfo.parameters.$skip = 0;
 		list += "<li><a class=\"entitySet\" href=\"{0}\">{1}</a></li>"
-			.format(uriInfo.toUri(),e);
+			.format(uriInfo.toServiceUri(),e);
 	}
 	list += "</ul>";									
 	var menu = document.getElementById("menu");
@@ -34,9 +32,7 @@ function metadataCallback(metadata) {
 	for (var i = 0, l = entitySet.length; i < l; i++) {
 		entitySet[i].addEventListener('click', eSetHandler, true);
 	}
-	var uri = new UriInfo(location.href);
-	uri.servletPath = "SQLODataService.svc";	
-	buildDataTable(uri);
+	
 }
 
 function buildDataTable(uriInfo) {			
@@ -60,7 +56,7 @@ function buildDataTable(uriInfo) {
 			for(var k in entityType.keys){
 				key[entityType.keys[k]] = row[entityType.keys[k]];  
 			}
-		
+
 			if (i % 2 == 1) {
 				dataTable += "<tr >";
 			} else {
@@ -76,11 +72,11 @@ function buildDataTable(uriInfo) {
 		}
 		dataTable += "</tbody>";
 		var previus = new UriInfo(uriInfo.toUri());
-		
+
 		var skip = parseInt(uriInfo.parameters.$skip) - parseInt(uriInfo.parameters.$top);
 		var previus = new UriInfo(uriInfo.toUri());
 		previus.parameters.$skip = skip < 0 ? 0 : skip;
-		
+
 		var next = new UriInfo(uriInfo.toUri());
 		if(++i == parseInt(next.parameters.$top)){
 			next.parameters.$skip = parseInt(uriInfo.parameters.$skip) + parseInt(uriInfo.parameters.$top);
@@ -91,7 +87,7 @@ function buildDataTable(uriInfo) {
 		document.getElementById("dataTable").innerHTML = dataTable;
 		document.getElementById("previus").addEventListener('click', eSetHandler, true);
 		document.getElementById("next").addEventListener('click', eSetHandler, true);;
-		
+
 	});
 }
 

@@ -11,6 +11,12 @@ if (!String.prototype.format) {
 	};
 }
 
+if (!String.prototype.toUriInfo) {
+	String.prototype.toUriInfo = function() {		
+		return new UriInfo(this); 
+	};
+}
+
 function UriInfo(uri){
 
 	this.parameters = {};
@@ -68,6 +74,29 @@ function UriInfo(uri){
 				keys.push({"name": key[0],"value":key[1]});
 			}
 		}
+	}
+
+	
+	this.toUIUri = function(){
+		var newUri = new UriInfo(this.toUri());
+		newUri.servletPath = "ui";
+		return newUri.toUri();
+	}
+	
+	this.toServiceUri = function(){
+		var newUri = new UriInfo(this.toUri());
+		newUri.servletPath = "SQLODataService.svc";
+		return newUri.toUri();
+	}
+	
+	this.toBaseUri = function(){
+		var uri = this.scheme + "://" + this.server + (this.port === undefined ? "/" : ":" + this.port) + "/";
+		if(this.contextPath === undefined ){
+			return uri; 
+		}else{
+			return uri + this.contextPath;
+		}	
+		
 	}
 
 
