@@ -5,7 +5,7 @@ window.addEventListener('popstate', function(event) {
 	dispatch($metadata,uriInfo);		
 });
 
-function eSetHandler(event) {
+function navigationHandler(event) {
 	var href = event.target.getAttribute('href');			      	
 	var uriInfo = new UriInfo(href);	     	
 	dispatch($metadata,uriInfo);
@@ -25,14 +25,14 @@ function metadataCallback(metadata) {
 		uriInfo.parameters.$top = 20;
 		uriInfo.parameters.$skip = 0;
 		list += "<li><a class=\"entitySet\" href=\"{0}\">{1}</a></li>"
-			.format(uriInfo.toServiceUri(),e);
+			.format(uriInfo.toUIUri(),e);
 	}
 	list += "</ul>";									
 	var menu = document.getElementById("menu");
 	menu.innerHTML = list;
 	var entitySet = document.querySelectorAll("a.entitySet");					 
 	for (var i = 0, l = entitySet.length; i < l; i++) {
-		entitySet[i].addEventListener('click', eSetHandler, true);
+		entitySet[i].addEventListener('click', navigationHandler, true);
 	}
 
 	dispatch(metadata,locationInfo);
@@ -40,36 +40,50 @@ function metadataCallback(metadata) {
 
 function buildEntityView(uriInfo){
 	$service.get(uriInfo, function(data,$metadata) {		
-		var	eSetName = uriInfo.pathInfo[uriInfo.pathInfo.length - 1].name;
-		var entityType =  $metadata.getEntityType($metadata.entitySets[eSetName].entityType);		
-		var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table>".format(entityType.name);
+		var	eSetName = uriInfo.pathInfo[0].name;
+		var entityType = $metadata.resolveEntityType(uriInfo);		
+		var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table>".format(uriInfo.getPath());
 		for(var prop in entityType.properties){
 			dataTable += "<tr><td>{0}</td><td>{1}</td></tr>".format(prop,data[prop]);
 		}
+		for(var nav in entityType.navProperties){
+			var propTypeName = entityType.navProperties[nav].type;
+			var navInfo = uriInfo.toUri().toUriInfo();
+			navInfo.pathInfo.push({"name" : nav });
+			navInfo.parameters.$top = 20;
+			navInfo.parameters.$skip = 0;
+			dataTable += "<tr><td>{0}</td><td><a class=\"nav\" href=\"{1}\">{2}</a></td></tr>".format(nav,navInfo.toUIUri(),propTypeName.split(".")[1]);
+		}
+		
 		dataTable += "</table>";
 		document.getElementById("dataTable").innerHTML = dataTable;
+		var navLinks = document.querySelectorAll("a.nav");					 
+		for (var i = 0, l = navLinks.length; i < l; i++) {
+			navLinks[i].addEventListener('click', navigationHandler, true);
+		}
+		
 	});
 }
 
-function buildDataTable(uriInfo) {			
+function buildEntitySetView(uriInfo) {			
 	$service.get(uriInfo, function(data,$metadata) {
-		var	eSetName = uriInfo.pathInfo[uriInfo.pathInfo.length - 1].name;
-		var entityType = $metadata.getEntityType($metadata.entitySets[eSetName].entityType);
+		
+		var entityType = $metadata.resolveEntityType(uriInfo);
 		var entities;
 		if(data.value === undefined){					
 			entities = new Array(data);
 		}else {
 			entities = data.value;
 		}
-		var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table><thead><tr>".format(eSetName);
+		var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table><thead><tr>".format(uriInfo.getPath());
 		var colCount = 0;
 		for (var k in entityType.keys) {		
-			dataTable += "<th>{0}</th>".format(k);
+			dataTable += "<th>{0}</th>".format(k.split("_").join("<br/>"));
 			colCount++;			
 		}
 		for (var p in entityType.properties) {
 			if(entityType.keys[p] === undefined){
-				dataTable += "<th>{0}</th>".format(p);
+				dataTable += "<th>{0}</th>".format(p.split("_").join("<br/>"));
 				colCount++;
 			}	
 		}
@@ -86,11 +100,12 @@ function buildDataTable(uriInfo) {
 			for (var k in entityType.keys) {
 				entityKey[k] = row[k];	 	
 			}	
-			entityUri.pathInfo[entityUri.pathInfo.length - 1].keys = entityKey; 
+			entityUri.pathInfo = [{"name" : entityType.name }];
+			entityUri.pathInfo[0].keys = entityKey; 
 			delete entityUri.parameters.$top;
 			delete entityUri.parameters.$skip;
 			for (var k in entityType.keys) {				
-				dataTable += "<td><a class=\"key\" href=\"{0}\">{1}</a></td>".format(entityUri.toServiceUri(),row[k]);							
+				dataTable += "<td><a class=\"key\" href=\"{0}\">{1}</a></td>".format(entityUri.toUIUri(),row[k]);							
 			}
 			for (var col in entityType.properties) {
 				if(entityType.keys[col] === undefined){
@@ -117,12 +132,12 @@ function buildDataTable(uriInfo) {
 		innerHTML.format(colCount,previus.toUri(),next.toUri());				
 		dataTable += "</table>";
 		document.getElementById("dataTable").innerHTML = dataTable;
-		document.getElementById("previus").addEventListener('click', eSetHandler, true);
-		document.getElementById("next").addEventListener('click', eSetHandler, true);
+		document.getElementById("previus").addEventListener('click', navigationHandler, true);
+		document.getElementById("next").addEventListener('click', navigationHandler, true);
 				
 		var entityLinks = document.querySelectorAll("a.key");					 
 		for (var i = 0, l = entityLinks.length; i < l; i++) {
-			entityLinks[i].addEventListener('click', eSetHandler, true);
+			entityLinks[i].addEventListener('click', navigationHandler, true);
 		}
 
 	});

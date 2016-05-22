@@ -65,6 +65,7 @@ body {
 	font-size: 15px; 
 	font-weight: bold; 
 	border-left: 1px solid #0070A8; 
+	text-align: center;
 } 
 .datagrid table thead th:first-child { border: none; }
 .datagrid table tbody td { 

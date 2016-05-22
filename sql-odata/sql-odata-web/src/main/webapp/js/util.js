@@ -101,16 +101,9 @@ function UriInfo(uri){
 		
 	}
 
-
-	this.toUri = function(){
-
-		var uri = this.scheme + "://" + this.server + (this.port === undefined ? "/" : ":" + this.port);
-		var servletPath = this.servletPath === undefined ? "" : "/" + this.servletPath;
-		if(this.contextPath == ""){
-			uri += servletPath;
-		}else {
-			uri += "/" + this.contextPath +  servletPath;
-		}
+	
+	this.getPath = function(){
+		var uri = "";
 		for(var i = 0; i < this.pathInfo.length; i++){
 			uri += "/" + this.pathInfo[i].name;
 			var keys = [];
@@ -122,6 +115,19 @@ function UriInfo(uri){
 				uri += "(" + keys.join() + ")"; 	
 			}
 		}
+		return uri;
+	}
+
+	this.toUri = function(){
+
+		var uri = this.scheme + "://" + this.server + (this.port === undefined ? "/" : ":" + this.port);
+		var servletPath = this.servletPath === undefined ? "" : "/" + this.servletPath;
+		if(this.contextPath == ""){
+			uri += servletPath;
+		}else {
+			uri += "/" + this.contextPath +  servletPath;
+		}
+		uri += this.getPath();
 		var params = [];
 		for(var p in this.parameters){
 			params.push(p + "=" + this.parameters[p]);

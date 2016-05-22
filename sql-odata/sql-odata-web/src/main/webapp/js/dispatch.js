@@ -14,7 +14,7 @@ function dispatch($metadata, uriInfo){
 }
 
 function processEntitySetRequest($metadata, uriInfo){
-	buildDataTable(uriInfo);
+	buildEntitySetView(uriInfo);
 }
 
 function processEntityRequest($metadata,uriInfo){

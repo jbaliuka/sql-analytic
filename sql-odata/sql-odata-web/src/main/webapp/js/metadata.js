@@ -91,9 +91,18 @@ function ServiceMetadata(url, readyCallback){
 		}
 	}
 
-	$metadata.getEntityType = function getEntityType(fullName){
+	$metadata.getEntityType = function (fullName){
 		var split = fullName.split(".");    	
 		return $metadata.schemas[split[0]].entityTypes[split[1]];	    	
+	}
+	$metadata.resolveEntityType = function (uriInfo){
+		var eSet = $metadata.entitySets[uriInfo.pathInfo[0].name];
+		var entityType = $metadata.getEntityType(eSet.entityType);
+		for(var i = 1; i < uriInfo.pathInfo.length; i++){
+			var nav = entityType.navProperties[uriInfo.pathInfo[i].name];
+			entityType = $metadata.getEntityType(nav.type);	
+		}
+		return entityType;
 	}
 	
 	function EntitySet(path,name,type){
