@@ -72,10 +72,10 @@ function ServiceMetadata(url, readyCallback){
 	}
 	
 	function buildTypeKeys(entityType,keys){
-		entityType.keys = [];
+		entityType.keys = {};
 		for(var i = 0; i < keys.length; i++ ){
 			var name = keys[i].attributes["Name"].value;
-			entityType.keys.push(name);	
+			entityType.keys[name] = name;	
 		}
 	}
 

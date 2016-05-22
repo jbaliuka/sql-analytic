@@ -1,3 +1,5 @@
+"use strict";
+
 if (!String.prototype.format) {
 	String.prototype.format = function() {
 		var args = arguments;
@@ -64,14 +66,14 @@ function UriInfo(uri){
 		if(pathFragments[0] == ""){
 			continue;
 		}
-		var keys = [];
+		var keys = {};
 		this.pathInfo.push({"name": pathFragments[0],"keys" : keys });			
 		if(pathFragments.length == 2){
 			var keysFragments = pathFragments[1].split(")");
 			keysFragments = keysFragments[0].split(",");
 			for(var j = 0; j < keysFragments.length; j++){
 				var key = keysFragments[j].split("=");
-				keys.push({"name": key[0],"value":key[1]});
+				keys[key[0]] = key[1];
 			}
 		}
 	}
@@ -113,8 +115,8 @@ function UriInfo(uri){
 			uri += "/" + this.pathInfo[i].name;
 			var keys = [];
 			var uriKeys = this.pathInfo[i].keys;
-			for(var j = 0; j < uriKeys.length; j++){
-				keys.push(uriKeys[j].name + "=" + uriKeys[j].value);
+			for(var k in uriKeys ){
+				keys.push(k + "=" + uriKeys[k]);
 			}
 			if(keys.length > 0){
 				uri += "(" + keys.join() + ")"; 	
