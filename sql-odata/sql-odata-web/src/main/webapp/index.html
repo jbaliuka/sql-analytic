@@ -11,12 +11,10 @@
 <script type="text/javascript" src="js/dispatch.js"></script>
 </head>
 <body>
-	<script type="text/javascript" id="buildMenu">	    
-	    var baseUri = new UriInfo(location.href.toUriInfo().toBaseUri()); 
-		window.$metadata = new ServiceMetadata(
-				baseUri.toServiceUri(),
+	<script type="text/javascript" id="buildMenu">
+		var baseUri = new UriInfo(location.href.toUriInfo().toBaseUri());
+		window.$metadata = new ServiceMetadata(baseUri.toServiceUri(),
 				metadataCallback);
-	
 	</script>
 
 	<script type="text/template" id="dataTableFoot">
@@ -25,19 +23,20 @@
 			<td colspan="{0}">
 				<div id="paging">
 					<ul>
-						<li><a id="previus" href="{1}" >Previous</a></li>						
-						<li><a id="next" href="{2}">Next</a></li>
+						<li><a class="odataUri" id="previus" href="{1}" >Previous</a></li>						
+						<li><a class="odataUri" id="next" href="{2}">Next</a></li>
 					</ul>
 				</div>
 		</tr>
 	</tfoot>
 	</script>
 	<div class="header">
-		<h1>Data Service</h1>
+		<h1>
+			Data Service
+		</h1>
 	</div>
 	<div id="menu"></div>
 	<div id="dataTable" class="datagrid"></div>
-
 	
 </body>
 </html>

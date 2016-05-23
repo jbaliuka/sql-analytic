@@ -49,6 +49,7 @@ body {
 }
 .datagrid table { 
  	text-align: left;  
+ 	width: 100%
 } 
 .datagrid {
 	font: normal 12px/150% Arial, Helvetica, sans-serif; 
