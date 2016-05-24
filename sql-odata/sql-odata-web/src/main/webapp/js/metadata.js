@@ -1,7 +1,5 @@
 "use strict";
-
-function ServiceMetadata(url, readyCallback){	
-
+function ServiceMetadata(url, readyCallback){
 	var $metadata = this;	
 	$metadata.url = url;	
 	var xhttp = new XMLHttpRequest();
@@ -12,7 +10,6 @@ function ServiceMetadata(url, readyCallback){
 	};
 	xhttp.open("GET", $metadata.url + "/$metadata", true);
 	xhttp.send();
-
 	function buildMetadata(xml) {
 		var xmlDoc = xml.responseXML;
 		buildSchemas(xmlDoc);
@@ -20,12 +17,11 @@ function ServiceMetadata(url, readyCallback){
 		window.$service = new Service($metadata);
 		readyCallback($metadata);
 	}
-
 	function buildSchemas(xmlDoc){
 		var schemaNodes = xmlDoc.getElementsByTagName("Schema");
 		$metadata.schemas = new Object();
 		for( var i = 0; i < schemaNodes.length; i++){
-			var namespace = schemaNodes[i].attributes["Namespace"].value;	
+			var namespace = schemaNodes[i].attributes["Namespace"].value;
 			var schema = new Schema(namespace);
 			$metadata.schemas[namespace] = schema;
 			schema.entityTypes = new Object();
@@ -34,9 +30,7 @@ function ServiceMetadata(url, readyCallback){
 				buildEntityType(schema,childNode);
 			}
 		}
-
 	}
-
 	function buildEntityType(schema,childNode){
 		if(childNode.localName == "EntityType"){
 			var typeName = childNode.attributes["Name"].value; 
@@ -56,9 +50,7 @@ function ServiceMetadata(url, readyCallback){
 				}
 			}
 		}
-
-	}
-	
+	}	
 	function buildNavigationProperty(entityType,propertyNode){		
 		var propertyName = propertyNode.attributes["Name"].value;
 		var propertyType = propertyNode.attributes["Type"].value;
@@ -67,10 +59,7 @@ function ServiceMetadata(url, readyCallback){
 			propertyType = propertyType.split("(")[1].split(")")[0];
 			entityType.navProperties[propertyName] = new Property(propertyName,propertyType);
 		}
-		
-		
-	}
-	
+	}	
 	function buildTypeKeys(entityType,keys){
 		entityType.keys = {};
 		for(var i = 0; i < keys.length; i++ ){
@@ -78,7 +67,6 @@ function ServiceMetadata(url, readyCallback){
 			entityType.keys[name] = name;	
 		}
 	}
-
 	function buildEntitySets(xmlDoc){
 		var entitySetNodes = xmlDoc.getElementsByTagName("EntitySet");
 		$metadata.entitySets = new Object();
@@ -90,10 +78,9 @@ function ServiceMetadata(url, readyCallback){
 			$metadata.entitySets[name] = entitySet;
 		}
 	}
-
 	$metadata.getEntityType = function (fullName){
 		var split = fullName.split(".");    	
-		return $metadata.schemas[split[0]].entityTypes[split[1]];	    	
+		return $metadata.schemas[split[0]].entityTypes[split[1]];
 	}
 	$metadata.resolveEntityType = function (uriInfo){
 		var eSet = $metadata.entitySets[uriInfo.pathInfo[0].name];
@@ -103,8 +90,7 @@ function ServiceMetadata(url, readyCallback){
 			entityType = $metadata.getEntityType(nav.type);	
 		}
 		return entityType;
-	}
-	
+	}	
 	function EntitySet(path,name,type){
 		this.path = path;
 		this.name = name;
@@ -120,7 +106,4 @@ function ServiceMetadata(url, readyCallback){
 		this.name = name;
 		this.type = type;
 	}
-
 }
-
-

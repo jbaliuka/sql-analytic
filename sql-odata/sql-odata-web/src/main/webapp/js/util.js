@@ -1,5 +1,4 @@
 "use strict";
-
 if (!String.prototype.format) {
 	String.prototype.format = function() {
 		var args = arguments;
@@ -12,13 +11,11 @@ if (!String.prototype.format) {
 		return result; 
 	};
 }
-
 if (!String.prototype.toUriInfo) {
 	String.prototype.toUriInfo = function() {		
 		return new UriInfo(this); 
 	};
 }
-
 function UriInfo(uri){
 
 	this.parameters = {};
@@ -67,7 +64,7 @@ function UriInfo(uri){
 			continue;
 		}
 		var keys = {};
-		this.pathInfo.push({"name": pathFragments[0],"keys" : keys });			
+		this.pathInfo.push({"name": pathFragments[0],"keys" : keys });
 		if(pathFragments.length == 2){
 			var keysFragments = pathFragments[1].split(")");
 			keysFragments = keysFragments[0].split(",");
@@ -76,9 +73,7 @@ function UriInfo(uri){
 				keys[key[0]] = key[1];
 			}
 		}
-	}
-
-	
+	}	
 	this.toUIUri = function(){
 		var newUri = new UriInfo(this.toUri());
 		newUri.servletPath = "ui";
@@ -90,7 +85,6 @@ function UriInfo(uri){
 		newUri.servletPath = "SQLODataService.svc";
 		return newUri.toUri();
 	}
-	
 	this.toBaseUri = function(){
 		var uri = this.scheme + "://" + this.server + (this.port === undefined ? "/" : ":" + this.port) + "/";
 		if(this.contextPath === undefined ){
@@ -100,8 +94,6 @@ function UriInfo(uri){
 		}	
 		
 	}
-
-	
 	this.getPath = function(){
 		var uri = "";
 		for(var i = 0; i < this.pathInfo.length; i++){
@@ -117,9 +109,15 @@ function UriInfo(uri){
 		}
 		return uri;
 	}
-
+	this.toEntityUri = function(){
+		var newUri = new UriInfo(this.toUri());
+		delete newUri.parameters.$top;
+		delete newUri.parameters.$skip;		
+		delete newUri.parameters.$filter;
+		delete newUri.parameters.$orderby;
+		return newUri;
+	}
 	this.toUri = function(){
-
 		var uri = this.scheme + "://" + this.server + (this.port === undefined ? "/" : ":" + this.port);
 		var servletPath = this.servletPath === undefined ? "" : "/" + this.servletPath;
 		if(this.contextPath == ""){
@@ -137,6 +135,4 @@ function UriInfo(uri){
 		}
 		return uri + (this.hash === undefined ? "" : "#" + this.hash);
 	}
-
 }
-
