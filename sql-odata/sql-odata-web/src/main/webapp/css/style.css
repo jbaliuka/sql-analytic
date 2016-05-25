@@ -46,6 +46,8 @@ body {
     font-size: 16px;
     border: none;
     cursor: pointer;
+    font-size : small;
+    height: 8px
 }
 
 .dropbtn:hover, .dropbtn:focus {
@@ -135,7 +137,7 @@ body {
 .datagrid table tfoot td div{ padding: 2px; }
 .datagrid table tfoot td ul { margin: 0; padding:0; list-style: none; text-align: left; }
 .datagrid table tfoot  li { display: inline; }
-.datagrid table tfoot li a { 
+.button { 
 	text-decoration: none; 
 	display: inline-block;  
 	padding: 2px 8px; 
@@ -144,6 +146,7 @@ body {
 	border: 1px solid #006699;
 	border-radius: 3px; 
  	background-color:#006699; 
+ 	cursor: pointer;
  }
  .datagrid table tfoot ul.active, .datagrid table tfoot ul a:hover { 
  	text-decoration: none;

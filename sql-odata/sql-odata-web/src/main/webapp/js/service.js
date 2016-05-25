@@ -7,9 +7,7 @@ function Service($metadata){
 		xhttp.onreadystatechange = function() {
 			if (xhttp.readyState == 4 && xhttp.status == 200) {
 				var response = JSON.parse(xhttp.responseText);
-				processCallback(response,$metadata);
-				var uiUri = uriInfo.toUIUri();
-				history.pushState(uiUri, null,uiUri);
+				processCallback(response,$metadata);								
 			}
 		};
 		xhttp.open("GET", uriInfo.toServiceUri(), true);

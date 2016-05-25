@@ -4,7 +4,6 @@
 	window.$metadata = new ServiceMetadata(baseUri.toServiceUri(),metadataCallback);
 };
 function dispatch($metadata, uriInfo){
-
 	if(uriInfo.pathInfo.length > 0){
 		var l = uriInfo.pathInfo.length;
 		if(uriInfo.pathInfo[l - 1].keys && 
@@ -29,5 +28,7 @@ function navigationHandler(event) {
 	var href = event.target.getAttribute('href');
 	var uriInfo = new UriInfo(href);	     	
 	dispatch($metadata,uriInfo);	
+	var uiUri = uriInfo.toUIUri();
+	history.pushState(uiUri, null,uiUri);
 	return event.preventDefault();
 }

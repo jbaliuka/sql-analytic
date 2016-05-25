@@ -31,7 +31,7 @@ import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 
 public class EntityData {
 	
-	public static boolean inSelection(SelectOption selectOption, String name) {
+	public static boolean inSelection(EdmEntityType edmEntityType,SelectOption selectOption, String name) {
 		if(selectOption == null || selectOption.getSelectItems().isEmpty()){
 			return true;
 		}
@@ -44,6 +44,12 @@ public class EntityData {
 			  return true;
 		  }
 		}
+		for(String key : edmEntityType.getKeyPredicateNames()){
+			if(name.equals(key)){
+				return true;
+			}
+		}
+		
 		return false;
 	}
 

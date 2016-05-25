@@ -114,7 +114,7 @@ public abstract class ReadCommand {
 	public void appendProjection(EdmEntityType type, String alias,SelectOption selectOption) {
 
 		for(String name : type.getPropertyNames()){
-			if(EntityData.inSelection(selectOption, name)){
+			if(EntityData.inSelection(type,selectOption, name)){
 				SelectExpressionItem item = new SelectExpressionItem().setAlias(name);
 				Column column = new Column();
 				if(alias != null ){

@@ -1,29 +1,33 @@
 "use strict";
-
-
-window.onclick = function(event) {
-  if (!event.target.matches('.dropbtn')&&!event.target.matches('.checkProp')){
-    var dropdowns = document.getElementsByClassName("dropdown-content");
-    var selected = [];    
-    for (var i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-        var checkboxes = document.getElementsByClassName("checkProp");
-        for(var j = 0; j < checkboxes.length; j++ ){
-        	if(checkboxes[j].checked){
-        		selected.push(checkboxes[j].name);	
-        	}
-        }
-      }
-    }
-    if(selected.length > 0){
-    	var uriInfo = new UriInfo(history.state);
-    	uriInfo.parameters.$select = selected.join(",");
-    	dispatch($metadata,uriInfo);
-    }
-  }
+function handleSelectList(event) {
+	var dropdown = document.getElementsByClassName("dropdown-content")[0];
+	var selected = [];	
+	dropdown.classList.remove('show');
+	var checkboxes = document.getElementsByClassName("checkProp");
+	for(var j = 0; j < checkboxes.length; j++ ){
+		if(checkboxes[j].checked){
+			selected.push(checkboxes[j].name);	
+		}
+	}
+	if(selected.length > 0){
+		var uriInfo = new UriInfo(history.state || location.href);
+		uriInfo.parameters.$select = selected.join(",");
+		dispatch($metadata,uriInfo);
+	}
 }
+
+function cancelSelectList(event) {
+	var dropdown = document.getElementsByClassName("dropdown-content")[0];
+	var selected = [];	
+	var uriInfo = new UriInfo(history.state || location.href);
+	dropdown.classList.remove('show');
+	var checkboxes = document.getElementsByClassName("checkProp");
+	for(var j = 0; j < checkboxes.length; j++ ){
+		checkboxes[j].checked = isSelected(uriInfo,checkboxes[j].name);
+	}
+	
+}
+
 function renderHtml(id,innerHtml){	
 	var element = document.getElementById(id);
 	element.innerHTML = innerHtml;
@@ -83,18 +87,20 @@ function buildEntityView(uriInfo){
 	});
 }
 function toggleSelectionTool() {
-    document.getElementById("selectionTool").classList.toggle("show");
+	document.getElementById("selectionTool").classList.toggle("show");
 }
 function selectionTool(uriInfo,entityType){	
 	var tool =
-	"<div class=\"dropdown\">"+
-	"  <button class=\"fa fa-table dropbtn\" onclick=\"toggleSelectionTool()\"></button> " +
-	"  <div id=\"selectionTool\" class=\"dropdown-content\"><ul>" ;
+		"<div class=\"dropdown\">"+
+		"  <button class=\"dropbtn\" onclick=\"toggleSelectionTool()\">^</button> " +
+		"  <div id=\"selectionTool\" class=\"dropdown-content\"><ul>" ;
 	for (var p in entityType.properties) {
-	tool += "<li><input class=\"checkProp\" type=\"checkbox\" name=\"{0}\" {1}>{0}</li>"
-		.format(p,isSelected(uriInfo,p) ? "checked" : "");
-    }	
-	tool += "</ul></div>" +
+		tool += "<li><input class=\"checkProp\" type=\"checkbox\" name=\"{0}\" {1}>{0}</li>"
+			.format(p,isSelected(uriInfo,p) ? "checked" : "");
+	}	
+	tool += "<li><hr></li><li><button class=\"button\" onclick=\"handleSelectList()\">Ok</button>"+
+	"<button class=\"button\" onclick=\"cancelSelectList()\">Cancel</button>"
+	+ "</li></ul></div>" +
 	"</div>";
 	return tool;
 }
@@ -132,8 +138,7 @@ function buildEntitySetView(uriInfo) {
 				entityKey[k] = row[k];				
 			}	
 			entityUri.pathInfo = [{"name" : entityType.name }];
-			entityUri.pathInfo[0].keys = entityKey; 
-			
+			entityUri.pathInfo[0].keys = entityKey;
 			for (var k in entityType.keys) {	
 				if(isSelected(uriInfo,k)){
 					dataTable += "<td><a class=\"odataUri\" href=\"{0}\">{1}</a></td>".format(entityUri.toUIUri(),row[k]);
@@ -147,7 +152,7 @@ function buildEntitySetView(uriInfo) {
 			dataTable += "</tr>";
 		}
 		for(var j = 1; j < uriInfo.parameters.$top - i; j++ ){
-			dataTable += "<tr><td colspan=\"{0}\">&nbsp;</td></tr>".format(entityType.properties.lenght);
+			dataTable += "<tr><td colspan=\"{0}\">&nbsp;</td></tr>".format(colCount);
 		}
 		dataTable += "</tbody>";
 		var previus = new UriInfo(uriInfo.toUri());
@@ -163,8 +168,8 @@ function buildEntitySetView(uriInfo) {
 		"	<td colspan=\"{0}\">" +
 		"		<div id=\"paging\">" +
 		"			<ul>" +
-		"				<li><a class=\"odataUri\" id=\"previus\" href=\"{1}\" >Previous</a></li>" +
-		"				<li><a class=\"odataUri\" id=\"next\" href=\"{2}\">Next</a></li>" +
+		"				<li><a class=\"odataUri button\" id=\"previus\" href=\"{1}\" >Previous</a></li>" +
+		"				<li><a class=\"odataUri button\" id=\"next\" href=\"{2}\">Next</a></li>" +
 		"			</ul>" +
 		"		</div>" +
 		"</tr>" +
@@ -172,6 +177,6 @@ function buildEntitySetView(uriInfo) {
 		dataTable += tfoot.format(colCount,previus.toUri(),next.toUri());;
 		dataTable += "</table>";
 		renderHtml("dataTable",dataTable);
-		
+
 	});
 }
