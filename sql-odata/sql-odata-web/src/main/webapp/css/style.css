@@ -38,21 +38,13 @@ body {
 .header h2 {
 	margin:2px
 }
-
-.dropbtn {
-    background-color: #006699;
-    color: white;
-    padding: 0px;
-    font-size: 16px;
-    border: none;
-    cursor: pointer;
-    font-size : small;
-    height: 8px
+.sortIcon {
+	position:absolute;
+	top:0;
+	left:0; 
+	font-size: x-small
 }
 
-.dropbtn:hover, .dropbtn:focus {
-    background-color: #003366;
-}
 .dropdown {
     position: relative;
     display: inline-block;
@@ -77,8 +69,7 @@ body {
     display: block;
 }
 .dropdown-content a:hover {background-color: #f1f1f1}
-.show {display:block;}
-
+.show {display:block; z-index:10}
 #dataTable {
 	float : left;
 	overflow: auto; 
@@ -99,6 +90,7 @@ body {
 }
 .datagrid table td, .datagrid table th { 
 	padding: 3px 10px; 
+	position: relative;
 }
 .datagrid table thead th {
 	background-color: #006699; 
@@ -121,22 +113,17 @@ body {
 .datagrid table tbody .alt:hover  {
   background: #0099EE; 
 }
-
-
-
 .datagrid table tbody .alt { 
   background: #E1EEF4; 
   color: #00496B; 
 }
-
-
 .datagrid table tbody td:first-child{ border-left: none; }
 .datagrid table tbody tr:last-child td { border-bottom: none; }
 .datagrid table tfoot td div { border-top: 1px solid #006699; background: #E1EEF4;} 
 .datagrid table tfoot td { padding: 0; font-size: 12px } 
 .datagrid table tfoot td div{ padding: 2px; }
 .datagrid table tfoot td ul { margin: 0; padding:0; list-style: none; text-align: left; }
-.datagrid table tfoot  li { display: inline; }
+.datagrid table tfoot li { display: inline; }
 .button { 
 	text-decoration: none; 
 	display: inline-block;  

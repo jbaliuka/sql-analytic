@@ -9,11 +9,11 @@ function handleSelectList(event) {
 			selected.push(checkboxes[j].name);	
 		}
 	}
-	if(selected.length > 0){
-		var uriInfo = new UriInfo(history.state || location.href);
-		uriInfo.parameters.$select = selected.join(",");
-		dispatch($metadata,uriInfo);
+	var uriInfo = new UriInfo(history.state || location.href);
+	if(selected.length > 0){		
+		uriInfo.parameters.$select = selected.join(",");		
 	}
+	dispatch($metadata,uriInfo);
 }
 
 function cancelSelectList(event) {
@@ -92,7 +92,7 @@ function toggleSelectionTool() {
 function selectionTool(uriInfo,entityType){	
 	var tool =
 		"<div class=\"dropdown\">"+
-		"  <button class=\"dropbtn\" onclick=\"toggleSelectionTool()\">^</button> " +
+		"  <button class=\"button\" onclick=\"toggleSelectionTool()\">&#x25A5;</button> " +
 		"  <div id=\"selectionTool\" class=\"dropdown-content\"><ul>" ;
 	for (var p in entityType.properties) {
 		tool += "<li><input class=\"checkProp\" type=\"checkbox\" name=\"{0}\" {1}>{0}</li>"
@@ -109,18 +109,19 @@ function buildEntitySetView(uriInfo) {
 	$service.get(uriInfo, function(data,$metadata) {
 		var entityType = $metadata.resolveEntityType(uriInfo);
 		var entities = data.value;		
-		var dataTable = "<div class=\"header\">{0}<h2>{1}</h2></div><table><thead><tr>"
+		var dataTable = "<div class=\"header\"><h2>{1}</h2>{0}</div><table><thead><tr>"
 			.format(selectionTool(uriInfo,entityType),uriInfo.getPath());
 		var colCount = 0;
+		var sort = "<div class=\"sortIcon\"><span class=\"up\">&#x25B2;</span><span class=\"down\">&#x25BC;</span><div>";
 		for (var k in entityType.keys) {
 			if(isSelected(uriInfo,k)){
-				dataTable += "<th>{0}</th>".format(k.split("_").join("<br/>"));
+				dataTable += "<th>{0}{1}</th>".format(k.split("_").join("<br/>"),sort);
 				colCount++;		
 			}
 		}
 		for (var p in entityType.properties) {
 			if(entityType.keys[p] === undefined && isSelected(uriInfo,p)){
-				dataTable += "<th>{0}</th>".format(p.split("_").join("<br/>"));
+				dataTable += "<th>{0}{1}</th>".format(p.split("_").join("<br/>"),sort);
 				colCount++;
 			}	
 		}
