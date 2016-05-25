@@ -43,7 +43,7 @@ body {
 }
 .sortIcon {
 	position:absolute;
-	top:0;
+	top:-15px;
 	left:0; 
 	font-size: x-small
 }
