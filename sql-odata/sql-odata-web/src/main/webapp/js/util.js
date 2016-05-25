@@ -115,6 +115,7 @@ function UriInfo(uri){
 		delete newUri.parameters.$skip;		
 		delete newUri.parameters.$filter;
 		delete newUri.parameters.$orderby;
+		delete newUri.parameters.$filter;
 		return newUri;
 	}
 	this.toUri = function(){

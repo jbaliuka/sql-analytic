@@ -16,6 +16,24 @@ function handleSelectList(event) {
 	dispatch($metadata,uriInfo);
 }
 
+function handleFilter(e){
+	
+	e = e || window.event;	
+    if (e.keyCode == 13)
+    {   
+    	var uriInfo = new UriInfo(history.state || location.href);
+    	var filter = document.getElementById("filter");
+    	if(filter && filter.value.trim().length > 0){
+    		uriInfo.parameters.$filter = filter.value.trim(); 
+    	}else {
+    		delete uriInfo.parameters.$filter;
+    	}    	
+    	dispatch($metadata,uriInfo)
+        return false;
+    }
+    return true;
+}
+
 function cancelSelectList(event) {
 	var dropdown = document.getElementsByClassName("dropdown-content")[0];
 	var selected = [];	
@@ -90,6 +108,7 @@ function toggleSelectionTool() {
 	document.getElementById("selectionTool").classList.toggle("show");
 }
 function selectionTool(uriInfo,entityType){	
+	var filter = uriInfo.parameters.$filter || "";	
 	var tool =
 		"<div class=\"dropdown\">"+
 		"  <button class=\"button\" onclick=\"toggleSelectionTool()\">&#x25A5;</button> " +
@@ -101,27 +120,38 @@ function selectionTool(uriInfo,entityType){
 	tool += "<li><hr></li><li><button class=\"button\" onclick=\"handleSelectList()\">Ok</button>"+
 	"<button class=\"button\" onclick=\"cancelSelectList()\">Cancel</button>"
 	+ "</li></ul></div>" +
-	"</div>";
+	"<input id=\"filter\" type=\"text\" value=\"{0}\" onkeypress=\"handleFilter(event)\"></div>".format(decodeURIComponent(filter));
 	return tool;
 }
 
-function buildEntitySetView(uriInfo) {			
+function buildEntitySetView(uriInfo) {	
 	$service.get(uriInfo, function(data,$metadata) {
 		var entityType = $metadata.resolveEntityType(uriInfo);
 		var entities = data.value;		
 		var dataTable = "<div class=\"header\"><h2>{1}</h2>{0}</div><table><thead><tr>"
 			.format(selectionTool(uriInfo,entityType),uriInfo.getPath());
 		var colCount = 0;
-		var sort = "<div class=\"sortIcon\"><span class=\"up\">&#x25B2;</span><span class=\"down\">&#x25BC;</span><div>";
+		var sort = "<div class=\"sortIcon\"><span class=\"up\"><a class=\"odataUri\" href=\"{0}\">&#x25B2;</a></span>"+
+		"<span class=\"down\"><a class=\"odataUri\" href=\"{1}\">&#x25BC;</a></span><div>";
 		for (var k in entityType.keys) {
 			if(isSelected(uriInfo,k)){
-				dataTable += "<th>{0}{1}</th>".format(k.split("_").join("<br/>"),sort);
+				var sortUriInfoAsc = uriInfo.toUIUri().toUriInfo();
+				var sortUriInfoDesc = uriInfo.toUIUri().toUriInfo();
+				sortUriInfoAsc.parameters.$orderby = k + " asc";
+				sortUriInfoDesc.parameters.$orderby = k + " desc";
+				dataTable += "<th>{0}{1}</th>".format(k.split("_").join("<br/>"),
+						sort.format(sortUriInfoAsc.toUri(),sortUriInfoDesc.toUri()));
 				colCount++;		
 			}
 		}
 		for (var p in entityType.properties) {
 			if(entityType.keys[p] === undefined && isSelected(uriInfo,p)){
-				dataTable += "<th>{0}{1}</th>".format(p.split("_").join("<br/>"),sort);
+				var sortUriInfoAsc = uriInfo.toUIUri().toUriInfo();
+				var sortUriInfoDesc = uriInfo.toUIUri().toUriInfo();
+				sortUriInfoAsc.parameters.$orderby = p + " asc";
+				sortUriInfoDesc.parameters.$orderby = p + " desc";
+				dataTable += "<th>{0}{1}</th>".format(p.split("_").join("<br/>"),
+						sort.format(sortUriInfoAsc.toUri(),sortUriInfoDesc.toUri()));
 				colCount++;
 			}	
 		}
