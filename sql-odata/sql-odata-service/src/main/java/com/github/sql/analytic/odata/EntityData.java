@@ -30,32 +30,32 @@ import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 
 public class EntityData {
-	
+
 	public static boolean inSelection(EdmEntityType edmEntityType,SelectOption selectOption, String name) {
 		if(selectOption == null || selectOption.getSelectItems().isEmpty()){
 			return true;
 		}
 		for(SelectItem item : selectOption.getSelectItems()){
-		  if(item.isStar()){
-			  return true;
-		  }
-		  List<UriResource> parts = item.getResourcePath().getUriResourceParts();
-		  if(parts.get(parts.size() - 1).getSegmentValue().equals(name)  ){
-			  return true;
-		  }
+			if(item.isStar()){
+				return true;
+			}
+			List<UriResource> parts = item.getResourcePath().getUriResourceParts();
+			if(parts.get(parts.size() - 1).getSegmentValue().equals(name)  ){
+				return true;
+			}
 		}
 		for(String key : edmEntityType.getKeyPredicateNames()){
 			if(name.equals(key)){
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
 	public static Entity createEntity(EdmEntityType edmEntityType, Set<String> projection, ResultSet rs) throws SQLException, IOException {
 
-		
+
 		Entity entity = new Entity();
 		entity.setType(edmEntityType.getFullQualifiedName().toString());
 
@@ -64,12 +64,7 @@ public class EntityData {
 				EdmElement prop = edmEntityType.getProperty(name);
 				entity.addProperty( new Property(null,prop.getName(),ValueType.PRIMITIVE,toPrimitive(rs, prop)));
 			}
-		}
-		for( EdmKeyPropertyRef ref : edmEntityType.getKeyPropertyRefs()){
-			if(projection == null || projection.contains(ref.getName())){
-				entity.addProperty( new Property(null,ref.getName(),ValueType.PRIMITIVE,rs.getObject(ref.getName())));
-			}
-		}		
+		}			
 		entity.setId(createId(edmEntityType.getName(),rs,edmEntityType));
 		return entity;
 	}
@@ -142,8 +137,8 @@ public class EntityData {
 			}	    	
 		}
 	}
-	
-	
+
+
 
 
 }

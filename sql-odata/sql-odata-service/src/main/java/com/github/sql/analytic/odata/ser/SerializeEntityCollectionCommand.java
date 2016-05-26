@@ -57,7 +57,7 @@ public class SerializeEntityCollectionCommand {
 				.build();
 
 		if(contentType.isCompatible(ContentType.create("text/csv"))){
-			response.setODataContent(new CSVContent(iterator));
+			response.setODataContent(new CSVContent(opts,iterator));
 			response.addHeader("Content-Disposition", 
 	                   "attachment; filename=\"" + entityType.getName() + ".csv\"");
 		}else{
