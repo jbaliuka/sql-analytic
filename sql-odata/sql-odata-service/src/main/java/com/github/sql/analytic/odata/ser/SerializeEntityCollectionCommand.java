@@ -19,7 +19,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import com.github.sql.analytic.odata.ResultSetIterator;
 
 public class SerializeEntityCollectionCommand {
-	
+
 	private ODataRequest request;	
 	private ODataResponse response;
 	private UriInfo uriInfo;
@@ -35,12 +35,12 @@ public class SerializeEntityCollectionCommand {
 		this.uriInfo = uriInfo;
 		this.contentType = contentType;
 	}
-	
+
 	public void init(OData odata, ServiceMetadata metadata) {
 		this.odata = odata;
 		this.metadata = metadata;
 	}
-	
+
 	public void serialize(ResultSetIterator iterator) throws SerializerException, ODataApplicationException {
 
 		ContextURL contextUrl = ContextURL.with().
@@ -56,14 +56,20 @@ public class SerializeEntityCollectionCommand {
 				.writeContentErrorCallback(iterator)
 				.build();
 
-		ODataSerializer serializer = odata.createSerializer(contentType);
-		SerializerStreamResult serializerResult = serializer.entityCollectionStreamed(metadata, 
-				getEntityType(), iterator, opts);
-		response.setODataContent(serializerResult.getODataContent());
+		if(contentType.isCompatible(ContentType.create("text/csv"))){
+			response.setODataContent(new CSVContent(iterator));
+			response.addHeader("Content-Disposition", 
+	                   "attachment; filename=\"" + entityType.getName() + ".csv\"");
+		}else{
+			ODataSerializer serializer = odata.createSerializer(contentType);
+			SerializerStreamResult serializerResult = serializer.entityCollectionStreamed(metadata, 
+					getEntityType(), iterator, opts);		
+			response.setODataContent(serializerResult.getODataContent());			
+		}
 		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 		response.setHeader(HttpHeader.CONTENT_TYPE, contentType.toContentTypeString());
 	}
-	
+
 	public EdmEntityType getEntityType() {		
 		return entityType;
 	}
@@ -72,7 +78,7 @@ public class SerializeEntityCollectionCommand {
 		return odata.createUriHelper().buildContextURLSelectList(getEntityType(),
 				uriInfo.getExpandOption(), uriInfo.getSelectOption());
 	}
-	
+
 	public ODataRequest getRequest() {
 		return request;
 	}
@@ -99,7 +105,7 @@ public class SerializeEntityCollectionCommand {
 
 	public void setEntityType(EdmEntityType entityType) {
 		this.entityType = entityType;
-		
+
 	}
-	
+
 }

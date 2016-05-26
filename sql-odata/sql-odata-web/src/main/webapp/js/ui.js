@@ -1,50 +1,4 @@
 "use strict";
-function handleSelectList(event) {
-	var dropdown = document.getElementsByClassName("dropdown-content")[0];
-	var selected = [];	
-	dropdown.classList.remove('show');
-	var checkboxes = document.getElementsByClassName("checkProp");
-	for(var j = 0; j < checkboxes.length; j++ ){
-		if(checkboxes[j].checked){
-			selected.push(checkboxes[j].name);	
-		}
-	}
-	var uriInfo = new UriInfo(history.state || location.href);
-	if(selected.length > 0){		
-		uriInfo.parameters.$select = selected.join(",");		
-	}
-	dispatch($metadata,uriInfo);
-}
-
-function handleFilter(e){
-	
-	e = e || window.event;	
-    if (e.keyCode == 13)
-    {   
-    	var uriInfo = new UriInfo(history.state || location.href);
-    	var filter = document.getElementById("filter");
-    	if(filter && filter.value.trim().length > 0){
-    		uriInfo.parameters.$filter = filter.value.trim(); 
-    	}else {
-    		delete uriInfo.parameters.$filter;
-    	}    	
-    	dispatch($metadata,uriInfo)
-        return false;
-    }
-    return true;
-}
-
-function cancelSelectList(event) {
-	var dropdown = document.getElementsByClassName("dropdown-content")[0];
-	var selected = [];	
-	var uriInfo = new UriInfo(history.state || location.href);
-	dropdown.classList.remove('show');
-	var checkboxes = document.getElementsByClassName("checkProp");
-	for(var j = 0; j < checkboxes.length; j++ ){
-		checkboxes[j].checked = isSelected(uriInfo,checkboxes[j].name);
-	}
-	
-}
 
 function renderHtml(id,innerHtml){	
 	var element = document.getElementById(id);
@@ -108,11 +62,16 @@ function toggleSelectionTool() {
 	document.getElementById("selectionTool").classList.toggle("show");
 }
 function selectionTool(uriInfo,entityType){	
-	var filter = uriInfo.parameters.$filter || "";	
+	var filter = uriInfo.parameters.$filter || "";
+	var csv = uriInfo.toServiceUri().toUriInfo();
+	csv.parameters.$format = "text/csv";
+	delete csv.parameters.$top;
+	delete csv.parameters.$skip;
 	var tool =
 		"<div class=\"dropdown\">"+
-		"  <button class=\"button\" onclick=\"toggleSelectionTool()\">&#x25A5;</button> " +
-		"  <div id=\"selectionTool\" class=\"dropdown-content\"><ul>" ;
+		" <button class=\"button\" onclick=\"window.location.href='{0}';\">&#x21E9;</button>".format(csv.toUri()) +
+		" <button class=\"button\" onclick=\"toggleSelectionTool()\">&#x25A5;</button> " +
+		" <div id=\"selectionTool\" class=\"dropdown-content\"><ul>" ;
 	for (var p in entityType.properties) {
 		tool += "<li><input class=\"checkProp\" type=\"checkbox\" name=\"{0}\" {1}>{0}</li>"
 			.format(p,isSelected(uriInfo,p) ? "checked" : "");

@@ -23,6 +23,7 @@ import com.github.sql.analytic.odata.SQLEdmProvider;
 import com.github.sql.analytic.odata.SQLEntityCollectionProcessor;
 import com.github.sql.analytic.odata.SQLEntityProcessor;
 import com.github.sql.analytic.odata.SQLPrimitiveProcessor;
+import com.github.sql.analytic.odata.ser.CustomContentTypes;
 import com.github.sql.analytic.session.SQLDialect;
 import com.github.sql.analytic.session.SQLSession;
 import com.github.sql.analytic.statement.Cursor;
@@ -83,6 +84,7 @@ public class SQLOdataHandler {
 		handler.register(processor);	      
 		handler.register(new SQLEntityProcessor(session));
 		handler.register(new SQLPrimitiveProcessor(session,functions));
+		handler.register(new CustomContentTypes());
 		handler.process(request, response);	
 
 	}
