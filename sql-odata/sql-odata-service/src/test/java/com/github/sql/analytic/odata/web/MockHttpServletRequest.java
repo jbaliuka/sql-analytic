@@ -2,8 +2,10 @@ package com.github.sql.analytic.odata.web;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,9 +39,20 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 public final class MockHttpServletRequest implements HttpServletRequest {
 	private HttpUriRequest clientRequest;
+	private InputStream in;
 
-	public MockHttpServletRequest(HttpUriRequest clientRequest) {
+	public MockHttpServletRequest(HttpUriRequest clientRequest) throws IllegalStateException, IOException {
 		this.clientRequest = clientRequest;
+		if(clientRequest instanceof HttpEntityEnclosingRequest ){
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			InputStream stream = ((HttpEntityEnclosingRequest) clientRequest).getEntity().getContent();			
+			while( stream.available() > 0 ){
+				out.write(stream.read());
+			}
+			in = new ByteArrayInputStream(out.toByteArray());
+		}else {
+			in = new ByteArrayInputStream(new byte[]{});
+		}		
 	}
 
 	@Override
@@ -146,8 +159,7 @@ public final class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public BufferedReader getReader() throws IOException {
-
-		return  new BufferedReader(null);
+		return  new BufferedReader(new InputStreamReader(getInputStream()));
 	}
 
 	@Override
@@ -215,17 +227,7 @@ public final class MockHttpServletRequest implements HttpServletRequest {
 
 		return new ServletInputStream() {
 
-			private InputStream in;
 
-			{
-
-				if(clientRequest instanceof HttpEntityEnclosingRequest ){
-					in = ((HttpEntityEnclosingRequest) clientRequest).getEntity().getContent();
-				}else {
-					in = new ByteArrayInputStream(new byte[]{});
-				}
-
-			}
 
 			@Override
 			public int read() throws IOException {
@@ -241,7 +243,7 @@ public final class MockHttpServletRequest implements HttpServletRequest {
 
 			@Override
 			public boolean isReady() {			
-				return false;
+				return true;
 			}
 
 			@Override
@@ -378,7 +380,7 @@ public final class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public StringBuffer getRequestURL() {
-		
+
 		URI uri = clientRequest.getURI();	
 		try {
 			URI newUri = new URI(uri.getScheme(), uri.getUserInfo(), 
@@ -388,12 +390,12 @@ public final class MockHttpServletRequest implements HttpServletRequest {
 		} catch (URISyntaxException e) {
 			throw new AssertionError(e);
 		} 
-		
+
 	}
 
 	@Override
 	public String getRequestURI() {
-		
+
 		return clientRequest.getURI().toString();
 	}
 

@@ -19,6 +19,7 @@ import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
 
 import com.github.sql.analytic.odata.FunctionCommand;
+import com.github.sql.analytic.odata.SQLBatchProcessor;
 import com.github.sql.analytic.odata.SQLEdmProvider;
 import com.github.sql.analytic.odata.SQLEntityCollectionProcessor;
 import com.github.sql.analytic.odata.SQLEntityProcessor;
@@ -85,7 +86,9 @@ public class SQLOdataHandler {
 		handler.register(new SQLEntityProcessor(session));
 		handler.register(new SQLPrimitiveProcessor(session,functions));
 		handler.register(new CustomContentTypes());
+		handler.register(new SQLBatchProcessor());
 		handler.process(request, response);	
+		
 
 	}
 

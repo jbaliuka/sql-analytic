@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,9 +13,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -22,6 +27,10 @@ import javax.sql.DataSource;
 
 import org.apache.http.client.HttpClient;
 import org.apache.olingo.client.api.ODataClient;
+import org.apache.olingo.client.api.communication.request.ODataBatchableRequest;
+import org.apache.olingo.client.api.communication.request.batch.BatchManager;
+import org.apache.olingo.client.api.communication.request.batch.ODataBatchRequest;
+import org.apache.olingo.client.api.communication.request.batch.ODataBatchResponseItem;
 import org.apache.olingo.client.api.communication.request.cud.CUDRequestFactory;
 import org.apache.olingo.client.api.communication.request.cud.ODataDeleteRequest;
 import org.apache.olingo.client.api.communication.request.cud.ODataEntityUpdateRequest;
@@ -121,6 +130,23 @@ public class SQLODataServletTest {
 		ClientEntitySet entity = res.getBody();		
 		assertFalse( entity.getEntities().isEmpty() );
 
+	}
+	
+	@Test
+	public void testBatch() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException{
+		
+		ODataBatchRequest request = client.getBatchRequestFactory().getBatchRequest(serviceRoot);
+		BatchManager manager = request.payloadManager();
+		ODataBatchableRequest delete  = client.getCUDRequestFactory().getDeleteRequest(new URI(serviceRoot + "CUSTOMERS(3)"));
+		manager.addRequest(delete);	
+		Iterator<ODataBatchResponseItem> iterator = manager.getAsyncResponse().get(5, TimeUnit.MINUTES).getBody();
+		/*
+		while(iterator.hasNext()){
+			ODataBatchResponseItem item = iterator.next();
+			assertTrue(item != null);
+		}
+		*/
+		
 	}
 	
 	@Test
