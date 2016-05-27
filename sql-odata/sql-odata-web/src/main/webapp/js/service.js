@@ -10,6 +10,7 @@ function Service($metadata){
 				processCallback(response,$metadata);								
 			}
 		};
+		uriInfo.parameters.$format="JSON";
 		xhttp.open("GET", uriInfo.toServiceUri(), true);
 		xhttp.send();
 	}

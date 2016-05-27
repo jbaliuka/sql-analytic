@@ -143,4 +143,31 @@ body {
  	background: none; 
  	background-color:#00557F;
  }
+ td.Double {
+  text-align: right;
+ }
+ td.Byte {
+  text-align: center;
+ }
+ td.Duration {
+ 	text-align: right;
+ }
+ td.Decimal{
+      text-align: right;
+ }
+ td.Int16{
+      text-align: right;
+ }
+ td.Int32{
+      text-align: right;
+ }
+ td.Int64{
+      text-align: right;
+ }
+ td.Date{
+      text-align: center;
+ }
+ td.String{
+      text-align: left;
+ }
  

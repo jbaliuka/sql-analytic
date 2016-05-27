@@ -136,7 +136,8 @@ function buildEntitySetView(uriInfo) {
 			}
 			for (var col in entityType.properties) {
 				if(entityType.keys[col] === undefined && isSelected(uriInfo,col)){
-					dataTable += "<td>{0}</td>".format(row[col]);
+					var property = entityType.properties[col];
+					dataTable += "<td class=\""+ property.type.split(".")[1] +"\">{0}</td>".format(row[col]);
 				}
 			}
 			dataTable += "</tr>";
