@@ -82,6 +82,21 @@ function selectionTool(uriInfo,entityType){
 	"<input id=\"filter\" type=\"text\" value=\"{0}\" onkeypress=\"handleFilter(event)\"></div>".format(decodeURIComponent(filter));
 	return tool;
 }
+function handleDelete(){
+	var checkboxes = document.getElementsByClassName("deleteCheck");
+	var requests = [];
+	for(var j = 0; j < checkboxes.length; j++ ){
+		if(checkboxes[j].checked){
+			requests.push(checkboxes[j].name);	
+		}
+	}
+	var uriInfo = new UriInfo(location.href).toBaseUri().toUriInfo();
+	delete uriInfo.parameters.$format;
+	$service.batchDelete(uriInfo,requests,function(response,$metadata){
+		var currentUriInfo = new UriInfo(history.state);
+		processEntitySetRequest($metadata,currentUriInfo);
+	});
+}
 
 function buildEntitySetView(uriInfo) {	
 	$service.get(uriInfo, function(data,$metadata) {
@@ -89,15 +104,16 @@ function buildEntitySetView(uriInfo) {
 		var entities = data.value;		
 		var dataTable = "<div class=\"header\"><h2>{1}</h2>{0}</div><table><thead><tr>"
 			.format(selectionTool(uriInfo,entityType),uriInfo.getPath());
+		dataTable += "<th><button class=\"button\" onclick=\"handleDelete()\">&#x2717;</button></th>";
 		var colCount = 0;
 		var sort = "<div class=\"sortIcon\"><span class=\"up\"><a class=\"odataUri\" href=\"{0}\">&#x25B2;</a></span>"+
-		"<span class=\"down\"><a class=\"odataUri\" href=\"{1}\">&#x25BC;</a></span><div>";
+		"<span class=\"down\"><a class=\"odataUri\" href=\"{1}\">&#x25BC;</a></span><div>";		
 		for (var k in entityType.keys) {
 			if(isSelected(uriInfo,k)){
 				var sortUriInfoAsc = uriInfo.toUIUri().toUriInfo();
 				var sortUriInfoDesc = uriInfo.toUIUri().toUriInfo();
 				sortUriInfoAsc.parameters.$orderby = k + " asc";
-				sortUriInfoDesc.parameters.$orderby = k + " desc";
+				sortUriInfoDesc.parameters.$orderby = k + " desc";				
 				dataTable += "<th>{0}{1}</th>".format(k.split("_").join("<br/>"),
 						sort.format(sortUriInfoAsc.toUri(),sortUriInfoDesc.toUri()));
 				colCount++;		
@@ -129,8 +145,12 @@ function buildEntitySetView(uriInfo) {
 			}	
 			entityUri.pathInfo = [{"name" : entityType.name }];
 			entityUri.pathInfo[0].keys = entityKey;
+			var deleteUri = entityUri.toUri().toUriInfo();
+			delete deleteUri.parameters.$format;
+			dataTable += "<td><input class=\"deleteCheck\" type=\"checkbox\" name=\"{0}\" ></td>".format(deleteUri.toServiceUri());
+			
 			for (var k in entityType.keys) {	
-				if(isSelected(uriInfo,k)){
+				if(isSelected(uriInfo,k)){					
 					dataTable += "<td><a class=\"odataUri\" href=\"{0}\">{1}</a></td>".format(entityUri.toUIUri(),row[k]);
 				}
 			}
