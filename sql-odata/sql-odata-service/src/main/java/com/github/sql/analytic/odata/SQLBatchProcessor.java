@@ -57,7 +57,12 @@ public class SQLBatchProcessor implements BatchProcessor {
 		final List<ODataResponse> responses = new ArrayList<ODataResponse>();
 		for(final ODataRequest request : requests) {
 			ODataResponse response = facade.handleODataRequest(request);
-			responses.add(response);			
+			if(response.getStatusCode() < 400){
+				responses.add(response);		
+			}else {
+				return new ODataResponsePart(response, false);
+			}
+
 		}
 		return new ODataResponsePart(responses, true);
 	}

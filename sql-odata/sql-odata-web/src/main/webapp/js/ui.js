@@ -185,7 +185,7 @@ function buildEntitySetView(uriInfo) {
 		"		</div>" +
 		"</tr>" +
 		"</tfoot>"; 
-		dataTable += tfoot.format(colCount,previus.toUri(),next.toUri());;
+		dataTable += tfoot.format(colCount + 1,previus.toUri(),next.toUri());;
 		dataTable += "</table>";
 		renderHtml("dataTable",dataTable);
 

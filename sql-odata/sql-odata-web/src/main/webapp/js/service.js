@@ -7,6 +7,8 @@ function Service($metadata){
 			if (xhttp.readyState == 4 && xhttp.status == 200) {
 				var response = JSON.parse(xhttp.responseText);
 				processCallback(response,$metadata);								
+			}else if (xhttp.readyState == 4 && xhttp.status != 200){
+				Alert.show(xhttp.responseText);
 			}
 		};
 		uriInfo.parameters.$format="JSON";
@@ -16,9 +18,26 @@ function Service($metadata){
 	this.batchDelete = function(uriInfo,requests,callBack){
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {
-			if (xhttp.readyState == 4 ) {				
-				callBack();								
+			if (xhttp.readyState == 4 && xhttp.status < 400) {				
+				callBack();
+				var msg = "";
+				var lines = xhttp.responseText.split("\r\n");
+				var status = /^HTTP\/1\.\d (\d{3}) (.*)$/i;
+				for(var i in lines){
+					var line = lines[i];
+					var match = status.exec(line);
+					if (match) {
+						if( parseInt(match[1]) >= 400){
+							msg += match[1] + " " + match[2] + "\n";
+						}
+					} 
+				}
+				if(msg.length > 0){
+					Alert.show(msg);
+				}
 			}
+
+
 		};		
 		delete uriInfo.parameters.$format;
 		var boundary = guid();
