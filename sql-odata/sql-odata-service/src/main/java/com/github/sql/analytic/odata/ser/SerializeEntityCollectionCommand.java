@@ -1,5 +1,7 @@
 package com.github.sql.analytic.odata.ser;
 
+import java.util.List;
+
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -15,6 +17,7 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerStreamResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 
 import com.github.sql.analytic.odata.ResultSetIterator;
 
@@ -50,7 +53,7 @@ public class SerializeEntityCollectionCommand {
 		final String id = request.getRawBaseUri() + "/" + entityType.getName();
 		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
 				.id(id)
-				.select(uriInfo.getSelectOption())
+				.select(getUriInfo().getSelectOption())
 				.expand(getUriInfo().getExpandOption())
 				.contextURL(contextUrl)
 				.writeContentErrorCallback(iterator)
@@ -76,7 +79,7 @@ public class SerializeEntityCollectionCommand {
 
 	protected String getSelectList() throws SerializerException {
 		return odata.createUriHelper().buildContextURLSelectList(getEntityType(),
-				uriInfo.getExpandOption(), uriInfo.getSelectOption());
+				getUriInfo().getExpandOption(), getUriInfo().getSelectOption());
 	}
 
 	public ODataRequest getRequest() {
@@ -87,7 +90,7 @@ public class SerializeEntityCollectionCommand {
 		return response;
 	}
 
-	public UriInfo getUriInfo() {
+	public UriInfo getUriInfo() {		
 		return uriInfo;
 	}
 

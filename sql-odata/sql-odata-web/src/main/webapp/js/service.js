@@ -1,5 +1,4 @@
 "use strict";
-
 function Service($metadata){
 	this.get = function(uriInfo, processCallback){
 		var xhttp = new XMLHttpRequest();
@@ -11,8 +10,21 @@ function Service($metadata){
 				Alert.show(xhttp.responseText);
 			}
 		};
-		uriInfo.parameters.$format="JSON";
-		xhttp.open("GET", uriInfo.toServiceUri(), true);
+		var serviceUriInfo = uriInfo.toServiceUri().toUriInfo();
+		serviceUriInfo.parameters.$format="JSON";
+		if(serviceUriInfo.parameters.$select !== undefined && 
+				serviceUriInfo.parameters.$select != "*"){
+			var entityType = $metadata.resolveEntityType(serviceUriInfo);
+			var select = serviceUriInfo.parameters.$select.split(",");
+			for(var key in entityType.keys){
+				if(select.indexOf(key) < 0){
+					select.push(key);	
+				}
+			}
+			serviceUriInfo.parameters.$select = select.join(",");
+		}
+
+		xhttp.open("GET", serviceUriInfo.toUri(), true);
 		xhttp.send();
 	}	
 	this.batchDelete = function(uriInfo,requests,callBack){
@@ -36,10 +48,7 @@ function Service($metadata){
 					Alert.show(msg);
 				}
 			}
-
-
 		};		
-		delete uriInfo.parameters.$format;
 		var boundary = guid();
 		xhttp.open("POST", uriInfo.toServiceUri() + "/$batch", true);
 		xhttp.setRequestHeader('Content-Type', 'multipart/mixed;boundary=' + boundary);
@@ -76,5 +85,4 @@ function Service($metadata){
 		body.push('--' + boundary + '--', '');
 		return body.join('\r\n');
 	}
-
 }	

@@ -24,24 +24,14 @@ function metadataCallback(metadata){
 	renderHtml("menu",list)
 	dispatch(metadata,locationInfo);
 }
-function isSelected(uriInfo,propName){
-	if(uriInfo.parameters === undefined){
-		return true;
-	}
-	var selectOption = uriInfo.parameters.$select;
-	if(selectOption === undefined || selectOption == "*"){
-		return true;
-	}else {
-		return selectOption.split(",").indexOf(propName) != -1;
-	}
-}
+
 function buildEntityView(uriInfo){
 	$service.get(uriInfo, function(data,$metadata) {
 		var	eSetName = uriInfo.pathInfo[0].name;
 		var entityType = $metadata.resolveEntityType(uriInfo);
 		var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table>".format(uriInfo.getPath());
 		for(var prop in entityType.properties){
-			if(isSelected(uriInfo,prop)){
+			if(uriInfo.isSelected(prop)){
 				dataTable += "<tr><td>{0}</td><td>{1}</td></tr>".format(prop,data[prop]);
 			}
 		}
@@ -74,28 +64,13 @@ function selectionTool(uriInfo,entityType){
 		" <div id=\"selectionTool\" class=\"dropdown-content\"><ul>" ;
 	for (var p in entityType.properties) {
 		tool += "<li><input class=\"checkProp\" type=\"checkbox\" name=\"{0}\" {1}>{0}</li>"
-			.format(p,isSelected(uriInfo,p) ? "checked" : "");
+			.format(p,uriInfo.isSelected(p) ? "checked" : "");
 	}	
 	tool += "<li><hr></li><li><button class=\"button\" onclick=\"handleSelectList()\">Ok</button>"+
 	"<button class=\"button\" onclick=\"cancelSelectList()\">Cancel</button>"
 	+ "</li></ul></div>" +
 	"<input id=\"filter\" type=\"text\" value=\"{0}\" onkeypress=\"handleFilter(event)\"></div>".format(decodeURIComponent(filter));
 	return tool;
-}
-function handleDelete(){
-	var checkboxes = document.getElementsByClassName("deleteCheck");
-	var requests = [];
-	for(var j = 0; j < checkboxes.length; j++ ){
-		if(checkboxes[j].checked){
-			requests.push(checkboxes[j].name);	
-		}
-	}
-	var uriInfo = new UriInfo(location.href).toBaseUri().toUriInfo();
-	delete uriInfo.parameters.$format;
-	$service.batchDelete(uriInfo,requests,function(response,$metadata){
-		var currentUriInfo = new UriInfo(history.state);
-		processEntitySetRequest($metadata,currentUriInfo);
-	});
 }
 
 function buildEntitySetView(uriInfo) {	
@@ -109,7 +84,7 @@ function buildEntitySetView(uriInfo) {
 		var sort = "<div class=\"sortIcon\"><span class=\"up\"><a class=\"odataUri\" href=\"{0}\">&#x25B2;</a></span>"+
 		"<span class=\"down\"><a class=\"odataUri\" href=\"{1}\">&#x25BC;</a></span><div>";		
 		for (var k in entityType.keys) {
-			if(isSelected(uriInfo,k)){
+			if(uriInfo.isSelected(k)){
 				var sortUriInfoAsc = uriInfo.toUIUri().toUriInfo();
 				var sortUriInfoDesc = uriInfo.toUIUri().toUriInfo();
 				sortUriInfoAsc.parameters.$orderby = k + " asc";
@@ -120,7 +95,7 @@ function buildEntitySetView(uriInfo) {
 			}
 		}
 		for (var p in entityType.properties) {
-			if(entityType.keys[p] === undefined && isSelected(uriInfo,p)){
+			if(entityType.keys[p] === undefined && uriInfo.isSelected(p)){
 				var sortUriInfoAsc = uriInfo.toUIUri().toUriInfo();
 				var sortUriInfoDesc = uriInfo.toUIUri().toUriInfo();
 				sortUriInfoAsc.parameters.$orderby = p + " asc";
@@ -146,16 +121,16 @@ function buildEntitySetView(uriInfo) {
 			entityUri.pathInfo = [{"name" : entityType.name }];
 			entityUri.pathInfo[0].keys = entityKey;
 			var deleteUri = entityUri.toUri().toUriInfo();
-			delete deleteUri.parameters.$format;
+			delete deleteUri.parameters;
 			dataTable += "<td><input class=\"deleteCheck\" type=\"checkbox\" name=\"{0}\" ></td>".format(deleteUri.toServiceUri());
 			
 			for (var k in entityType.keys) {	
-				if(isSelected(uriInfo,k)){					
+				if(uriInfo.isSelected(k)){					
 					dataTable += "<td><a class=\"odataUri\" href=\"{0}\">{1}</a></td>".format(entityUri.toUIUri(),row[k]);
 				}
 			}
 			for (var col in entityType.properties) {
-				if(entityType.keys[col] === undefined && isSelected(uriInfo,col)){
+				if(entityType.keys[col] === undefined && uriInfo.isSelected(col)){
 					var property = entityType.properties[col];
 					dataTable += "<td class=\""+ property.type.split(".")[1] +"\">{0}</td>".format(row[col]);
 				}
@@ -163,7 +138,7 @@ function buildEntitySetView(uriInfo) {
 			dataTable += "</tr>";
 		}
 		for(var j = 1; j < uriInfo.parameters.$top - i; j++ ){
-			dataTable += "<tr><td colspan=\"{0}\">&nbsp;</td></tr>".format(colCount);
+			dataTable += "<tr><td colspan=\"{0}\">&nbsp;</td></tr>".format(colCount + 1);
 		}
 		dataTable += "</tbody>";
 		var previus = new UriInfo(uriInfo.toUri());

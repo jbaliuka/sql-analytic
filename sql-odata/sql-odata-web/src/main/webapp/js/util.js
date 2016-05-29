@@ -136,4 +136,18 @@ function UriInfo(uri){
 		}
 		return uri + (this.hash === undefined ? "" : "#" + this.hash);
 	}
+	
+	this.isSelected = function (propName){
+		if(this.parameters === undefined){
+			return true;
+		}
+		var selectOption = this.parameters.$select;
+		if(selectOption === undefined || selectOption == "*"){
+			return true;
+		}else {
+			return selectOption.split(",").indexOf(propName) != -1;
+		}
+	}
+
 }
+

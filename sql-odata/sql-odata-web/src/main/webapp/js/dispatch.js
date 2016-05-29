@@ -81,5 +81,19 @@ function cancelSelectList(event) {
 	for(var j = 0; j < checkboxes.length; j++ ){
 		checkboxes[j].checked = isSelected(uriInfo,checkboxes[j].name);
 	}
-
+}
+function handleDelete(){
+	var checkboxes = document.getElementsByClassName("deleteCheck");
+	var requests = [];
+	for(var j = 0; j < checkboxes.length; j++ ){
+		if(checkboxes[j].checked){
+			requests.push(checkboxes[j].name);	
+		}
+	}
+	var uriInfo = new UriInfo(location.href).toBaseUri().toUriInfo();
+	delete uriInfo.parameters.$format;
+	$service.batchDelete(uriInfo,requests,function(response,$metadata){
+		var currentUriInfo = new UriInfo(history.state);
+		processEntitySetRequest($metadata,currentUriInfo);
+	});
 }
