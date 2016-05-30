@@ -1,5 +1,19 @@
 "use strict";
 function Service($metadata){
+	
+	this.patch = function(uriInfo,data,callback){
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (xhttp.readyState == 4 && xhttp.status < 400) {				
+				callback();								
+			}else if (xhttp.readyState == 4 && xhttp.status >= 400){
+				Alert.show(xhttp.responseText);
+			}
+		};		
+		xhttp.open("PATCH", uriInfo.toServiceUri(), true);
+		xhttp.setRequestHeader('Content-Type', 'application/json');
+		xhttp.send(JSON.stringify(data));
+	}
 	this.get = function(uriInfo, processCallback){
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {

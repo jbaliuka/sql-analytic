@@ -36,6 +36,30 @@ function navigationHandler(event) {
 	pushStateHistory(uriInfo);
 	return event.preventDefault();
 }
+function editHandler(event) {
+	var href = event.target.getAttribute('href');
+	var uriInfo = new UriInfo(href);
+	var entityType = $metadata.resolveEntityType(uriInfo);
+	var inputs = document.querySelectorAll("input.propertyEditor");
+	var data = {};
+	for( var i = 0; i < inputs.length; i++ ){
+		var property = entityType.properties[inputs[i].name];
+		if(property !== undefined){
+			if(property.type.startsWith("Edm.Int")){
+				data[inputs[i].name] = parseInt(inputs[i].value);
+			}else {
+				data[inputs[i].name] = inputs[i].value;
+			}
+		}
+	}
+	$service.patch(uriInfo,data, function(){
+		delete uriInfo.parameters.edit;
+		dispatch($metadata,uriInfo);		
+	});
+
+	return event.preventDefault();
+}
+
 function handleSelectList(event) {
 	var dropdown = document.getElementsByClassName("dropdown-content")[0];
 	var selected = [];	

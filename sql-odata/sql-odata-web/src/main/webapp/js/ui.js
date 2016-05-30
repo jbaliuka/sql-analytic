@@ -30,7 +30,7 @@ function editor(uriInfo,entityType,prop,data){
 	if(etitUri.parameters.edit === undefined){
 		return data[prop];
 	}else {
-		return "<input type=\"text\" value=\"{0}\" name=\"{0}\">".format(data[prop],prop);
+		return "<input class=\"propertyEditor\" type=\"text\" value=\"{0}\" name=\"{1}\">".format(data[prop],prop);
 	}
 }
 
@@ -58,23 +58,39 @@ function buildEntityView(uriInfo){
 		"<tr>" +
 		"	<td colspan=\"2\">" +
 		"		<div id=\"tools\">" +
-		"			<ul>" +
-		"				<li><a class=\"odataUri button\" id=\"{2}\" href=\"{0}\" >{1}</a></li>" +
+		"			<ul id=\"editButtons\">" +
+		"				<li><a class=\"odataUri button\" href=\"{0}\" >{1}</a></li>" +
 		"			</ul>" +
 		"		</div>" +
 		"</tr>" +
 		"</tfoot>"; 
 		if(editUri.parameters.edit === undefined){
 			editUri.parameters.edit = true;
-			dataTable += tfoot.format(editUri.toUri(),"Edit","edit");			 
+			dataTable += tfoot.format(editUri.toUri(),"Edit");			 
 		}else {
 			delete editUri.parameters.edit;
-			dataTable += tfoot.format(editUri.toUri(),"Back","back");
+			dataTable += tfoot.format(editUri.toUri(),"Back");
 		}
 		dataTable += "</table>";
 		renderHtml("dataTable",dataTable);
+		submitButtotn(editUri);
 	});
 }
+
+function submitButtotn(editUri){
+	if(editUri.parameters.edit === undefined){
+		var ul = document.getElementById("editButtons");
+		var li = document.createElement("LI");     
+		var a = document.createElement("A");
+		a.className = "button";
+		a.href = editUri.toServiceUri();
+		li.appendChild(a);
+		ul.appendChild(li); 
+		a.addEventListener("click",editHandler,true);
+		a.innerHTML = "Submit";
+	}
+}
+
 function toggleSelectionTool() {
 	document.getElementById("selectionTool").classList.toggle("show");
 }
@@ -150,7 +166,7 @@ function buildEntitySetView(uriInfo) {
 			var deleteUri = entityUri.toUri().toUriInfo();
 			delete deleteUri.parameters;
 			dataTable += "<td><input class=\"deleteCheck\" type=\"checkbox\" name=\"{0}\" ></td>".format(deleteUri.toServiceUri());
-			
+
 			for (var k in entityType.keys) {	
 				if(uriInfo.isSelected(k)){					
 					dataTable += "<td><a class=\"odataUri\" href=\"{0}\">{1}</a></td>".format(entityUri.toUIUri(),row[k]);
