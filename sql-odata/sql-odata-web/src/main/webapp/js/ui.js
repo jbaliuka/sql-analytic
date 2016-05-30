@@ -25,6 +25,15 @@ function metadataCallback(metadata){
 	dispatch(metadata,locationInfo);
 }
 
+function editor(uriInfo,entityType,prop,data){
+	var etitUri = uriInfo.toUIUri().toUriInfo();	 
+	if(etitUri.parameters.edit === undefined){
+		return data[prop];
+	}else {
+		return "<input type=\"text\" value=\"{0}\" name=\"{0}\">".format(data[prop],prop);
+	}
+}
+
 function buildEntityView(uriInfo){
 	$service.get(uriInfo, function(data,$metadata) {
 		var	eSetName = uriInfo.pathInfo[0].name;
@@ -32,7 +41,7 @@ function buildEntityView(uriInfo){
 		var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table>".format(uriInfo.getPath());
 		for(var prop in entityType.properties){
 			if(uriInfo.isSelected(prop)){
-				dataTable += "<tr><td>{0}</td><td>{1}</td></tr>".format(prop,data[prop]);
+				dataTable += "<tr><td>{0}</td><td>{1}</td></tr>".format(prop,editor(uriInfo,entityType,prop,data));
 			}
 		}
 		for(var nav in entityType.navProperties){
@@ -43,7 +52,25 @@ function buildEntityView(uriInfo){
 			navInfo.parameters.$skip = 0;
 			delete navInfo.parameters.$select;
 			dataTable += "<tr><td>{0}</td><td><a class=\"odataUri\" href=\"{1}\">{2}</a></td></tr>".format(nav,navInfo.toUIUri(),propTypeName.split(".")[1]);
-		}		
+		}	
+		var editUri = uriInfo.toUIUri().toUriInfo();		
+		var tfoot = "<tfoot>" +
+		"<tr>" +
+		"	<td colspan=\"2\">" +
+		"		<div id=\"tools\">" +
+		"			<ul>" +
+		"				<li><a class=\"odataUri button\" id=\"{2}\" href=\"{0}\" >{1}</a></li>" +
+		"			</ul>" +
+		"		</div>" +
+		"</tr>" +
+		"</tfoot>"; 
+		if(editUri.parameters.edit === undefined){
+			editUri.parameters.edit = true;
+			dataTable += tfoot.format(editUri.toUri(),"Edit","edit");			 
+		}else {
+			delete editUri.parameters.edit;
+			dataTable += tfoot.format(editUri.toUri(),"Back","back");
+		}
 		dataTable += "</table>";
 		renderHtml("dataTable",dataTable);
 	});
