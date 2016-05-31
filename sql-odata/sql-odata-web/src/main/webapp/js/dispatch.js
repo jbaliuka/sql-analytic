@@ -9,6 +9,8 @@ function dispatch($metadata, uriInfo){
 		if(uriInfo.pathInfo[l - 1].keys && 
 				Object.keys(uriInfo.pathInfo[l - 1].keys).length > 0 ){
 			processEntityRequest($metadata,uriInfo);	
+		}else if (uriInfo.parameters.action ){
+			processEntityRequest($metadata,uriInfo);
 		}else{
 			processEntitySetRequest($metadata,uriInfo);
 		}
@@ -52,10 +54,17 @@ function editHandler(event) {
 			}
 		}
 	}
-	$service.patch(uriInfo,data, function(){
-		delete uriInfo.parameters.edit;
-		dispatch($metadata,uriInfo);		
-	});
+	if(uriInfo.parameters.action == "add"){
+		$service.post(uriInfo,data, function(){
+			delete uriInfo.parameters.action;
+			dispatch($metadata,uriInfo);		
+		});
+	}else{
+		$service.patch(uriInfo,data, function(){
+			delete uriInfo.parameters.action;
+			dispatch($metadata,uriInfo);		
+		});
+	}
 
 	return event.preventDefault();
 }

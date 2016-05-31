@@ -27,15 +27,21 @@ function metadataCallback(metadata){
 
 function editor(uriInfo,entityType,prop,data){
 	var etitUri = uriInfo.toUIUri().toUriInfo();	 
-	if(etitUri.parameters.edit === undefined){
+	if(etitUri.parameters.action === undefined){
 		return data[prop];
+	}else if(etitUri.parameters.action == "add"){
+		return "<input class=\"propertyEditor\" type=\"text\" name=\"{0}\">".format(prop);
 	}else {
 		return "<input class=\"propertyEditor\" type=\"text\" value=\"{0}\" name=\"{1}\">".format(data[prop],prop);
 	}
 }
-
-function buildEntityView(uriInfo){
-	$service.get(uriInfo, function(data,$metadata) {
+function buildEntityView(uriInfo){	
+	if(uriInfo.parameters.action == "add"){
+		buildView({},$metadata);
+	}else {
+		$service.get(uriInfo,buildView);
+	}
+	function buildView(data,$metadata){
 		var	eSetName = uriInfo.pathInfo[0].name;
 		var entityType = $metadata.resolveEntityType(uriInfo);
 		var dataTable = "<div class=\"header\"><h2>{0}</h2></div><table>".format(uriInfo.getPath());
@@ -54,40 +60,33 @@ function buildEntityView(uriInfo){
 			dataTable += "<tr><td>{0}</td><td><a class=\"odataUri\" href=\"{1}\">{2}</a></td></tr>".format(nav,navInfo.toUIUri(),propTypeName.split(".")[1]);
 		}	
 		var editUri = uriInfo.toUIUri().toUriInfo();		
-		var tfoot = "<tfoot>" +
+		dataTable += "<tfoot>" +
 		"<tr>" +
 		"	<td colspan=\"2\">" +
 		"		<div id=\"tools\">" +
-		"			<ul id=\"editButtons\">" +
-		"				<li><a class=\"odataUri button\" href=\"{0}\" >{1}</a></li>" +
-		"			</ul>" +
+		"			<ul id=\"editButtons\">" ;
+		if(editUri.parameters.action === undefined){	
+			var backUri = uriInfo.toUIUri().toUriInfo();
+			delete backUri.pathInfo[backUri.pathInfo.length - 1].keys;
+			dataTable += "<li><a class=\"odataUri button\" href=\"{0}\" >{1}</a></li>".format(backUri.toUri(),"Back");
+			editUri.parameters.action = "edit";
+			dataTable += "<li><a class=\"odataUri button\" href=\"{0}\" >{1}</a></li>".format(editUri.toUri(),"Edit");			 
+		}else if(editUri.parameters.action == "add"){
+			delete editUri.parameters.action;
+			dataTable += "<li><a class=\"odataUri button\" href=\"{0}\" >{1}</a></li>".format(editUri.toUri(),"Back");
+			editUri.parameters.action = "add";
+			dataTable += "<li><a class=\"button\" href=\"{0}\" onclick=\"editHandler(event)\" >{1}</a></li>".format(editUri.toUri(),"Submit");
+		}else {
+			delete editUri.parameters.action;
+			dataTable += "<li><a class=\"odataUri button\" href=\"{0}\" >{1}</a></li>".format(editUri.toUri(),"Back");
+			dataTable += "<li><a class=\"button\" href=\"{0}\" onclick=\"editHandler(event)\" >{1}</a></li>".format(editUri.toUri(),"Submit");
+		}
+		dataTable += "</ul>" +
 		"		</div>" +
 		"</tr>" +
 		"</tfoot>"; 
-		if(editUri.parameters.edit === undefined){
-			editUri.parameters.edit = true;
-			dataTable += tfoot.format(editUri.toUri(),"Edit");			 
-		}else {
-			delete editUri.parameters.edit;
-			dataTable += tfoot.format(editUri.toUri(),"Back");
-		}
 		dataTable += "</table>";
-		renderHtml("dataTable",dataTable);
-		submitButtotn(editUri);
-	});
-}
-
-function submitButtotn(editUri){
-	if(editUri.parameters.edit === undefined){
-		var ul = document.getElementById("editButtons");
-		var li = document.createElement("LI");     
-		var a = document.createElement("A");
-		a.className = "button";
-		a.href = editUri.toServiceUri();
-		li.appendChild(a);
-		ul.appendChild(li); 
-		a.addEventListener("click",editHandler,true);
-		a.innerHTML = "Submit";
+		renderHtml("dataTable",dataTable);		
 	}
 }
 
@@ -185,7 +184,14 @@ function buildEntitySetView(uriInfo) {
 		}
 		dataTable += "</tbody>";
 		var previus = new UriInfo(uriInfo.toUri());
+		if(uriInfo.parameters.$top === undefined ){
+			uriInfo.parameters.$top = 20;
+		}
+		if(uriInfo.parameters.$skip === undefined ){
+			uriInfo.parameters.$skip = 0;
+		}
 		var skip = parseInt(uriInfo.parameters.$skip) - parseInt(uriInfo.parameters.$top);
+		skip = isNaN(skip) ? 0 : skip;
 		var previus = new UriInfo(uriInfo.toUri());
 		previus.parameters.$skip = skip < 0 ? 0 : skip;
 		var next = new UriInfo(uriInfo.toUri());
@@ -197,13 +203,16 @@ function buildEntitySetView(uriInfo) {
 		"	<td colspan=\"{0}\">" +
 		"		<div id=\"paging\">" +
 		"			<ul>" +
-		"				<li><a class=\"odataUri button\" id=\"previus\" href=\"{1}\" >Previous</a></li>" +
-		"				<li><a class=\"odataUri button\" id=\"next\" href=\"{2}\">Next</a></li>" +
+		"				<li><a class=\"odataUri button\" id=\"add\" href=\"{1}\" >Add New</a></li>" +
+		"				<li><a class=\"odataUri button\" id=\"previus\" href=\"{2}\" >Previous</a></li>" +
+		"				<li><a class=\"odataUri button\" id=\"next\" href=\"{3}\">Next</a></li>" +
 		"			</ul>" +
 		"		</div>" +
 		"</tr>" +
 		"</tfoot>"; 
-		dataTable += tfoot.format(colCount + 1,previus.toUri(),next.toUri());;
+		entityUri.parameters.action = "add";
+		delete entityUri.pathInfo[entityUri.pathInfo.length - 1].keys;
+		dataTable += tfoot.format(colCount + 1,entityUri.toUIUri(),previus.toUri(),next.toUri());
 		dataTable += "</table>";
 		renderHtml("dataTable",dataTable);
 
