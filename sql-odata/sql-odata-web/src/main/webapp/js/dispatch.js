@@ -47,8 +47,10 @@ function editHandler(event) {
 	for( var i = 0; i < inputs.length; i++ ){
 		var property = entityType.properties[inputs[i].name];
 		if(property !== undefined){
-			if(property.type.startsWith("Edm.Int")){
+			if(property.type.startsWith("Edm.Int") || property.type == "Edm.Byte"){
 				data[inputs[i].name] = parseInt(inputs[i].value);
+			}else if(property.type == "Edm.Decimal" || property.type == "Edm.Double"){
+				data[inputs[i].name] = parseFloat(inputs[i].value);
 			}else {
 				data[inputs[i].name] = inputs[i].value;
 			}

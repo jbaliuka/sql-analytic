@@ -1,7 +1,6 @@
 package com.github.sql.analytic.odata;
 
 import java.io.InputStream;
-import java.io.Reader;
 import java.math.BigDecimal;
 import java.security.Timestamp;
 import java.sql.Blob;

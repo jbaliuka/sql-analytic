@@ -1,8 +1,6 @@
 package com.github.sql.analytic.odata;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;

@@ -4,14 +4,18 @@ import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
+import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
@@ -139,7 +143,18 @@ public class SQLEntityProcessor implements EntityProcessor {
 			for(int i = 0; i < propertyNames.size(); i++){				
 				Property p = requestEntity.getProperty(propertyNames.get(i));	
 				if(p != null){
-					ps.setObject(i + 1, p.getValue());
+					if(p.getValue() instanceof Calendar){ 
+						Date value;
+						EdmElement prop = entityType.getProperty(propertyNames.get(i));
+						if("Edm.Date".equals(prop.getType().getFullQualifiedName().toString())){
+							value =  new java.sql.Date(((Calendar)p.getValue()).getTime().getTime());
+						}else {
+							value = new Timestamp(((Calendar)p.getValue()).getTime().getTime());
+						}
+						ps.setObject(i + 1, value);
+					} else {
+					  ps.setObject(i + 1, p.getValue());
+					}
 				}else {
 					ps.setNull(i + 1, Types.CHAR);
 				}
