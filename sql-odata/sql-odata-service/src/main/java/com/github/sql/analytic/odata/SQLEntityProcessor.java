@@ -60,20 +60,18 @@ public class SQLEntityProcessor implements EntityProcessor {
 	public void init(OData odata, ServiceMetadata serviceMetadata) {
 		this.serviceMetadata = serviceMetadata;
 		this.odata = odata;
-
 	}
 
 	@Override
 	public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat)
 			throws ODataApplicationException, ODataLibraryException {
-		
+
 		ReadEntityCollectionCommand command = new ReadEntityCollectionCommand(uriInfo);			
 		ResultSetIterator iterator = command.execute(session);
 		SerializeEntityCommand ser = new SerializeEntityCommand(request, response, uriInfo, responseFormat);
 		ser.init(odata,serviceMetadata);
 		ser.setEntityType(command.getEntityType());
 		ser.serialize(iterator);
-		
 	}
 
 	private void setKeyParams(EdmEntityType entityType, List<UriParameter> keyPredicates, PreparedStatement ps, int first)
@@ -129,7 +127,6 @@ public class SQLEntityProcessor implements EntityProcessor {
 				builder.append(",");
 			}
 		}
-
 		builder.append(")VALUES(");
 		for(int i = 0; i < propertyNames.size(); i++){
 			builder.append("?");
@@ -139,37 +136,41 @@ public class SQLEntityProcessor implements EntityProcessor {
 		}
 		builder.append(")");
 		try(PreparedStatement ps = session.prepareStatement(builder.toString())){
-
-			for(int i = 0; i < propertyNames.size(); i++){				
-				Property p = requestEntity.getProperty(propertyNames.get(i));	
-				if(p != null){
-					if(p.getValue() instanceof Calendar){ 
-						Date value;
-						EdmElement prop = entityType.getProperty(propertyNames.get(i));
-						if("Edm.Date".equals(prop.getType().getFullQualifiedName().toString())){
-							value =  new java.sql.Date(((Calendar)p.getValue()).getTime().getTime());
-						}else {
-							value = new Timestamp(((Calendar)p.getValue()).getTime().getTime());
-						}
-						ps.setObject(i + 1, value);
-					} else {
-					  ps.setObject(i + 1, p.getValue());
-					}
-				}else {
-					ps.setNull(i + 1, Types.CHAR);
-				}
-			}
+			setParams(requestEntity, entityType, ps);
 			if(ps.executeUpdate() != 1){
 				throw new ODataApplicationException("Unable to insert", HttpStatusCode.CONFLICT.getStatusCode(), 
-						Locale.ENGLISH);
+						Locale.ROOT);
 			}
 
 		} catch (SQLException e) {
 			throw new ODataApplicationException("Internal Error", HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
-					Locale.ENGLISH,e);
+					Locale.ROOT,e);
 		}
 
 		return requestEntity;
+	}
+
+	private void setParams(Entity requestEntity, EdmEntityType entityType, 	PreparedStatement ps) throws SQLException {
+		List<String> propertyNames = entityType.getPropertyNames();
+		for(int i = 0; i < propertyNames.size(); i++){				
+			Property p = requestEntity.getProperty(propertyNames.get(i));	
+			if(p != null){
+				if(p.getValue() instanceof Calendar){ 
+					Date value;
+					EdmElement prop = entityType.getProperty(propertyNames.get(i));
+					if("Edm.Date".equals(prop.getType().getFullQualifiedName().toString())){
+						value =  new java.sql.Date(((Calendar)p.getValue()).getTime().getTime());
+					}else {
+						value = new Timestamp(((Calendar)p.getValue()).getTime().getTime());
+					}
+					ps.setObject(i + 1, value);
+				} else {
+					ps.setObject(i + 1, p.getValue());
+				}
+			}else {
+				ps.setNull(i + 1, Types.CHAR);
+			}
+		}
 	}
 
 	@Override
@@ -212,28 +213,17 @@ public class SQLEntityProcessor implements EntityProcessor {
 		}
 		EntityData.buildWhere(keyPredicates, builder);
 
-
 		try(PreparedStatement ps = session.prepareStatement(builder.toString())){
-
-			for(int i = 0; i < pachedProperties.size(); i++){				
-				Property p = requestEntity.getProperty(pachedProperties.get(i));	
-				if(p != null){
-					ps.setObject(i + 1, p.getValue());
-				}else {
-					ps.setNull(i + 1, Types.CHAR);
-				}
-			}
+			setParams(requestEntity, edmEntityType, ps);
 			setKeyParams(edmEntityType, keyPredicates, ps,pachedProperties.size());
 			if(ps.executeUpdate() != 1){
 				throw new ODataApplicationException("Unable to update", HttpStatusCode.CONFLICT.getStatusCode(), 
-						Locale.ENGLISH);
+						Locale.ROOT);
 			}
-
 		} catch (SQLException | EdmPrimitiveTypeException e) {
 			throw new ODataApplicationException("Internal Error", HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
-					Locale.ENGLISH,e);
+					Locale.ROOT,e);
 		}
-
 
 		response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
 
@@ -255,14 +245,14 @@ public class SQLEntityProcessor implements EntityProcessor {
 			setKeyParams(edmEntitySet.getEntityType(), keyPredicates, ps,0);
 			if(ps.executeUpdate() != 1){
 				throw new ODataApplicationException("Unable to delete", HttpStatusCode.CONFLICT.getStatusCode(), 
-						Locale.ENGLISH);
+						Locale.ROOT);
 			}
 		}catch(SQLIntegrityConstraintViolationException e){
 			throw new ODataApplicationException("Unable to delete", HttpStatusCode.CONFLICT.getStatusCode(), 
-					Locale.ENGLISH);
+					Locale.ROOT);
 		} catch (SQLException | EdmPrimitiveTypeException e) {
 			throw new ODataApplicationException("Internal Error", HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), 
-					Locale.ENGLISH,e);
+					Locale.ROOT,e);
 		}		
 		response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
 	}

@@ -65,21 +65,12 @@ function buildEntityView(uriInfo){
 		"	<td colspan=\"2\">" +
 		"		<div id=\"tools\">" +
 		"			<ul id=\"editButtons\">" ;
+		dataTable += "<li><a class=\"odataUri button\" href=\"{0}\" >{back}</a></li>".format("javascript:history.back()");
 		if(editUri.parameters.action === undefined){	
-			var backUri = uriInfo.toUIUri().toUriInfo();
-			delete backUri.pathInfo[backUri.pathInfo.length - 1].keys;
-			dataTable += "<li><a class=\"odataUri button\" href=\"{0}\" >{1}</a></li>".format(backUri.toUri(),"Back");
 			editUri.parameters.action = "edit";
-			dataTable += "<li><a class=\"odataUri button\" href=\"{0}\" >{1}</a></li>".format(editUri.toUri(),"Edit");			 
-		}else if(editUri.parameters.action == "add"){
-			delete editUri.parameters.action;
-			dataTable += "<li><a class=\"odataUri button\" href=\"{0}\" >{1}</a></li>".format(editUri.toUri(),"Back");
-			editUri.parameters.action = "add";
-			dataTable += "<li><a class=\"button\" href=\"{0}\" onclick=\"editHandler(event)\" >{1}</a></li>".format(editUri.toUri(),"Submit");
-		}else {
-			delete editUri.parameters.action;
-			dataTable += "<li><a class=\"odataUri button\" href=\"{0}\" >{1}</a></li>".format(editUri.toUri(),"Back");
-			dataTable += "<li><a class=\"button\" href=\"{0}\" onclick=\"editHandler(event)\" >{1}</a></li>".format(editUri.toUri(),"Submit");
+			dataTable += "<li><a class=\"odataUri button\" href=\"{0}\" >{edit}</a></li>".format(editUri.toUri());
+		}else {			
+			dataTable += "<li><a class=\"button\" href=\"{0}\" onclick=\"editHandler(event)\" >{submit}</a></li>".format(editUri.toUri());
 		}
 		dataTable += "</ul>" +
 		"		</div>" +
@@ -203,13 +194,14 @@ function buildEntitySetView(uriInfo) {
 		"	<td colspan=\"{0}\">" +
 		"		<div id=\"paging\">" +
 		"			<ul>" +
-		"				<li><a class=\"odataUri button\" id=\"add\" href=\"{1}\" >Add New</a></li>" +
-		"				<li><a class=\"odataUri button\" id=\"previus\" href=\"{2}\" >Previous</a></li>" +
-		"				<li><a class=\"odataUri button\" id=\"next\" href=\"{3}\">Next</a></li>" +
+		"				<li><a class=\"odataUri button\" id=\"add\" href=\"{1}\" >{add}</a></li>" +
+		"				<li><a class=\"odataUri button\" id=\"previus\" href=\"{2}\" >{previous}</a></li>" +
+		"				<li><a class=\"odataUri button\" id=\"next\" href=\"{3}\">{next}</a></li>" +
 		"			</ul>" +
 		"		</div>" +
 		"</tr>" +
 		"</tfoot>"; 
+		entityUri.parameters = entityUri.parameters||{};
 		entityUri.parameters.action = "add";
 		delete entityUri.pathInfo[entityUri.pathInfo.length - 1].keys;
 		dataTable += tfoot.format(colCount + 1,entityUri.toUIUri(),previus.toUri(),next.toUri());

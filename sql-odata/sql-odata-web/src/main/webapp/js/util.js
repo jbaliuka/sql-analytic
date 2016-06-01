@@ -1,12 +1,20 @@
 "use strict";
+window.labels = window.labels || {};
 if (!String.prototype.format) {
-	String.prototype.format = function() {
+	String.prototype.format = function() {		
 		var args = arguments;
-		var result = this.replace(/{(\d+)}/g, function(match, number) { 
-			return typeof args[number] != 'undefined'
-				? args[number]
-			: match
-			;
+		var result = this.replace(/({(\d+)})|({(\w+)})/g, function(match,match1,number,match2,reference) {
+			if(number !== undefined){
+				return args[number] !== undefined
+					? args[number]
+				: match;
+			}else if (reference !== undefined){
+				return window.labels[reference] !== undefined
+					? window.labels[reference]
+				: match;
+			}else {
+				return match;
+			}
 		});
 		return result; 
 	};
@@ -79,7 +87,7 @@ function UriInfo(uri){
 		newUri.servletPath = "ui";
 		return newUri.toUri();
 	}
-	
+
 	this.toServiceUri = function(){
 		var newUri = new UriInfo(this.toUri());
 		newUri.servletPath = "SQLODataService.svc";
@@ -92,7 +100,7 @@ function UriInfo(uri){
 		}else{
 			return uri + this.contextPath;
 		}	
-		
+
 	}
 	this.getPath = function(){
 		var uri = "";
@@ -136,7 +144,7 @@ function UriInfo(uri){
 		}
 		return uri + (this.hash === undefined ? "" : "#" + this.hash);
 	}
-	
+
 	this.isSelected = function (propName){
 		if(this.parameters === undefined){
 			return true;

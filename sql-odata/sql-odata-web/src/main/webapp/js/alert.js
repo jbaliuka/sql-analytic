@@ -12,9 +12,9 @@ function CustomAlert() {
 		dialogbox.style.left = (winW / 2) - (550 * .5) + "px";
 		dialogbox.style.top = "100px";
 		dialogbox.style.display = "block";
-		document.getElementById('dialogboxhead').innerHTML = "Error";
+		document.getElementById('dialogboxhead').innerHTML = "{error}".format();
 		document.getElementById('dialogboxbody').innerHTML = dialog;
-		document.getElementById('dialogboxfoot').innerHTML = '<button class="button" onclick="Alert.ok()">OK</button>';
+		document.getElementById('dialogboxfoot').innerHTML = '<button class="button" onclick="Alert.ok()">{ok}</button>'.format();
 	}
 	this.ok = function() {
 		document.getElementById('dialogbox').style.display = "none";

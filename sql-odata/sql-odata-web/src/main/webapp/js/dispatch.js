@@ -57,14 +57,12 @@ function editHandler(event) {
 		}
 	}
 	if(uriInfo.parameters.action == "add"){
-		$service.post(uriInfo,data, function(){
-			delete uriInfo.parameters.action;
-			dispatch($metadata,uriInfo);		
+		$service.post(uriInfo,data, function(){			
+			history.back();		
 		});
 	}else{
-		$service.patch(uriInfo,data, function(){
-			delete uriInfo.parameters.action;
-			dispatch($metadata,uriInfo);		
+		$service.patch(uriInfo,data, function(){			
+			history.back();		
 		});
 	}
 
