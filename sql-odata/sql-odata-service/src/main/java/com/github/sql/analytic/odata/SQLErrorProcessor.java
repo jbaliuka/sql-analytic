@@ -24,9 +24,13 @@ public class SQLErrorProcessor extends DefaultProcessor implements ErrorProcesso
 		while(cause.getCause() != null){
 			cause = cause.getCause();
 		}
-		config.getServletContext().log(serverError.getMessage(), cause);
+		if(config != null){
+			config.getServletContext().log(serverError.getMessage(), cause);
+		}else {
+			cause.printStackTrace();
+		}
 		super.processError(request, response, serverError, responseFormat);
-		
+
 	}
 
 }

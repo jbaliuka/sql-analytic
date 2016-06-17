@@ -132,24 +132,7 @@ public class SQLODataServletTest {
 
 	}
 	
-	@Test
-	public void testBatch() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException{
 		
-		ODataBatchRequest request = client.getBatchRequestFactory().getBatchRequest(serviceRoot);
-		BatchManager manager = request.payloadManager();
-		ODataChangeset changeset = manager.addChangeset();		
-		ODataBatchableRequest delete  = client.getCUDRequestFactory().getDeleteRequest(new URI(serviceRoot + "ORDER_DETAILS(30)"));
-		changeset.addRequest(delete);	
-		delete  =  client.getCUDRequestFactory().getDeleteRequest(new URI(serviceRoot + "ORDER_DETAILS(31)"));
-		changeset.addRequest(delete);	
-				
-		try(InputStream resp = manager.getResponse().getRawResponse()){
-			//TODO: mock up  PipedOutputStream (it is random)  
-		   assertTrue(true);	   
-		}
-		
-	}
-	
 	@Test
 	public void testCreateEntityReq() throws URISyntaxException {
 		URI uri = new URI(serviceRoot + "CUSTOMERS");

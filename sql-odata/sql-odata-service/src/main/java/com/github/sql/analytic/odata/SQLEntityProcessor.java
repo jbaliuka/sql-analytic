@@ -136,7 +136,7 @@ public class SQLEntityProcessor implements EntityProcessor {
 		}
 		builder.append(")");
 		try(PreparedStatement ps = session.prepareStatement(builder.toString())){
-			setParams(requestEntity, entityType, ps);
+			setCreateParams(requestEntity, entityType, ps);
 			if(ps.executeUpdate() != 1){
 				throw new ODataApplicationException("Unable to insert", HttpStatusCode.CONFLICT.getStatusCode(), 
 						Locale.ROOT);
@@ -149,15 +149,39 @@ public class SQLEntityProcessor implements EntityProcessor {
 
 		return requestEntity;
 	}
-
-	private void setParams(Entity requestEntity, EdmEntityType entityType, 	PreparedStatement ps) throws SQLException {
-		List<String> propertyNames = entityType.getPropertyNames();
-		for(int i = 0; i < propertyNames.size(); i++){				
-			Property p = requestEntity.getProperty(propertyNames.get(i));	
+	
+	private void setCreateParams(Entity requestEntity, EdmEntityType entityType,PreparedStatement ps) throws SQLException {
+		List<String> properties = entityType.getPropertyNames();
+		for(int i = 0; i < properties.size(); i++){				
+			Property p = requestEntity.getProperty(properties.get(i));	
 			if(p != null){
 				if(p.getValue() instanceof Calendar){ 
 					Date value;
-					EdmElement prop = entityType.getProperty(propertyNames.get(i));
+					EdmElement prop = entityType.getProperty(p.getName());
+					if("Edm.Date".equals(prop.getType().getFullQualifiedName().toString())){
+						value =  new java.sql.Date(((Calendar)p.getValue()).getTime().getTime());
+					}else {
+						value = new Timestamp(((Calendar)p.getValue()).getTime().getTime());
+					}
+					ps.setObject(i + 1, value);
+				} else {
+					ps.setObject(i + 1, p.getValue());
+				}
+			}else {
+				ps.setNull(i + 1, Types.CHAR);
+			}
+		}
+	}
+
+
+	private void setPatchParams(Entity requestEntity, EdmEntityType entityType,PreparedStatement ps) throws SQLException {
+		List<Property> properties = requestEntity.getProperties();
+		for(int i = 0; i < properties.size(); i++){				
+			Property p = properties.get(i);	
+			if(p != null){
+				if(p.getValue() instanceof Calendar){ 
+					Date value;
+					EdmElement prop = entityType.getProperty(p.getName());
 					if("Edm.Date".equals(prop.getType().getFullQualifiedName().toString())){
 						value =  new java.sql.Date(((Calendar)p.getValue()).getTime().getTime());
 					}else {
@@ -214,7 +238,7 @@ public class SQLEntityProcessor implements EntityProcessor {
 		EntityData.buildWhere(keyPredicates, builder);
 
 		try(PreparedStatement ps = session.prepareStatement(builder.toString())){
-			setParams(requestEntity, edmEntityType, ps);
+			setPatchParams(requestEntity, edmEntityType, ps);
 			setKeyParams(edmEntityType, keyPredicates, ps,pachedProperties.size());
 			if(ps.executeUpdate() != 1){
 				throw new ODataApplicationException("Unable to update", HttpStatusCode.CONFLICT.getStatusCode(), 
