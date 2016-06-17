@@ -1,4 +1,4 @@
-sql-analytic
+sql-analytic [![Build Status](https://travis-ci.org/jbaliuka/sql-analytic.svg?branch=master)](https://travis-ci.org/jbaliuka/sql-analytic)
 ============
 
 SQL Parser for JAVA programming language. 
