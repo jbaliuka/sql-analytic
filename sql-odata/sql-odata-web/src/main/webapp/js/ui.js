@@ -201,6 +201,7 @@ function buildEntitySetView(uriInfo) {
 		"		</div>" +
 		"</tr>" +
 		"</tfoot>"; 
+		var entityUri = uriInfo.toEntityUri();
 		entityUri.parameters = entityUri.parameters||{};
 		entityUri.parameters.action = "add";
 		delete entityUri.pathInfo[entityUri.pathInfo.length - 1].keys;

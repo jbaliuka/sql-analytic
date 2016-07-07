@@ -15,6 +15,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
 
+import org.h2.Driver;
+
 import com.github.sql.analytic.JSQLParserException;
 import com.github.sql.analytic.odata.testdata.Loader;
 import com.github.sql.analytic.odata.web.SQLODataServlet;
@@ -70,6 +72,16 @@ public class TestSQLODataServlet extends SQLODataServlet {
 }
 
 class H2Datasource implements DataSource {
+	
+	static {
+		
+		try {
+			Driver.class.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {			
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		
