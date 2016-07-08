@@ -44,9 +44,8 @@ public class SQLBatchProcessor implements BatchProcessor {
 		for (final BatchRequestPart part : requestParts) {
 			responseParts.add(facade.handleBatchRequest(part));
 		}
-		InputStream responseContent = odata.createFixedFormatSerializer().batchResponse(responseParts, boundary);
-		String responseBoundary = "batch_" + UUID.randomUUID().toString();
-		response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.MULTIPART_MIXED + ";boundary=" + responseBoundary);
+		InputStream responseContent = odata.createFixedFormatSerializer().batchResponse(responseParts, boundary);		
+		response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.MULTIPART_MIXED.toContentTypeString());
 		response.setContent(responseContent);
 		response.setStatusCode(HttpStatusCode.ACCEPTED.getStatusCode());
 	}
