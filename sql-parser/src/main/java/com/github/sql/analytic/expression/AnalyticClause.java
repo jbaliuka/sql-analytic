@@ -10,8 +10,9 @@ public class AnalyticClause implements SQLExpression{
 		return orderByClause;
 	}
 
-	public void setOrderByClause(OrderByClause orderByCause) {
+	public AnalyticClause setOrderByClause(OrderByClause orderByCause) {
 		this.orderByClause = orderByCause;
+		return this;
 	}
 
 	private Function function;

@@ -31,7 +31,7 @@ import com.github.sql.analytic.transform.policy.SessionContext;
 
 public class SQLSession implements Connection{
 
-	private Connection connection;	
+	protected Connection connection;	
 	private SessionContext context;
 	private List<CreatePolicy> policy;
 	private Map<String, DeparsedSQL> sqlCache = createCache();

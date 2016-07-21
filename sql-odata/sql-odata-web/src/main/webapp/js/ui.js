@@ -170,7 +170,7 @@ function buildEntitySetView(uriInfo) {
 			}
 			dataTable += "</tr>";
 		}
-		for(var j = 1; j < uriInfo.parameters.$top - i; j++ ){
+		for(var j = 1; j < uriInfo.parameters.$top - entities.length + 1 ; j++ ){
 			dataTable += "<tr><td colspan=\"{0}\">&nbsp;</td></tr>".format(colCount + 1);
 		}
 		dataTable += "</tbody>";

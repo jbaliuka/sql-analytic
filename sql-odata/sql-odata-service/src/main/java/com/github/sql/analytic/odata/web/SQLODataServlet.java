@@ -26,7 +26,7 @@ public abstract class SQLODataServlet extends HttpServlet {
 			try(Connection connection = getDatasource().getConnection()){
 				try{
 					
-					SQLOdataHandler handler = new SQLOdataHandler(config,connection, getPolicy(),getCursors());
+					SQLOdataHandler handler = createHandler(connection);
 					handler.process(request, response);
 					connection.commit();
 
@@ -40,16 +40,25 @@ public abstract class SQLODataServlet extends HttpServlet {
 		}
 
 	}
+	protected  SQLOdataHandler createHandler(Connection connection) {
+		return new SQLOdataHandler(getConfig(),connection, getPolicy(),getCursors());
+	}
 	@Override
 	public void init(ServletConfig config) throws ServletException {		
 		super.init(config);
-		this.config = config;
+		this.setConfig(config);
 	}
 
 	abstract protected List<CreatePolicy> getPolicy();
 
 	abstract protected DataSource getDatasource();
 	abstract protected Map<String, Cursor> getCursors();
+	public ServletConfig getConfig() {
+		return config;
+	}
+	public void setConfig(ServletConfig config) {
+		this.config = config;
+	}
 	
 
 

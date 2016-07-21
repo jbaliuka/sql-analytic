@@ -1,1 +1,1 @@
-com.github.sql.analytic.dialect.h2.OrclDialect
+com.github.sql.analytic.dialect.orcl.OrclDialect

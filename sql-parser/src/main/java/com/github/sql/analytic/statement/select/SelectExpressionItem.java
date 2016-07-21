@@ -22,6 +22,7 @@
 
 package com.github.sql.analytic.statement.select;
 
+import com.github.sql.analytic.expression.Function;
 import com.github.sql.analytic.expression.SQLExpression;
 
 /**
@@ -32,6 +33,14 @@ public class SelectExpressionItem implements SelectListItem {
 	private SQLExpression expression;
 	private String alias;
 	
+	public SelectExpressionItem(Function expr) {
+		this.expression = expr;
+	}
+
+	public SelectExpressionItem() {
+		
+	}
+
 	public String getAlias() {
 		return alias;
 	}

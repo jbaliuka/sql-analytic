@@ -61,8 +61,9 @@ public class OrderByElement implements SQLExpression{
 		return columnReference;
 	}
 
-	public void setColumnReference(SQLExpression columnReference) {
+	public OrderByElement setColumnReference(SQLExpression columnReference) {
 		this.columnReference = columnReference;
+		return this;
 	}
 
 	public String toString() {

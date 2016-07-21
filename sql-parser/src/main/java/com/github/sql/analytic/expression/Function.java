@@ -41,6 +41,13 @@ public class Function implements SQLExpression,FromItem {
 	private boolean distinct = false;
 	private AnalyticClause analyticCause;
 	
+	public Function(String name) {
+		this.name = name;
+	}
+
+	public Function() {		
+	}
+
 	public boolean isDistinct() {
 		return distinct;
 	}

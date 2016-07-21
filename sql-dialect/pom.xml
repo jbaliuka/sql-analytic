@@ -12,5 +12,6 @@
   <modules>
   	<module>sql-dialect-h2</module>
   	<module>sql-dialect-orcl</module>
+	<module>sql-srv</module>
   </modules>
 </project>

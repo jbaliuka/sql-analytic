@@ -14,8 +14,9 @@ public class OrderByClause {
 		return elements;
 	}
 
-	public void setElements(List<OrderByElement> elements) {
+	public OrderByClause setElements(List<OrderByElement> elements) {
 		this.elements = elements;
+		return this;
 	}
 	
 	@Override

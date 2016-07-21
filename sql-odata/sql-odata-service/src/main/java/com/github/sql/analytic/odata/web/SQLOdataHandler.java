@@ -74,18 +74,18 @@ public class SQLOdataHandler {
 	public void process(final HttpServletRequest request, HttpServletResponse response) throws SQLException{
 
 		SessionContext context = createContext(request);										
-		session = createSession(context);					
+		setSession(createSession(context));					
 		OData odata = OData.newInstance();
-		SQLEdmProvider edmProvider = new SQLEdmProvider(session.getMetaData());
+		SQLEdmProvider edmProvider = new SQLEdmProvider(getSession().getMetaData());
 		edmProvider.setCursors(cursors);
 		edmProvider.setFunctions(functions);
 		ServiceMetadata edm = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 		ODataHttpHandler handler = odata.createHandler(edm);
-		SQLEntityCollectionProcessor processor = new SQLEntityCollectionProcessor(session);
+		SQLEntityCollectionProcessor processor = new SQLEntityCollectionProcessor(getSession());
 		processor.setCursors(cursors);
 		handler.register(processor);	      
-		handler.register(new SQLEntityProcessor(session));
-		handler.register(new SQLPrimitiveProcessor(session,functions));
+		handler.register(new SQLEntityProcessor(getSession()));
+		handler.register(new SQLPrimitiveProcessor(getSession(),functions));
 		handler.register(new CustomContentTypes());
 		handler.register(new SQLBatchProcessor());
 		handler.register( new SQLErrorProcessor(config));
@@ -132,7 +132,7 @@ public class SQLOdataHandler {
 			@Override
 			public String getDefaultSchema() {				
 					try {
-						return session.getSchema();
+						return getSession().getSchema();
 					} catch (SQLException e) {
 						return null;
 					}
@@ -150,6 +150,14 @@ public class SQLOdataHandler {
 
 	public void setDialect(SQLDialect dialect) {
 		this.dialect = dialect;
+	}
+
+	public SQLSession getSession() {
+		return session;
+	}
+
+	public void setSession(SQLSession session) {
+		this.session = session;
 	}
 
 }
