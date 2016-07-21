@@ -51,3 +51,6 @@ err
 
 # Code Recommenders
 .recommenders/
+# Maven
+*.versionsBackup
+
