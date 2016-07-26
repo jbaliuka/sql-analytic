@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmFunction;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
+import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
@@ -50,7 +51,10 @@ public class CallCursorFunctionCommand extends ReadCommand {
 					}
 
 					EdmPrimitiveType type = (EdmPrimitiveType) function.getParameter(param.getName()).getType();
-					Object value = type.valueOfString(param.getText(), true,null, null, null, true, type.getDefaultType());					
+					Object value = type.valueOfString(param.getText(), true,null, null, null, true, type.getDefaultType());
+					if(type.getDefaultType() == String.class){
+					   value = value.toString().substring(1,  value.toString().length() - 1);
+					}
 					getStatementParams().put(param.getName(),toJdbcValue(value));
 				}
 			}else {

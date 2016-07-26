@@ -80,6 +80,7 @@ public class ResultSetIterator extends EntityIterator implements ODataContentWri
 	@Override
 	public void handleError(ODataContentWriteErrorContext context, WritableByteChannel channel) {
 		close();
+		context.getException().printStackTrace();
 	}
 	public ResultSet getResultSet() {
 		return rs;
