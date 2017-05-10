@@ -7,6 +7,7 @@ import com.github.sql.analytic.expression.SQLExpression;
 import com.github.sql.analytic.expression.Parenthesis;
 import com.github.sql.analytic.expression.operators.conditional.AndExpression;
 import com.github.sql.analytic.expression.operators.conditional.OrExpression;
+import com.github.sql.analytic.expression.operators.relational.InExpression;
 import com.github.sql.analytic.schema.Column;
 import com.github.sql.analytic.schema.Table;
 import com.github.sql.analytic.statement.policy.CreatePolicy;
@@ -234,11 +235,12 @@ public class SelectPolicy extends SelectTransform {
 
 	private SQLExpression getUsing(final Table table,SQLExpression using) {
 
-
 		return  new StatementTransform(){
 			@Override
 			protected ExpressionTransform createExpressionTransform() {		    		
-				return new ExpressionTransform(this){		    			
+				return new ExpressionTransform(this){
+				    
+				    @Override
 					public void visit(Column column){		    				
 						Table newTable;
 						if(table.getAlias() != null){
@@ -249,7 +251,35 @@ public class SelectPolicy extends SelectTransform {
 
 						setExpression(new Column(newTable,column.getColumnName()));
 					}
-
+					
+                    /**
+                     * Subquery would not work with the logic defined above
+                     * (visit column) as column wiil be applied to the wrong
+                     * table (security policy main table instead of subquery's)
+                     * Because of that use usual transform for ItemsList instead
+                     * of custom
+                     * 
+                     * Example:
+                     * SELECT 1 FROM TEST A WHERE A.col = 1 OR A.col IN (SELECT col2 FROM TEST2)
+                     * 
+                     * will be parsed to:
+                     * 
+                     * SELECT 1 FROM TEST A WHERE A.col = 1 OR A.col IN (SELECT A.col2 FROM TEST2) (undefined column exception)
+                     * 
+                     * instead of
+                     * 
+                     * SELECT 1 FROM TEST A WHERE A.col = 1 OR A.col IN (SELECT col2 FROM TEST2)
+                     * 
+                     * without this override
+                     */
+					@Override
+	                public void visit(InExpression inExpression) {
+	                    InExpression newExpression = new InExpression();
+	                    setExpression(newExpression);       
+	                    newExpression.setNot(inExpression.isNot());
+	                    newExpression.setLeftExpression(statementTransform.transform(inExpression.getLeftExpression()));        
+	                    newExpression.setItemsList(new StatementTransform().transform(inExpression.getItemsList()));
+	                }
 				};
 			}
 		}.transform(using);
