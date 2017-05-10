@@ -80,18 +80,22 @@ public class PolicySelectTransformTest extends TestCase {
 
 	}
 
+    public void testUsingAlias() throws JSQLParserException {
 
-	public void testUsingAlias() throws JSQLParserException{
+        String policy1 = "CREATE POLICY P_1 ON  TEST USING ( col = 1 ) ";
+        String policy2 = "CREATE POLICY P_1 ON  TEST USING ( col = 1 OR col IN (SELECT col2 FROM TEST2)) ";
+        String policy3 = "CREATE POLICY P_1 ON  TEST USING ( col = 1 OR col IN ('A', 'B', 'C')) ";
+        
+        assertTransform(Arrays.asList(policy1), "SELECT 1 FROM TEST A", "SELECT 1 FROM TEST A WHERE A.col = 1");
+        assertTransform(Arrays.asList(policy1), "SELECT 1 FROM TEST", "SELECT 1 FROM TEST  WHERE TEST.col = 1");
+        assertTransform(Arrays.asList(policy1), "SELECT 1 FROM TEST A,TEST B",
+                "SELECT 1 FROM TEST A,TEST B WHERE (B.col = 1) AND (A.col = 1)");
 
-		String policy1 = "CREATE POLICY P_1 ON  TEST USING ( col = 1 ) ";
-
-		assertTransform(Arrays.asList(policy1),"SELECT 1 FROM TEST A","SELECT 1 FROM TEST A WHERE A.col = 1");
-		assertTransform(Arrays.asList(policy1),"SELECT 1 FROM TEST","SELECT 1 FROM TEST  WHERE TEST.col = 1");
-		assertTransform(Arrays.asList(policy1),"SELECT 1 FROM TEST A,TEST B",
-				"SELECT 1 FROM TEST A,TEST B WHERE (B.col = 1) AND (A.col = 1)");
-
-
-	}
+        assertTransform(Arrays.asList(policy2), "SELECT 1 FROM TEST A",
+                "SELECT 1 FROM TEST A WHERE A.col = 1 OR A.col IN (SELECT col2 FROM TEST2)");
+        assertTransform(Arrays.asList(policy3), "SELECT 1 FROM TEST A",
+                "SELECT 1 FROM TEST A WHERE A.col = 1 OR A.col IN ('A', 'B', 'C')");
+    }
 
 	public void testColumns() throws JSQLParserException{
 
